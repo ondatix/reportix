@@ -1,0 +1,25 @@
+{
+  "name": "autoreportix",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/file-saver": "^2.0.7",
+    "typescript": "~5.9.3",
+    "vite": "^8.0.1"
+  },
+  "dependencies": {
+    "chart.js": "^4.5.1",
+    "docx": "^9.6.1",
+    "file-saver": "^2.0.5",
+    "marked": "^17.0.5",
+    "smol-toml": "^1.6.1",
+    "xlsx": "^0.18.5",
+    "yaml": "^2.8.3"
+  }
+}
