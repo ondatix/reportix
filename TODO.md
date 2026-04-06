@@ -23,9 +23,9 @@
 - [ ] Validate License with Team
 
 ## Security
-- [ ] Subresource Integrity (SRI)
-- [ ] Content Security Policy (CSP)
-- [ ] Obligatory HTTPS
+- [x] Subresource Integrity (SRI)
+- [x] Content Security Policy (CSP)
+- [x] Obligatory HTTPS
 
 ## Penetration Test
 - [x] [LSI Informationsblatt](https://www.lsi.bayern.de/mam/aktuelles/lsi-info_t03_penetrationstest.pdf)
