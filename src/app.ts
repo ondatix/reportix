@@ -17,7 +17,7 @@ export function initApp(root: HTMLElement): void {
   const config = loadConfig();
 
   root.innerHTML = `
-    <h1>autoreportix</h1>
+    <h1>ondatix autoreport</h1>
     <div id="step-data" class="step">
       <h2>1. Load Data Files</h2>
       <div id="data-inputs"></div>
@@ -125,7 +125,7 @@ export function initApp(root: HTMLElement): void {
     stepPreview.hidden = false;
 
     const blocks = parseTemplate(tplText);
-    renderBlocks(blocks, dataStore, paramValues, previewContainer);
+    renderBlocks(blocks, dataStore, paramValues, previewContainer, config.charts);
 
     // Export button
     const exportBtn = root.querySelector<HTMLButtonElement>("#export-btn")!;

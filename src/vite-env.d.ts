@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-declare module "*.toml?raw" {
+declare module "*.yaml?raw" {
   const content: string;
   export default content;
 }

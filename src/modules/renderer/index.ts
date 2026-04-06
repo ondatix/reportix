@@ -9,13 +9,14 @@ export { renderTable } from "./table";
 import { renderText } from "./text";
 import { renderChart } from "./chart";
 import { renderTable } from "./table";
-import type { TemplateBlock, DataStore, ParameterValues } from "../types";
+import type { TemplateBlock, DataStore, ParameterValues, ChartDefaults } from "../types";
 
 export function renderBlocks(
   blocks: TemplateBlock[],
   dataStore: DataStore,
   parameters: ParameterValues,
-  container: HTMLElement
+  container: HTMLElement,
+  chartDefaults?: ChartDefaults
 ): void {
   for (const block of blocks) {
     switch (block.type) {
@@ -35,7 +36,7 @@ export function renderBlocks(
           container.appendChild(err);
           break;
         }
-        renderChart(block.spec, data, container);
+        renderChart(block.spec, data, container, chartDefaults);
         break;
       }
 

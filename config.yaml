@@ -1,0 +1,125 @@
+parameters:
+  period:
+    label: "Reporting period"
+    type: text
+    default: "Q1 2026"
+  department:
+    label: "Department"
+    type: select
+    options:
+      - Sales
+      - Engineering
+      - Marketing
+
+data:
+  gleichstellung:
+    sheets:
+      - sheet: Stichtag
+        columns:
+          - PersNr
+          - Geschlecht
+
+template:
+  file: report_template.md
+
+export:
+  filename: report.docx
+  locale: de-DE
+
+  document:
+    title: Report
+    subject: ""
+    creator: ""
+    description: ""
+    keywords: ""
+
+  font:
+    family: Arial
+    size: 11        # pt
+    heading_family: Arial
+    color: "1A1A1A"  # hex without #
+
+  headings:
+    color: "1F3864"  # dark blue; hex without #
+    h1_size: 20      # pt
+    h2_size: 16
+    h3_size: 13
+    h4_size: 12
+
+  paragraph:
+    alignment: left          # left | center | right | justify
+    spacing_before: 0        # twips
+    spacing_after: 120       # twips (~6 pt)
+    line_spacing: 276        # twips (276 ≈ single at 11 pt)
+
+  page:
+    orientation: portrait    # portrait | landscape
+    # A4 in twips (1 mm ≈ 56.7 twips); remove to use orientation defaults
+    width: 11906
+    height: 16838
+    margin:
+      top: 1418      # ~25 mm
+      right: 1418
+      bottom: 1418
+      left: 1418
+      header: 709    # ~12 mm from top edge to header
+      footer: 709    # ~12 mm from bottom edge to footer
+
+  page_numbers:
+    show: true
+    start: 1
+    format: decimal  # decimal | upperRoman | lowerRoman | upperLetter | lowerLetter
+
+  header:
+    text: ""         # static text shown in the page header (left-aligned)
+
+  footer:
+    text: ""         # static text shown left of the page numbers
+
+  table:
+    border_style: single    # single | double | dashed | dotted | thick | none
+    border_color: "AAAAAA"  # hex without #
+    border_size: 4          # eighths of a point
+    cell_padding: 80        # twips (~1.5 mm)
+
+charts:
+  animation: false         # disable animation (recommended for reports)
+  aspect_ratio: 2.0        # width:height ratio of every chart
+
+  font:
+    family: Arial
+    size: 12               # pt
+    color: "555555"        # hex without #; used for tick labels and legend
+
+  title:
+    position: top          # top | bottom | left | right
+    align: center          # start | center | end
+    color: "1A1A1A"        # hex without #
+
+  legend:
+    display: true
+    position: top          # top | bottom | left | right
+    align: center          # start | center | end
+
+  tooltip:
+    enabled: true
+
+  scales:
+    x:
+      begin_at_zero: false
+      grid_display: true
+      grid_color: "rgba(0,0,0,0.08)"
+      tick_color: "888888"  # hex without #
+    y:
+      begin_at_zero: true
+      grid_display: true
+      grid_color: "rgba(0,0,0,0.08)"
+      tick_color: "888888"  # hex without #
+
+  elements:
+    line:
+      tension: 0.0          # 0 = straight lines, ~0.4 = smooth curves
+      point_radius: 3       # point marker size in px
+    bar:
+      border_radius: 0      # rounded bar corners in px
+      bar_percentage: 0.9   # fraction of category slot used by bars (0–1)

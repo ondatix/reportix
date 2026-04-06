@@ -20,7 +20,7 @@ npm run preview    # preview production build locally
 
 Each utility is a self-contained module usable independently in other projects.
 
-0. **Load config** — parse the TOML/YAML config file (see Config File); drives all subsequent steps
+0. **Load config** — parse the YAML config file (see Config File); drives all subsequent steps
 1. **Load data** — import data files as specified in `[data]` (e.g. `.xlsx`)
 2. **Query parameters** — render a form from the `[parameters]` section and collect user inputs
 3. **Load report template** — parse the Markdown template file specified in `[template]` (see Template Format)
@@ -33,68 +33,150 @@ Each utility is a self-contained module usable independently in other projects.
 
 ## Config File
 
-A single TOML config file (`/config.toml` in the project root) is the entry point for the app. It is bundled at build time and **not uploaded by the user** — only developers edit it. It declares what to ask the user, where to find the data, and which template to use.
+A single YAML config file (`/config.yaml` in the project root) is the entry point for the app. It is bundled at build time and **not uploaded by the user** — only developers edit it. It declares what to ask the user, where to find the data, and which template to use.
 
 **Top-level sections**
 
-```toml
-[parameters]
-# Fields queried from the user before report generation begins.
-# Each entry defines the input type, label, and optional default/validation.
+```yaml
+parameters:
+  # Fields queried from the user before report generation begins.
+  # Each entry defines the input type, label, and optional default/validation.
 
-[data]
-# Defines expected data sources. Each source declares the sheet names
-# and required columns. Used to validate the uploaded .xlsx file.
+data:
+  # Defines expected data sources. Each source declares the sheet names
+  # and required columns. Used to validate the uploaded .xlsx file.
 
-[template]
-# Points to the Markdown template file and sets rendering options.
+template:
+  # Points to the Markdown template file and sets rendering options.
 ```
 
 **Example**
 
-```toml
-[parameters]
-  [parameters.period]
-  label   = "Reporting period"
-  type    = "text"
-  default = "Q1 2026"
+```yaml
+parameters:
+  period:
+    label: "Reporting period"
+    type: text
+    default: "Q1 2026"
+  department:
+    label: "Department"
+    type: select
+    options:
+      - Sales
+      - Engineering
+      - Marketing
 
-  [parameters.department]
-  label   = "Department"
-  type    = "select"
-  options = ["Sales", "Engineering", "Marketing"]
+data:
+  financials:
+    sheets:
+      - sheet: Monthly
+        columns: [month, revenue, growth]
+      - sheet: Quarterly
+        columns: [quarter, revenue, target]
 
-[data]
-  [data.financials]
-  [[data.financials.sheets]]
-  sheet   = "Monthly"
-  columns = ["month", "revenue", "growth"]
+template:
+  file: report_template.md
 
-  [[data.financials.sheets]]
-  sheet   = "Quarterly"
-  columns = ["quarter", "revenue", "target"]
+export:
+  filename: report.docx
+  locale: de-DE
 
-[template]
-file = "report_template.md"
+  document:
+    title: Report
+    subject: ""
+    creator: ""
+    description: ""
+    keywords: ""
 
-[export]
-filename = "report.docx"
-locale   = "de-DE"
+  font:
+    family: Arial
+    size: 11        # pt
+    heading_family: Arial
+    color: "1A1A1A"  # hex without #
 
-  [export.font]
-  family          = "Arial"
-  size            = 11
-  heading_family  = "Arial"
+  headings:
+    color: "1F3864"  # hex without #
+    h1_size: 20      # pt
+    h2_size: 16
+    h3_size: 13
+    h4_size: 12
 
-  [export.page]
-  width  = 11906   # A4 width in twips
-  height = 16838   # A4 height in twips
+  paragraph:
+    alignment: left          # left | center | right | justify
+    spacing_before: 0        # twips
+    spacing_after: 120       # twips
+    line_spacing: 276        # twips (276 ≈ single at 11 pt)
 
-    [export.page.margin]
-    top    = 1417   # ~25 mm
-    right  = 1417
-    bottom = 1417
-    left   = 1417
+  page:
+    orientation: portrait    # portrait | landscape
+    width: 11906             # A4 width in twips
+    height: 16838            # A4 height in twips
+    margin:
+      top: 1417      # ~25 mm
+      right: 1417
+      bottom: 1417
+      left: 1417
+      header: 709    # ~12 mm from top edge to header
+      footer: 709    # ~12 mm from bottom edge to footer
+
+  page_numbers:
+    show: true
+    start: 1
+    format: decimal  # decimal | upperRoman | lowerRoman | upperLetter | lowerLetter
+
+  header:
+    text: ""         # static text in the page header
+
+  footer:
+    text: ""         # static text left of the page numbers
+
+  table:
+    border_style: single    # single | double | dashed | dotted | thick | none
+    border_color: "AAAAAA"  # hex without #
+    border_size: 4          # eighths of a point
+    cell_padding: 80        # twips (~1.5 mm)
+
+charts:
+  animation: false         # disable animation (recommended for reports)
+  aspect_ratio: 2.0        # width:height ratio of every chart
+
+  font:
+    family: Arial
+    size: 12               # pt
+    color: "555555"        # hex without #
+
+  title:
+    position: top          # top | bottom | left | right
+    align: center          # start | center | end
+    color: "1A1A1A"
+
+  legend:
+    display: true
+    position: top
+    align: center
+
+  tooltip:
+    enabled: true
+
+  scales:
+    x:
+      begin_at_zero: false
+      grid_display: true
+      grid_color: "rgba(0,0,0,0.08)"
+      tick_color: "888888"
+    y:
+      begin_at_zero: true
+      grid_display: true
+      grid_color: "rgba(0,0,0,0.08)"
+      tick_color: "888888"
+
+  elements:
+    line:
+      tension: 0.0          # 0 = straight, ~0.4 = smooth curves
+      point_radius: 3
+    bar:
+      border_radius: 0      # rounded corners in px
+      bar_percentage: 0.9   # fraction of category slot (0–1)
 ```
 
 **Supported parameter types:** `text`, `number`, `date`, `select`, `multiselect`, `boolean`
@@ -102,11 +184,39 @@ locale   = "de-DE"
 **Export settings:**
 - `filename` — output file name (default: `report.docx`)
 - `locale` — locale for number/currency formatting
+- `document.*` — metadata written into .docx file properties (title, subject, creator, description, keywords)
 - `font.family` — body text font (default: `Arial`)
 - `font.size` — body text size in pt (default: `11`)
 - `font.heading_family` — heading font (defaults to `font.family`)
+- `font.color` — body text color as 6-digit hex without `#` (default: `1A1A1A`)
+- `headings.color` — color applied to all headings (default: `000000`)
+- `headings.h1_size`–`h4_size` — heading sizes in pt
+- `paragraph.alignment` — default text alignment: `left`, `center`, `right`, `justify`
+- `paragraph.spacing_before` / `spacing_after` — space around paragraphs in twips
+- `paragraph.line_spacing` — line height in twips (276 ≈ single)
+- `page.orientation` — `portrait` or `landscape`; auto-swaps A4 dimensions
 - `page.width` / `page.height` — page dimensions in twips (default: A4)
-- `page.margin.*` — top/right/bottom/left margins in twips (default: ~25 mm)
+- `page.margin.*` — top/right/bottom/left margins plus `header`/`footer` offset from page edge
+- `page_numbers.show` — insert page numbers in the footer (default: `true`)
+- `page_numbers.start` — starting page number
+- `page_numbers.format` — number style: `decimal`, `upperRoman`, `lowerRoman`, `upperLetter`, `lowerLetter`
+- `header.text` — static text rendered in the page header
+- `footer.text` — static text rendered left of the page numbers in the footer
+- `table.border_style` / `border_color` / `border_size` — default table borders
+- `table.cell_padding` — default cell padding in twips
+
+**Chart settings (`[charts]`):**
+- `animation` — set to `false` to disable chart animation (default: `false`)
+- `aspect_ratio` — width:height ratio for all charts (default: `2.0`)
+- `font.*` — global font family, size (pt), and color (hex) for all chart text
+- `title.position` / `align` / `color` — chart title placement and style
+- `legend.display` / `position` / `align` — legend visibility and placement
+- `tooltip.enabled` — show/hide hover tooltips
+- `scales.x.*` / `scales.y.*` — per-axis: `begin_at_zero`, `grid_display`, `grid_color`, `tick_color`
+- `elements.line.tension` — line smoothness: `0` = straight, `~0.4` = curves
+- `elements.line.point_radius` — data point marker size in px
+- `elements.bar.border_radius` — rounded bar corners in px
+- `elements.bar.bar_percentage` — fraction of category slot occupied by bars (0–1)
 
 The config is imported at build time via Vite's `?raw` import and parsed on app startup. When the user uploads an `.xlsx` file, the data-loader validates that the expected sheets exist and contain the required columns before proceeding. The DataStore is keyed by **sheet name** (e.g. `Monthly`), which is what template chart/table blocks reference via their `data:` field.
 

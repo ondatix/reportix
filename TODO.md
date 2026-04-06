@@ -1,14 +1,26 @@
 # TODO
 
+## README
+- [ ] Fill the README
+
 ## Design
+- [ ] Prepare generic CSS
+- [ ] Apply ondatix theme
 
 ## Config
+- [ ] Create StMAS Config
+- [ ] Create Config Specification
 
 ## Modules
+- [ ] Write module specifications
+- [ ] Write tests for each module
+- [ ] Finish and test modules
 
 ## Templates
+- [ ] Create the StMAS Template
 
 ## License
+- [ ] Validate License with Team
 
 ## Security
 - [ ] Subresource Integrity (SRI)
