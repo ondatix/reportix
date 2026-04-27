@@ -11,6 +11,8 @@ import {
 import { parseTemplate } from "./modules/template";
 import { renderBlocks } from "./modules/renderer";
 import { exportToDocx } from "./modules/exporter";
+import { getPalette } from "./modules/palettes";
+import { getFont } from "./modules/fonts";
 import type { DataStore } from "./modules/types";
 
 export function initApp(root: HTMLElement): void {
@@ -125,10 +127,30 @@ export function initApp(root: HTMLElement): void {
     stepPreview.hidden = false;
 
     const blocks = parseTemplate(tplText);
-    renderBlocks(blocks, dataStore, paramValues, previewContainer, config.charts);
+    const palette = getPalette(paramValues.palette as string | undefined);
+    const font = getFont(paramValues.font as string | undefined);
+
+    // Apply font to preview (covers tables and inline text via inheritance).
+    previewContainer.style.fontFamily = font.cssStack;
+
+    // Override chart and export font with the user's selection.
+    const chartDefaults = {
+      ...(config.charts ?? {}),
+      font: { ...(config.charts?.font ?? {}), family: font.docxName },
+    };
+    const exportConfig = {
+      ...(config.export ?? {}),
+      font: {
+        ...(config.export?.font ?? {}),
+        family: font.docxName,
+        headingFamily: font.docxName,
+      },
+    };
+
+    renderBlocks(blocks, dataStore, paramValues, previewContainer, chartDefaults, palette);
 
     // Export button
     const exportBtn = root.querySelector<HTMLButtonElement>("#export-btn")!;
-    exportBtn.onclick = () => exportToDocx(previewContainer, config.export);
+    exportBtn.onclick = () => exportToDocx(previewContainer, exportConfig);
   }
 }

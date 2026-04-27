@@ -69,9 +69,9 @@ function validateSheet(
   }
 
   const sheet = workbook.Sheets[sheetDef.sheet];
-  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
+  const aoa = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, blankrows: false });
 
-  if (rows.length === 0) {
+  if (aoa.length === 0) {
     errors.push({
       source: sourceName,
       message: `Sheet "${sheetDef.sheet}" is empty.`,
@@ -79,8 +79,12 @@ function validateSheet(
     return errors;
   }
 
-  const actualColumns = Object.keys(rows[0]);
-  const missing = sheetDef.columns.filter((col) => !actualColumns.includes(col));
+  const headerRow = aoa[0] ?? [];
+  const actualColumns = headerRow.map((h) => normalizeHeader(h));
+  const expectedColumns = sheetDef.columns.map(normalizeHeader);
+  const missing = sheetDef.columns.filter(
+    (_col, i) => !actualColumns.includes(expectedColumns[i])
+  );
   if (missing.length > 0) {
     errors.push({
       source: sourceName,
@@ -89,6 +93,14 @@ function validateSheet(
   }
 
   return errors;
+}
+
+/** Normalize a column header for comparison: NFC, trimmed, collapse internal whitespace. */
+function normalizeHeader(value: unknown): string {
+  return String(value ?? "")
+    .normalize("NFC")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 /**

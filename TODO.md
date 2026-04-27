@@ -1,5 +1,8 @@
 # TODO
 
+- Warnings bei fehlenden Daten, aber trotzdem lauffähig
+
+
 ## README
 - [ ] Fill the README
 
@@ -37,7 +40,7 @@
     - [x] Ausführung von Datenbank-Abfragen (z.B. gegen SQL-Injections)
     - [ ] Möglichkeiten zum Datei-Upload (z.B. präparierte Dateien mit Schadcode)
     - [ ] Validierung von „versteckten“ Parametern (z.B. in Cookies oder POST-Requests)
-    - [ ] Aktualität von Softwareversionen (z. B. MySQL, PHP, Javascript, Angular)
+    - [ ] Aktualität von Softwareversionen (z.B. MySQL, PHP, Javascript, Angular)
   - [ ] OWASP (Open Web Application Security Project) Top 10 prüfen (es gibt Open Source Software dafür)
   - [ ] Sollten im Outsourcing betriebene Systeme (z.B. ein externer Hosting-Provider) überprüft werden, muss der Vertrag mit diesem Dienstleister eine s.g. „Permission to attack“ enthalten, bzw. diese muss separat gegeben werden.
 

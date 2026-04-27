@@ -8,27 +8,18 @@ import { Chart, registerables } from "chart.js";
 import type { ChartOptions } from "chart.js";
 import type { ChartSpec, DataSet, ChartDefaults } from "../types";
 import { generateAltText } from "../alt-text";
+import { getPalette } from "../palettes";
 
 Chart.register(...registerables);
-
-/** Colorblind-safe palette (Wong, 2011). */
-const ACCESSIBLE_PALETTE = [
-  "#0072B2", // blue
-  "#E69F00", // orange
-  "#009E73", // green
-  "#CC79A7", // pink
-  "#56B4E9", // sky blue
-  "#D55E00", // vermillion
-  "#F0E442", // yellow
-  "#000000", // black
-];
 
 export function renderChart(
   spec: ChartSpec,
   data: DataSet,
   container: HTMLElement,
-  defaults?: ChartDefaults
+  defaults?: ChartDefaults,
+  palette?: string[]
 ): HTMLElement {
+  const colors = palette ?? getPalette();
   const figure = document.createElement("figure");
 
   const canvas = document.createElement("canvas");
@@ -53,8 +44,8 @@ export function renderChart(
   const datasets = yFields.map((yKey, i) => ({
     label: yKey,
     data: data.map((row) => Number(row[yKey] ?? 0)),
-    backgroundColor: ACCESSIBLE_PALETTE[i % ACCESSIBLE_PALETTE.length],
-    borderColor: ACCESSIBLE_PALETTE[i % ACCESSIBLE_PALETTE.length],
+    backgroundColor: colors[i % colors.length],
+    borderColor: colors[i % colors.length],
   }));
 
   new Chart(canvas, {

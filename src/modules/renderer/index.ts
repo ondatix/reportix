@@ -16,7 +16,8 @@ export function renderBlocks(
   dataStore: DataStore,
   parameters: ParameterValues,
   container: HTMLElement,
-  chartDefaults?: ChartDefaults
+  chartDefaults?: ChartDefaults,
+  palette?: string[]
 ): void {
   for (const block of blocks) {
     switch (block.type) {
@@ -36,7 +37,7 @@ export function renderBlocks(
           container.appendChild(err);
           break;
         }
-        renderChart(block.spec, data, container, chartDefaults);
+        renderChart(block.spec, data, container, chartDefaults, palette);
         break;
       }
 

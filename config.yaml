@@ -10,14 +10,103 @@ parameters:
       - Sales
       - Engineering
       - Marketing
+  palette:
+    label: "Chart color palette"
+    type: select
+    default: okabe-ito
+    options:
+      - okabe-ito   # Okabe & Ito / Wong (2011) — 8-colour standard
+      - tol-bright  # Paul Tol — Bright (7)
+      - tol-muted   # Paul Tol — Muted (9)
+      - ibm         # IBM Design Language colourblind-safe (5)
+      - grayscale   # Print-safe maximum-contrast fallback
+  font:
+    label: "Font"
+    type: select
+    default: arial
+    options:
+      - verdana   # Screen-optimised sans, broad legibility
+      - tahoma    # Compact accessible sans
+      - arial     # Universal sans
+      - georgia   # Accessible serif option
 
 data:
-  gleichstellung:
+  Gleichstellung:
     sheets:
       - sheet: Stichtag
         columns:
           - PersNr
           - Geschlecht
+          - Entgeltgruppe / Besoldungsgruppe
+          - QE
+          - Einstiegs-QE
+          - Teilzeit / Vollzeit
+          - Arbeitszeitanteil
+          - Führungsebene
+          - Organisationseinheit
+          - Ausbildungsbereich
+          - Führung in Tandem
+          - Führungskraft (aktiv)
+          - Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung
+          - Ab- oder Anwesenheitsart
+          - Befristet / Unbefristet
+      - sheet: Zeitraum_Beurlaubung
+        columns:
+          - PersNr
+          - Geschlecht
+          - Entgeltgruppe / Besoldungsgruppe
+          - QE
+          - Arbeitszeitmodell
+          - Führungsebene
+          - Dauer der Elternzeit (Tage)
+      - sheet: Zeitraum_Bewerbung
+        columns:
+          - BewerberID
+          - Geschlecht
+          - Entgeltgruppe / Besoldungsgruppe
+          - QE
+          - Führungsebene
+          - Intern / Extern
+          - Organisationseinheit
+      - sheet: Zeitraum_Einstellung
+        columns:
+          - PersNr
+          - Geschlecht
+          - Entgeltgruppe / Besoldungsgruppe
+          - QE			
+      - sheet: Zeitraum_Fortbildung
+        columns:
+          - PersNr
+          - Geschlecht
+          - Entgeltgruppe / Besoldungsgruppe
+          - QE
+      - sheet: Zeitraum_Qualifikation
+        columns:
+          - PersNr
+          - Geschlecht
+          - Entgeltgruppe / Besoldungsgruppe
+          - QE
+          - Arbeitszeitmodell
+          - Qualifikationsart	
+      - sheet: Zeitraum_Leistungskomponente
+        columns:
+          - PersNr
+          - Geschlecht
+          - Entgeltgruppe / Besoldungsgruppe
+          - QE
+          - Arbeitszeitmodell
+          - Führungsebene
+          - Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB) 
+      - sheet: Zeitraum_Befoerderung
+        columns:
+          - PersNr
+          - Geschlecht
+          - Entgeltgruppe / Besoldungsgruppe
+          - QE
+          - Arbeitszeitmodell
+          - Führungsebene
+          - Maßnahmenantrag
+          - Maßnahmenart
 
 template:
   file: report_template.md

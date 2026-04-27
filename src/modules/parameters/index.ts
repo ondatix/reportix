@@ -4,6 +4,8 @@
  * Usable independently in other projects.
  */
 import type { ParameterDef, ParameterValues } from "../types";
+import { PALETTES } from "../palettes";
+import { FONTS } from "../fonts";
 
 export function buildParameterForm(
   parameters: Record<string, ParameterDef>,
@@ -13,6 +15,19 @@ export function buildParameterForm(
   form.className = "parameter-form";
 
   for (const [key, def] of Object.entries(parameters)) {
+    // Convention: a select named "palette" renders as an illustrated radio group
+    // showing each palette's swatches inline.
+    if (key === "palette" && def.type === "select") {
+      form.appendChild(buildPaletteField(key, def));
+      continue;
+    }
+
+    // Convention: a select named "font" renders each option in its own typeface.
+    if (key === "font" && def.type === "select") {
+      form.appendChild(buildFontField(key, def));
+      continue;
+    }
+
     const fieldset = document.createElement("div");
     fieldset.className = "parameter-field";
 
@@ -111,6 +126,99 @@ export function buildParameterForm(
 
   container.appendChild(form);
   return form;
+}
+
+/**
+ * Render a palette parameter as a fieldset of radio buttons, each showing
+ * the palette's name and a horizontal strip of its actual colour swatches.
+ * Falls back gracefully for any option ID that has no matching palette.
+ */
+function buildPaletteField(key: string, def: ParameterDef): HTMLElement {
+  const fieldset = document.createElement("fieldset");
+  fieldset.className = "parameter-field palette-field";
+
+  const legend = document.createElement("legend");
+  legend.textContent = def.label;
+  fieldset.appendChild(legend);
+
+  const defaultId = typeof def.default === "string" ? def.default : undefined;
+
+  for (const opt of def.options ?? []) {
+    const optionId = `param-${key}-${opt}`;
+    const wrapper = document.createElement("label");
+    wrapper.className = "palette-option";
+    wrapper.htmlFor = optionId;
+
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.id = optionId;
+    radio.name = key;
+    radio.value = opt;
+    if (defaultId === opt) radio.checked = true;
+    wrapper.appendChild(radio);
+
+    const name = document.createElement("span");
+    name.className = "palette-name";
+    name.textContent = opt;
+    wrapper.appendChild(name);
+
+    const swatches = document.createElement("span");
+    swatches.className = "palette-swatches";
+    swatches.setAttribute("aria-hidden", "true");
+    const colors = PALETTES[opt as keyof typeof PALETTES] ?? [];
+    for (const c of colors) {
+      const dot = document.createElement("span");
+      dot.className = "palette-swatch";
+      dot.style.background = c;
+      swatches.appendChild(dot);
+    }
+    wrapper.appendChild(swatches);
+
+    fieldset.appendChild(wrapper);
+  }
+
+  return fieldset;
+}
+
+/**
+ * Render a font parameter as a fieldset of radio buttons, each label rendered
+ * in the actual typeface so users can compare legibility before choosing.
+ */
+function buildFontField(key: string, def: ParameterDef): HTMLElement {
+  const fieldset = document.createElement("fieldset");
+  fieldset.className = "parameter-field font-field";
+
+  const legend = document.createElement("legend");
+  legend.textContent = def.label;
+  fieldset.appendChild(legend);
+
+  const defaultId = typeof def.default === "string" ? def.default : undefined;
+
+  for (const opt of def.options ?? []) {
+    const optionId = `param-${key}-${opt}`;
+    const wrapper = document.createElement("label");
+    wrapper.className = "font-option";
+    wrapper.htmlFor = optionId;
+
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.id = optionId;
+    radio.name = key;
+    radio.value = opt;
+    if (defaultId === opt) radio.checked = true;
+    wrapper.appendChild(radio);
+
+    const font = FONTS[opt];
+    const sample = document.createElement("span");
+    sample.className = "font-sample";
+    sample.textContent = font ? font.displayName : opt;
+    if (font) sample.style.fontFamily = font.cssStack;
+    wrapper.appendChild(sample);
+
+    fieldset.appendChild(wrapper);
+  }
+
+  return fieldset;
 }
 
 export function collectParameterValues(
