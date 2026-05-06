@@ -222,9 +222,39 @@ export interface TextBlock {
 
 export interface ChartSpec {
   data: string;
-  x: string;
+  /** Categorical axis for non-pyramid charts; not used by pyramid. */
+  x?: string;
+  /** Series key(s); for pyramid: the category axis (e.g. age group, pay grade). */
   y: string | string[];
-  type: "bar" | "line" | "pie" | "doughnut" | "scatter";
+  type: "bar" | "line" | "pie" | "doughnut" | "scatter" | "pyramid";
+  /** Pyramid only — column whose two distinct values split the chart left/right. */
+  split?: string;
+  /** Pyramid only — column to sum per bucket; if omitted, rows are counted. */
+  value?: string;
+  /**
+   * Categorical column used as the grouping (a.k.a. "hue") axis: rows are
+   * pivoted into one series per distinct value, each coloured from the
+   * active palette. Works across bar, line, scatter, pie, doughnut, and
+   * pyramid (where it acts as the binary split, equivalent to `split`).
+   */
+  color?: string;
+  /**
+   * For multi-series bar (and line) charts: stack groups along the value
+   * axis instead of placing them side-by-side. Defaults to `false`
+   * (dodged). Ignored by pyramid, which is always stacked.
+   */
+  stacked?: boolean;
+  /**
+   * How to combine rows that share the same group key. Setting `y` to any
+   * non-identity op enables grouping by `x` (and `color` if present).
+   * Defaults: ungrouped charts → `identity` (rows are data points);
+   * `color`-grouped or pyramid charts → `sum`.
+   * Supported ops: identity, count, sum, mean, min, max, median.
+   */
+  aggregation?: {
+    x?: import("./aggregation").AggregationOp;
+    y?: import("./aggregation").AggregationOp;
+  };
   title?: string;
   alt?: string;
   caption?: string;
@@ -239,6 +269,13 @@ export interface TableSpec {
   data: string;
   columns: string[];
   format?: Record<string, string>;
+  /**
+   * Per-column aggregation. Setting any column to a non-identity op enables
+   * GROUP BY semantics: rows are grouped by the columns whose op is
+   * `identity` (or unspecified), and the others are aggregated. Omitting
+   * the field entirely renders rows verbatim.
+   */
+  aggregation?: Record<string, import("./aggregation").AggregationOp>;
   caption?: string;
 }
 

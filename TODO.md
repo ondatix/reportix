@@ -14,6 +14,9 @@
 - [ ] Create StMAS Config
 - [ ] Create Config Specification
 
+## Charts
+- [ ] Accessible charts
+
 ## Modules
 - [ ] Write module specifications
 - [ ] Write tests for each module
@@ -23,7 +26,7 @@
 - [ ] Create the StMAS Template
 
 ## License
-- [ ] Validate License with Team
+- [x] Validate License with Team
 
 ## Security
 - [x] Subresource Integrity (SRI)

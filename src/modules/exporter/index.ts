@@ -9,6 +9,7 @@ import {
   Packer,
   Paragraph,
   TextRun,
+  ImageRun,
   Table,
   TableRow,
   TableCell,
@@ -373,25 +374,77 @@ function listItems(el: HTMLElement, s: ResolvedSettings): Paragraph[] {
 
 function convertFigure(el: HTMLElement, s: ResolvedSettings): Paragraph[] {
   const result: Paragraph[] = [];
-  const canvas = el.querySelector("canvas");
-  const alt = canvas?.getAttribute("aria-label");
-  if (alt) {
-    result.push(
-      new Paragraph({
-        children: [new TextRun({ text: `[Chart: ${alt}]`, italics: true, font: s.fontFamily, size: s.fontSize })],
-      })
-    );
+  const canvas = el.querySelector<HTMLCanvasElement>("canvas");
+
+  if (canvas) {
+    const alt = canvas.getAttribute("aria-label") ?? "";
+    try {
+      const bytes = dataUrlToBytes(canvas.toDataURL("image/png"));
+      const { width, height } = fitToPage(canvas, s);
+
+      result.push(
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [
+            new ImageRun({
+              type: "png",
+              data: bytes,
+              transformation: { width, height },
+              altText: alt
+                ? { title: alt, description: alt, name: "chart" }
+                : undefined,
+            }),
+          ],
+        })
+      );
+    } catch {
+      // Fallback to a text placeholder if rasterisation fails (e.g. tainted canvas).
+      result.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: alt ? `[Chart: ${alt}]` : "[Chart]",
+              italics: true,
+              font: s.fontFamily,
+              size: s.fontSize,
+            }),
+          ],
+        })
+      );
+    }
   }
+
   const figcaption = el.querySelector("figcaption");
   if (figcaption?.textContent) {
     result.push(
       new Paragraph({
         alignment: AlignmentType.CENTER,
-        children: [new TextRun({ text: figcaption.textContent, bold: true, font: s.fontFamily, size: s.fontSize })],
+        children: [new TextRun({ text: figcaption.textContent, italics: true, font: s.fontFamily, size: s.fontSize })],
       })
     );
   }
   return result;
+}
+
+/** Decode a `data:image/png;base64,…` URL into raw bytes. */
+function dataUrlToBytes(dataUrl: string): Uint8Array {
+  const base64 = dataUrl.split(",", 2)[1] ?? "";
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+/** Compute embed dimensions (px) that fit within the page content area, preserving aspect ratio. */
+function fitToPage(canvas: HTMLCanvasElement, s: ResolvedSettings): { width: number; height: number } {
+  const contentTwips = s.pageWidth - s.marginLeft - s.marginRight;
+  const maxWidthPx = Math.max(1, Math.floor((contentTwips / 1440) * 96)); // twips → in → px @96 DPI
+  const cssW = canvas.clientWidth || canvas.width;
+  const cssH = canvas.clientHeight || canvas.height;
+  const aspect = cssW > 0 ? cssH / cssW : 0.5;
+  const width = Math.min(cssW || maxWidthPx, maxWidthPx);
+  const height = Math.max(1, Math.round(width * aspect));
+  return { width, height };
 }
 
 function convertTable(tableEl: HTMLTableElement, s: ResolvedSettings): Table {

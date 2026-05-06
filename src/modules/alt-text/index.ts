@@ -25,9 +25,14 @@ export function generateAltText(spec: ChartSpec, data?: DataSet): string {
 // ── Spec-derived generation ─────────────────────────────────────────
 
 function deriveAltTextFromSpec(spec: ChartSpec, data?: DataSet): string {
+  if (spec.type === "pyramid") {
+    return derivePyramidAltText(spec, data);
+  }
+
   const chartLabel = chartTypeLabel(spec.type);
   const yFields = Array.isArray(spec.y) ? spec.y.join(", ") : spec.y;
   let text = `${chartLabel} showing ${yFields} by ${spec.x}`;
+  if (spec.color) text += `, grouped by ${spec.color}`;
 
   if (spec.title) {
     text = `${spec.title}. ${text}`;
@@ -65,6 +70,28 @@ function deriveAltTextFromSpec(spec: ChartSpec, data?: DataSet): string {
   return text + ".";
 }
 
+function derivePyramidAltText(spec: ChartSpec, data?: DataSet): string {
+  const yField = Array.isArray(spec.y) ? spec.y[0] : spec.y;
+  let text = `Pyramid chart showing distribution of ${yField}`;
+  if (spec.split) text += ` split by ${spec.split}`;
+
+  if (spec.title) text = `${spec.title}. ${text}`;
+
+  if (data && data.length > 0 && spec.split) {
+    const counts = new Map<string, number>();
+    for (const row of data) {
+      const key = String(row[spec.split] ?? "");
+      if (key === "") continue;
+      const v = spec.value ? Number(row[spec.value] ?? 0) : 1;
+      counts.set(key, (counts.get(key) ?? 0) + v);
+    }
+    const parts = [...counts.entries()].map(([k, v]) => `${k}: ${v.toLocaleString()}`);
+    if (parts.length > 0) text += `. Totals — ${parts.join(", ")}`;
+  }
+
+  return text + ".";
+}
+
 function chartTypeLabel(type: ChartSpec["type"]): string {
   const labels: Record<ChartSpec["type"], string> = {
     bar: "Bar chart",
@@ -72,6 +99,7 @@ function chartTypeLabel(type: ChartSpec["type"]): string {
     pie: "Pie chart",
     doughnut: "Doughnut chart",
     scatter: "Scatter plot",
+    pyramid: "Pyramid chart",
   };
   return labels[type] ?? "Chart";
 }

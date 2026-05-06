@@ -1,15 +1,12 @@
 parameters:
-  period:
-    label: "Reporting period"
+  title:
+    label: "Titel"
     type: text
-    default: "Q1 2026"
-  department:
-    label: "Department"
-    type: select
-    options:
-      - Sales
-      - Engineering
-      - Marketing
+    default: "Geleichstellungskonzept"
+  office:
+    label: "Behörde"
+    type: text
+    default: "Staatsministerium für Familie, Arbeit und Soziales"
   palette:
     label: "Chart color palette"
     type: select

@@ -235,6 +235,57 @@ title: Monthly Revenue
 ```
 ````
 
+Supported chart types: `bar`, `line`, `pie`, `doughnut`, `scatter`, `pyramid`.
+
+**Grouping (long-form data).** The optional `color` field names a column whose distinct values become the chart's series. Each series is coloured sequentially from the active palette. The renderer pivots long-form rows internally — no pre-aggregation needed — so a single dataset like `(month, region, revenue)` can be plotted as one line per region, one set of grouped bars per region, etc.
+
+| Chart type        | Behaviour with `color`                                                                     |
+|-------------------|---------------------------------------------------------------------------------------------|
+| `bar`, `line`     | Pivot to wide-form: one series per distinct value; `y` is summed within each `(x, group)`. |
+| `scatter`         | One dataset of `{x, y}` points per group; no aggregation.                                  |
+| `pie`, `doughnut` | One slice per distinct value; `y` summed (or rows counted if `y` is omitted).              |
+| `pyramid`         | `color` is the binary split column (alias for `split`).                                    |
+
+For multi-series `bar` (and `line`) charts, `stacked: true` stacks groups along the value axis instead of placing them side-by-side. Default is dodged (`stacked: false`); pyramid is always stacked regardless of this flag.
+
+````markdown
+```chart
+data: Stichtag
+type: bar
+x: QE
+y: PersNr
+color: Geschlecht
+stacked: true
+aggregation:
+  y: count
+```
+````
+
+````markdown
+```chart
+data: sales
+x: month
+y: revenue
+color: region        # one series per distinct region value
+type: line
+```
+````
+
+**Pyramid chart** (population-pyramid layout — horizontal stacked bars mirrored across a central y-axis). Aggregates raw rows internally, so the `data` source contains one row per record (e.g. one row per employee), not pre-summarised values:
+
+````markdown
+```chart
+data: Stichtag
+type: pyramid
+y: Entgeltgruppe / Besoldungsgruppe   # category axis
+split: Geschlecht                      # column with exactly 2 distinct values
+value: Arbeitszeitanteil               # optional — sums this column; omit to count rows
+title: Headcount by pay grade and gender
+```
+````
+
+The `split` field must contain exactly two distinct non-empty values across the dataset; the first encountered renders on the left, the second on the right. Tooltips and x-axis ticks display absolute values, so negative numbers are an implementation detail and not visible to the reader.
+
 **Table block:**
 ````markdown
 ```table
@@ -243,6 +294,36 @@ columns: [month, revenue, growth]
 format:
   revenue: currency
   growth: percent
+```
+````
+
+**Aggregation.** Both chart and table specs accept an `aggregation` field. Supported ops: `identity`, `count`, `sum`, `mean`, `min`, `max`, `median`. `count` ignores the field and returns the row count; `identity` is the group key (passthrough — used to keep a column verbatim).
+
+*Charts* — `aggregation: { x?, y? }`. Setting `y` to a non-identity op turns on grouping by `x` (and `color`, if set). Defaults: ungrouped charts → `identity` (rows are data points); `color`-grouped or pyramid charts → `sum`.
+
+````markdown
+```chart
+data: employees
+x: department
+y: salary
+type: bar
+aggregation:
+  y: mean        # one bar per department, height = average salary
+```
+````
+
+*Tables* — `aggregation: { <column>: op, ... }`. Columns marked `identity` (or omitted from the map) become group keys; others are aggregated. If the field is absent, rows render verbatim.
+
+````markdown
+```table
+data: employees
+columns: [department, headcount, total_salary]
+aggregation:
+  department: identity
+  headcount: count
+  total_salary: sum
+format:
+  total_salary: currency
 ```
 ````
 
