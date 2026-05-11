@@ -2,6 +2,17 @@
 
 - Warnings bei fehlenden Daten, aber trotzdem lauffähig
 
+## Forks
+- Main Fork
+  - Generic config
+  - Generic Template
+- StMAS Fork
+  - Data protection
+  - Data preprocessing
+  - Config
+  - Template
+  - German / Locale control
+
 
 ## README
 - [ ] Fill the README
@@ -11,11 +22,17 @@
 - [ ] Apply ondatix theme
 
 ## Config
-- [ ] Create StMAS Config
-- [ ] Create Config Specification
+- [ ] Create generic config
+- [ ] Create StMAS config
+- [ ] Create config specification
 
-## Charts
+## Charts and Tables
 - [ ] Accessible charts
+  - [ ] Actual numbers in the charts?
+  - [ ] Titles?
+- [ ] Well-formed tables
+  - [ ] Format
+  - [ ] Config options
 
 ## Modules
 - [ ] Write module specifications
@@ -24,6 +41,9 @@
 
 ## Templates
 - [ ] Create the StMAS Template
+  - [ ] Table section at the end
+  - [ ] Data Preprocessing
+- [x] Polish callouts
 
 ## License
 - [x] Validate License with Team

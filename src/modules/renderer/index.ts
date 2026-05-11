@@ -9,7 +9,7 @@ export { renderTable } from "./table";
 import { renderText } from "./text";
 import { renderChart } from "./chart";
 import { renderTable } from "./table";
-import type { TemplateBlock, DataStore, ParameterValues, ChartDefaults } from "../types";
+import type { TemplateBlock, DataStore, ParameterValues, ChartDefaults, DataProtectionConfig } from "../types";
 
 export function renderBlocks(
   blocks: TemplateBlock[],
@@ -17,7 +17,8 @@ export function renderBlocks(
   parameters: ParameterValues,
   container: HTMLElement,
   chartDefaults?: ChartDefaults,
-  palette?: string[]
+  palette?: string[],
+  dataProtection?: DataProtectionConfig
 ): void {
   for (const block of blocks) {
     switch (block.type) {
@@ -29,30 +30,50 @@ export function renderBlocks(
       }
 
       case "chart": {
-        const data = dataStore[block.spec.data];
-        if (!data) {
-          const err = document.createElement("p");
-          err.className = "error";
-          err.textContent = `Data source "${block.spec.data}" not found.`;
-          container.appendChild(err);
-          break;
-        }
-        renderChart(block.spec, data, container, chartDefaults, palette);
+        safeRender(container, "Diagramm", block.spec.title, () => {
+          const data = dataStore[block.spec.data];
+          if (!data) throw new Error(`Data source "${block.spec.data}" not found.`);
+          renderChart(block.spec, data, container, chartDefaults, palette, dataProtection);
+        });
         break;
       }
 
       case "table": {
-        const data = dataStore[block.spec.data];
-        if (!data) {
-          const err = document.createElement("p");
-          err.className = "error";
-          err.textContent = `Data source "${block.spec.data}" not found.`;
-          container.appendChild(err);
-          break;
-        }
-        renderTable(block.spec, data, container);
+        safeRender(container, "Tabelle", block.spec.caption, () => {
+          const data = dataStore[block.spec.data];
+          if (!data) throw new Error(`Data source "${block.spec.data}" not found.`);
+          renderTable(block.spec, data, container, dataProtection);
+        });
         break;
       }
     }
+  }
+}
+
+/**
+ * Run a render function that may append DOM children to `container`. If it
+ * throws, remove any children added during the failed attempt and replace
+ * them with a red TBD note carrying the error message so the rest of the
+ * report can still render.
+ */
+function safeRender(
+  container: HTMLElement,
+  kind: string,
+  label: string | undefined,
+  fn: () => void
+): void {
+  const beforeCount = container.childNodes.length;
+  try {
+    fn();
+  } catch (err) {
+    while (container.childNodes.length > beforeCount) {
+      container.removeChild(container.lastChild!);
+    }
+    const note = document.createElement("p");
+    note.className = "tbd-note";
+    note.setAttribute("role", "note");
+    const heading = label ? `${kind} „${label}"` : kind;
+    note.textContent = `⚠ ${heading} — TBD: ${(err as Error).message}`;
+    container.appendChild(note);
   }
 }

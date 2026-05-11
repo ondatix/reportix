@@ -23,10 +23,11 @@ import {
   PageOrientation,
   NumberFormat,
   LineRuleType,
+  ShadingType,
   convertMillimetersToTwip,
 } from "docx";
 import { saveAs } from "file-saver";
-import type { ExportConfig } from "../types";
+import type { ExportConfig, CalloutBoxConfig } from "../types";
 
 // ── Defaults ────────────────────────────────────────────────────────
 
@@ -79,6 +80,9 @@ interface ResolvedSettings {
   tableBorderColor: string;
   tableBorderSize: number;
   tableCellPadding: number;
+  // Callout box overrides (per-class).
+  definitionBox?: CalloutBoxConfig;
+  summaryBox?: CalloutBoxConfig;
 }
 
 function pt(points: number): number {
@@ -166,6 +170,8 @@ function resolveSettings(c?: ExportConfig): ResolvedSettings {
     tableBorderColor: c?.table?.borderColor ?? "999999",
     tableBorderSize: c?.table?.borderSize ?? 4,
     tableCellPadding: c?.table?.cellPadding ?? 80,
+    definitionBox: c?.definitionBox,
+    summaryBox: c?.summaryBox,
   };
 }
 
@@ -312,28 +318,37 @@ function convertChildren(el: HTMLElement, s: ResolvedSettings): DocxChild[] {
     }
 
     if (node.nodeType !== Node.ELEMENT_NODE) continue;
-    const child = node as HTMLElement;
-    const tag = child.tagName.toLowerCase();
-
-    switch (tag) {
-      case "h1": result.push(heading(child, HeadingLevel.HEADING_1, s)); break;
-      case "h2": result.push(heading(child, HeadingLevel.HEADING_2, s)); break;
-      case "h3": result.push(heading(child, HeadingLevel.HEADING_3, s)); break;
-      case "h4": result.push(heading(child, HeadingLevel.HEADING_4, s)); break;
-      case "h5": result.push(heading(child, HeadingLevel.HEADING_5, s)); break;
-      case "h6": result.push(heading(child, HeadingLevel.HEADING_6, s)); break;
-      case "p":  result.push(bodyParagraph(child, s)); break;
-      case "ul":
-      case "ol": result.push(...listItems(child, s)); break;
-      case "table": result.push(convertTable(child as HTMLTableElement, s)); break;
-      case "figure": result.push(...convertFigure(child, s)); break;
-      case "section":
-      case "div": result.push(...convertChildren(child, s)); break;
-      default: result.push(bodyParagraph(child, s)); break;
-    }
+    result.push(...convertElement(node as HTMLElement, s));
   }
 
   return result;
+}
+
+/**
+ * Convert a single block-level HTML element to one or more docx children,
+ * dispatching by tag. Used by `convertChildren` and `convertCallout` so
+ * block elements aren't accidentally treated as containers of paragraphs.
+ */
+function convertElement(child: HTMLElement, s: ResolvedSettings): DocxChild[] {
+  const tag = child.tagName.toLowerCase();
+  switch (tag) {
+    case "h1": return [heading(child, HeadingLevel.HEADING_1, s)];
+    case "h2": return [heading(child, HeadingLevel.HEADING_2, s)];
+    case "h3": return [heading(child, HeadingLevel.HEADING_3, s)];
+    case "h4": return [heading(child, HeadingLevel.HEADING_4, s)];
+    case "h5": return [heading(child, HeadingLevel.HEADING_5, s)];
+    case "h6": return [heading(child, HeadingLevel.HEADING_6, s)];
+    case "p":  return [bodyParagraph(child, s)];
+    case "ul":
+    case "ol": return listItems(child, s);
+    case "table": return [convertTable(child as HTMLTableElement, s)];
+    case "figure": return convertFigure(child, s);
+    case "section": return convertChildren(child, s);
+    case "div":
+      if (child.classList.contains("callout")) return convertCallout(child, s);
+      return convertChildren(child, s);
+    default: return [bodyParagraph(child, s)];
+  }
 }
 
 function heading(
@@ -348,12 +363,72 @@ function heading(
 }
 
 function bodyParagraph(el: HTMLElement, s: ResolvedSettings): Paragraph {
+  const isTbd = el.classList.contains("tbd-note") || el.classList.contains("error");
+  if (isTbd) {
+    return new Paragraph({
+      alignment: s.alignment,
+      children: [
+        new TextRun({
+          text: el.textContent ?? "",
+          font: s.fontFamily,
+          size: s.fontSize,
+          color: "B71C1C",
+          italics: true,
+          bold: true,
+        }),
+      ],
+    });
+  }
   return new Paragraph({
     alignment: s.alignment,
-    children: [
-      new TextRun({ text: el.textContent ?? "", font: s.fontFamily, size: s.fontSize, color: s.fontColor }),
-    ],
+    children: convertInlines(el, s),
   });
+}
+
+/**
+ * Walk the inline children of `el` and emit one `TextRun` per span,
+ * preserving bold (<strong>/<b>), italic (<em>/<i>), and inline code
+ * (<code>) flags. Line breaks (<br>) emit an empty run with a soft break.
+ * Unknown inline elements pass through with their children's runs intact.
+ */
+function convertInlines(
+  el: Node,
+  s: ResolvedSettings,
+  inherited: { bold?: boolean; italics?: boolean; code?: boolean } = {}
+): TextRun[] {
+  const runs: TextRun[] = [];
+  for (const node of Array.from(el.childNodes)) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent ?? "";
+      if (!text) continue;
+      runs.push(
+        new TextRun({
+          text,
+          font: inherited.code ? "Courier New" : s.fontFamily,
+          size: s.fontSize,
+          color: s.fontColor,
+          bold: inherited.bold,
+          italics: inherited.italics,
+        })
+      );
+      continue;
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) continue;
+    const child = node as HTMLElement;
+    const tag = child.tagName.toLowerCase();
+    if (tag === "strong" || tag === "b") {
+      runs.push(...convertInlines(child, s, { ...inherited, bold: true }));
+    } else if (tag === "em" || tag === "i") {
+      runs.push(...convertInlines(child, s, { ...inherited, italics: true }));
+    } else if (tag === "code") {
+      runs.push(...convertInlines(child, s, { ...inherited, code: true }));
+    } else if (tag === "br") {
+      runs.push(new TextRun({ text: "", break: 1 }));
+    } else {
+      runs.push(...convertInlines(child, s, inherited));
+    }
+  }
+  return runs;
 }
 
 function listItems(el: HTMLElement, s: ResolvedSettings): Paragraph[] {
@@ -370,6 +445,133 @@ function listItems(el: HTMLElement, s: ResolvedSettings): Paragraph[] {
         ],
       })
   );
+}
+
+/**
+ * Render a callout (`<div class="callout callout-X">`) as a single-cell
+ * bordered table — docx has no native callout primitive, but a 1×1 table
+ * with a coloured left border reads as a styled box and respects the
+ * accent colour map below.
+ */
+function convertCallout(el: HTMLElement, s: ResolvedSettings): DocxChild[] {
+  const variant = pickCalloutVariant(el, s);
+  const titleEl = el.querySelector(".callout-title");
+  const titleText = titleEl?.textContent?.trim() ?? "";
+
+  const bodyChildren: DocxChild[] = [];
+  if (titleText) {
+    bodyChildren.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: titleText,
+            bold: true,
+            font: s.fontFamily,
+            size: s.fontSize,
+            color: variant.accent,
+          }),
+        ],
+      })
+    );
+  }
+
+  // Convert each block-level child of the callout (excluding the title)
+  // as one docx element. Recursing into <p> children would incorrectly
+  // split bold/italic spans into their own paragraphs.
+  for (const node of Array.from(el.childNodes)) {
+    if (node.nodeType !== Node.ELEMENT_NODE) continue;
+    const child = node as HTMLElement;
+    if (child === titleEl) continue;
+    if (child.tagName.toLowerCase() === "div" && child.classList.contains("callout-title")) continue;
+    bodyChildren.push(...convertElement(child, s));
+  }
+  // Fallback for callouts whose body is text only (no <p> wrappers).
+  if (bodyChildren.length === (titleText ? 1 : 0)) {
+    const text = el.textContent?.replace(titleText, "").trim();
+    if (text) {
+      bodyChildren.push(
+        new Paragraph({
+          children: [new TextRun({ text, font: s.fontFamily, size: s.fontSize, color: s.fontColor })],
+        })
+      );
+    }
+  }
+
+  const noBorder = { style: BorderStyle.NONE, color: "FFFFFF", size: 0 };
+  const accent = { style: BorderStyle.SINGLE, color: variant.accent, size: 24 }; // 24 = 3pt
+  return [
+    new Table({
+      rows: [
+        new TableRow({
+          children: [
+            new TableCell({
+              borders: { top: noBorder, right: noBorder, bottom: noBorder, left: accent },
+              shading: { type: ShadingType.CLEAR, color: "auto", fill: variant.background },
+              margins: { top: 120, bottom: 120, left: 200, right: 120 },
+              children: bodyChildren.length > 0 ? bodyChildren : [new Paragraph({})],
+              width: { size: 100, type: WidthType.PERCENTAGE },
+            }),
+          ],
+        }),
+      ],
+      width: { size: 100, type: WidthType.PERCENTAGE },
+    }),
+  ];
+}
+
+interface CalloutVariant {
+  accent: string;     // left-border + title colour (hex, no #)
+  background: string; // cell shading (hex, no #)
+}
+
+const CALLOUT_VARIANTS: Record<string, CalloutVariant> = {
+  "callout-note":      { accent: "1F77B4", background: "EAF2FB" },
+  "callout-tip":       { accent: "2CA02C", background: "EBF6EC" },
+  "callout-warning":   { accent: "FF7F0E", background: "FDF1E3" },
+  "callout-caution":   { accent: "D62728", background: "FBE9E9" },
+  "callout-important": { accent: "9467BD", background: "F3EDF8" },
+};
+
+const GENERIC_CALLOUT: CalloutVariant = { accent: "888888", background: "F5F5F5" };
+
+function pickCalloutVariant(el: HTMLElement, s: ResolvedSettings): CalloutVariant {
+  let variantCls = "";
+  for (const cls of Array.from(el.classList)) {
+    if (cls in CALLOUT_VARIANTS) {
+      variantCls = cls;
+      break;
+    }
+  }
+  const base = variantCls ? CALLOUT_VARIANTS[variantCls] : GENERIC_CALLOUT;
+
+  // Config overrides: definition_box → callout-note, summary_box → callout-tip.
+  let override: CalloutBoxConfig | undefined;
+  if (variantCls === "callout-note") override = s.definitionBox;
+  else if (variantCls === "callout-tip") override = s.summaryBox;
+
+  if (!override) return base;
+
+  const accent = override.color ?? base.accent;
+  // `background: false` clears the fill; `true` or unset derives a pale tint
+  // from the accent so the box still reads as a callout.
+  const wantsBg = override.background ?? true;
+  const background = wantsBg ? lighten(accent, 0.9) : "FFFFFF";
+  return { accent, background };
+}
+
+/**
+ * Blend a 6-digit hex colour toward white by `amount` (0 = unchanged,
+ * 1 = white). Used to derive callout backgrounds from accent colours.
+ */
+function lighten(hex: string, amount: number): string {
+  const clean = hex.replace(/^#/, "");
+  if (!/^[0-9A-Fa-f]{6}$/.test(clean)) return clean;
+  const r = parseInt(clean.slice(0, 2), 16);
+  const g = parseInt(clean.slice(2, 4), 16);
+  const b = parseInt(clean.slice(4, 6), 16);
+  const blend = (c: number) => Math.round(c + (255 - c) * amount);
+  const toHex = (n: number) => n.toString(16).padStart(2, "0").toUpperCase();
+  return toHex(blend(r)) + toHex(blend(g)) + toHex(blend(b));
 }
 
 function convertFigure(el: HTMLElement, s: ResolvedSettings): Paragraph[] {

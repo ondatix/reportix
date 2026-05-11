@@ -147,7 +147,7 @@ export function initApp(root: HTMLElement): void {
       },
     };
 
-    renderBlocks(blocks, dataStore, paramValues, previewContainer, chartDefaults, palette);
+    renderBlocks(blocks, dataStore, paramValues, previewContainer, chartDefaults, palette, config.dataProtection);
 
     // Export button
     const exportBtn = root.querySelector<HTMLButtonElement>("#export-btn")!;

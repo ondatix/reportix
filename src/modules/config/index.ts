@@ -3,7 +3,7 @@
  * Usable independently in other projects.
  */
 import { parse as parseYAML } from "yaml";
-import type { AppConfig, ParameterDef, DataSourceDef, SheetDef, TemplateDef, ExportConfig, ChartDefaults } from "../types";
+import type { AppConfig, ParameterDef, DataSourceDef, SheetDef, TemplateDef, ExportConfig, ChartDefaults, DataProtectionConfig } from "../types";
 
 export function parseConfig(yamlString: string): AppConfig {
   const raw = parseYAML(yamlString) as Record<string, unknown>;
@@ -53,6 +53,8 @@ export function parseConfig(yamlString: string): AppConfig {
     const headerRaw = e.header as Record<string, unknown> | undefined;
     const footerRaw = e.footer as Record<string, unknown> | undefined;
     const tableRaw = e.table as Record<string, unknown> | undefined;
+    const defBoxRaw = e.definition_box as Record<string, unknown> | undefined;
+    const sumBoxRaw = e.summary_box as Record<string, unknown> | undefined;
 
     exportConfig = {
       filename: e.filename as string | undefined,
@@ -136,6 +138,20 @@ export function parseConfig(yamlString: string): AppConfig {
             borderColor: tableRaw.border_color as string | undefined,
             borderSize: tableRaw.border_size as number | undefined,
             cellPadding: tableRaw.cell_padding as number | undefined,
+          }
+        : undefined,
+
+      definitionBox: defBoxRaw
+        ? {
+            color: defBoxRaw.color as string | undefined,
+            background: defBoxRaw.background as boolean | undefined,
+          }
+        : undefined,
+
+      summaryBox: sumBoxRaw
+        ? {
+            color: sumBoxRaw.color as string | undefined,
+            background: sumBoxRaw.background as boolean | undefined,
           }
         : undefined,
     };
@@ -227,7 +243,15 @@ export function parseConfig(yamlString: string): AppConfig {
     };
   }
 
-  return { parameters, data, template, export: exportConfig, charts };
+  let dataProtection: DataProtectionConfig | undefined;
+  if (raw.data_protection && typeof raw.data_protection === "object") {
+    const dp = raw.data_protection as Record<string, unknown>;
+    dataProtection = {
+      smallestGroup: dp.smallest_group as number | undefined,
+    };
+  }
+
+  return { parameters, data, template, export: exportConfig, charts, dataProtection };
 }
 
 /**

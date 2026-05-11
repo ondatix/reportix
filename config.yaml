@@ -28,7 +28,7 @@ parameters:
       - georgia   # Accessible serif option
 
 data:
-  Gleichstellung:
+  Gleichstellungsdatensatz:
     sheets:
       - sheet: Stichtag
         columns:
@@ -108,6 +108,9 @@ data:
 template:
   file: report_template.md
 
+data_protection:
+  smallest_group: 5  # aggregated values < this are masked as "<5" in tables and clamped in charts
+
 export:
   filename: report.docx
   locale: de-DE
@@ -167,6 +170,18 @@ export:
     border_color: "AAAAAA"  # hex without #
     border_size: 4          # eighths of a point
     cell_padding: 80        # twips (~1.5 mm)
+
+  # Callout boxes — applies to DOCX export.
+  # definition_box styles `::: {.callout-note} … :::` (used for Definitionen).
+  # summary_box    styles `::: {.callout-tip}  … :::` (used for Fazit).
+  # `color`      = accent (left border + title), 6-digit hex without #
+  # `background` = true → pale tint derived from `color`; false → no fill
+  definition_box:
+    color: "1F77B4"      # blue accent
+    background: true
+  summary_box:
+    color: "2CA02C"      # green accent
+    background: true
 
 charts:
   animation: false         # disable animation (recommended for reports)

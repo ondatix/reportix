@@ -235,7 +235,7 @@ title: Monthly Revenue
 ```
 ````
 
-Supported chart types: `bar`, `line`, `pie`, `doughnut`, `scatter`, `pyramid`.
+Supported chart types: `bar`, `line`, `pie`, `doughnut`, `scatter`, `pyramid`, `distance`.
 
 **Grouping (long-form data).** The optional `color` field names a column whose distinct values become the chart's series. Each series is coloured sequentially from the active palette. The renderer pivots long-form rows internally — no pre-aggregation needed — so a single dataset like `(month, region, revenue)` can be plotted as one line per region, one set of grouped bars per region, etc.
 
@@ -297,7 +297,11 @@ format:
 ```
 ````
 
-**Aggregation.** Both chart and table specs accept an `aggregation` field. Supported ops: `identity`, `count`, `sum`, `mean`, `min`, `max`, `median`. `count` ignores the field and returns the row count; `identity` is the group key (passthrough — used to keep a column verbatim).
+**Aggregation.** Both chart and table specs accept an `aggregation` field. Supported ops: `identity`, `count`, `sum`, `mean`, `min`, `max`, `median`, `share_total`, `share_group`.
+- `count` ignores the field and returns the row count.
+- `identity` is the group key (passthrough — used to keep a column verbatim).
+- `share_total` returns the group's row count as a percentage of the dataset (after filtering).
+- `share_group` interprets the field as a boolean (true / "Ja" / "Yes" / "1" are truthy) and returns the percentage of `true` rows in the group.
 
 *Charts* — `aggregation: { x?, y? }`. Setting `y` to a non-identity op turns on grouping by `x` (and `color`, if set). Defaults: ungrouped charts → `identity` (rows are data points); `color`-grouped or pyramid charts → `sum`.
 
@@ -327,7 +331,52 @@ format:
 ```
 ````
 
-All other content is standard Markdown (headings, paragraphs, lists, etc.) and is rendered as text.
+**Row filter (Personenkreis).** Both chart and table specs accept an optional `filter: <column>` that keeps only rows where the column's value is truthy (`true`, `"Ja"`, `"Yes"`, `"true"`, `"1"`). The values `Alle`, `-`, or empty disable the filter. Applied before aggregation.
+
+````markdown
+```chart
+data: Stichtag
+type: bar
+x: Geschlecht
+y: PersNr
+filter: Beurlaubung   # only rows where Beurlaubung is truthy
+aggregation: { y: count }
+```
+````
+
+**Distance plot.** Layout-equivalent to a horizontal grouped bar chart (`indexAxis: 'y'`), used for "X versus Y across categories" comparisons. Requires a `color` field naming the binary group:
+
+````markdown
+```chart
+data: Stichtag
+type: distance
+x: Entgeltgruppe / Besoldungsgruppe   # categorical axis (rendered on y)
+y: PersNr                              # value axis (rendered on x)
+color: Geschlecht                      # binary comparator
+aggregation: { y: count }
+```
+````
+
+**Callouts.** Pandoc-style fenced divs render as styled boxes (preview + DOCX). Recognised classes: `callout` (generic), `callout-note`, `callout-tip`, `callout-warning`, `callout-caution`, `callout-important`. Optional `title='…'`. Inner content is parsed as Markdown.
+
+````markdown
+::: {.callout-note title='Definitionen'}
+**Geschlecht:** Im Datensatz wird zwischen männlich und weiblich unterschieden.
+:::
+````
+
+## Data Protection
+
+Aggregated values smaller than `data_protection.smallest_group` are masked to avoid revealing identifiable individuals (default threshold: 5). Configured globally:
+
+```yaml
+data_protection:
+  smallest_group: 5
+```
+
+- **Tables:** affected cells render as `<5` instead of the formatted value.
+- **Charts:** affected bars/slices are clamped to the threshold so a small bar is still drawn, and the tooltip displays `<5` instead of the actual number.
+- **Applies to** count-like operations (`count`, `sum`, `share_total`, `share_group`). Means/medians/min/max are not masked because they don't reveal group sizes.
 
 ## Architecture
 

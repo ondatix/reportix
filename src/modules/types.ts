@@ -127,6 +127,27 @@ export interface ExportConfig {
     /** Default cell padding in twips (~80 twips ≈ 1.5 mm). */
     cellPadding?: number;
   };
+
+  /**
+   * Styling for `::: {.callout-note} … :::` blocks (used for definition
+   * boxes in the stmas template). The accent colour drives the left
+   * border and title text; `background: true` adds a pale tint derived
+   * from the accent colour.
+   */
+  definitionBox?: CalloutBoxConfig;
+
+  /**
+   * Styling for `::: {.callout-tip} … :::` blocks (used for summary /
+   * "Fazit" boxes).
+   */
+  summaryBox?: CalloutBoxConfig;
+}
+
+export interface CalloutBoxConfig {
+  /** 6-digit hex without #. Drives the left-border and title colour. */
+  color?: string;
+  /** When true, the cell is filled with a pale tint derived from `color`. */
+  background?: boolean;
 }
 
 /** Global chart rendering defaults applied to every chart. */
@@ -197,12 +218,23 @@ export interface ChartDefaults {
   };
 }
 
+export interface DataProtectionConfig {
+  /**
+   * Minimum aggregated value to display verbatim. Aggregated values strictly
+   * less than this threshold (and greater than zero) are replaced with the
+   * threshold itself in charts (so a small bar is still drawn) and rendered
+   * as `<{threshold}` in tables. Default: 5.
+   */
+  smallestGroup?: number;
+}
+
 export interface AppConfig {
   parameters: Record<string, ParameterDef>;
   data: Record<string, DataSourceDef>;
   template: TemplateDef;
   export?: ExportConfig;
   charts?: ChartDefaults;
+  dataProtection?: DataProtectionConfig;
 }
 
 // ── Data ────────────────────────────────────────────────────────────
@@ -226,7 +258,7 @@ export interface ChartSpec {
   x?: string;
   /** Series key(s); for pyramid: the category axis (e.g. age group, pay grade). */
   y: string | string[];
-  type: "bar" | "line" | "pie" | "doughnut" | "scatter" | "pyramid";
+  type: "bar" | "line" | "pie" | "doughnut" | "scatter" | "pyramid" | "distance";
   /** Pyramid only — column whose two distinct values split the chart left/right. */
   split?: string;
   /** Pyramid only — column to sum per bucket; if omitted, rows are counted. */
@@ -255,6 +287,12 @@ export interface ChartSpec {
     x?: import("./aggregation").AggregationOp;
     y?: import("./aggregation").AggregationOp;
   };
+  /**
+   * Boolean column whose truthy rows are kept before aggregation. Useful
+   * for restricting a chart to a sub-group ("Personenkreis"). Values
+   * `Alle`, `-`, or empty disable the filter.
+   */
+  filter?: string;
   title?: string;
   alt?: string;
   caption?: string;
@@ -276,6 +314,8 @@ export interface TableSpec {
    * the field entirely renders rows verbatim.
    */
   aggregation?: Record<string, import("./aggregation").AggregationOp>;
+  /** Boolean column whose truthy rows are kept before aggregation. */
+  filter?: string;
   caption?: string;
 }
 
