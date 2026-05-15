@@ -16,6 +16,7 @@
 
 ## README
 - [ ] Fill the README
+- [ ] Quick Start: mention to run app in root
 
 ## Parameters
 - Data validation only throws warning
