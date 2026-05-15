@@ -42,6 +42,8 @@ aggregation:
   y: share_total
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Wie viele Männer und Frauen arbeiten in den Organisationseinheiten?
 > Datenquelle: PVS · Personenkreis: Alle · Datensatz: Stichtag
 
@@ -56,6 +58,8 @@ filter: Alle
 aggregation:
   y: count
 ```
+
+_Hier ist Platz für Freitext._
 
 #### Wie viele Männer und Frauen sind Tarifbeschäftigte bzw. Beamte?
 > Datenquelle: PVS · Personenkreis: Alle · Datensatz: Stichtag
@@ -73,6 +77,8 @@ aggregation:
   y: count
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Wie viele Männer und Frauen haben befristete bzw. unbefristete Arbeitsverhältnisse?
 > Datenquelle: PVS · Personenkreis: Tarifbeschäftigte · Datensatz: Stichtag
 
@@ -89,6 +95,8 @@ aggregation:
   y: count
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Wie viele Männer und Frauen sind in den Entgelt-/Besoldungsgruppen?
 > Datenquelle: PVS · Personenkreis: Alle · Datensatz: Stichtag
 
@@ -104,6 +112,8 @@ aggregation:
   y: count
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Wie viele Männer und Frauen sind in welcher Qualifikationsebene?
 > Datenquelle: PVS · Personenkreis: Alle · Datensatz: Stichtag
 
@@ -117,6 +127,8 @@ filter: Alle
 aggregation:
   y: count
 ```
+
+_Hier ist Platz für Freitext._
 
 #### Wie viele Männer und Frauen sind in welcher QE verglichen zur Einstiegs-QE?
 > Datenquelle: PVS · Personenkreis: Alle · Datensatz: Stichtag
@@ -132,6 +144,8 @@ aggregation:
   y: count
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Wie viele Männer und Frauen sind Auszubildende?
 > Datenquelle: PVS · Personenkreis: Auszubildende · Datensatz: Stichtag
 
@@ -146,6 +160,8 @@ filter: Auszubildende
 aggregation:
   y: count
 ```
+
+_Hier ist Platz für Freitext._
 
 #### Übersicht: Anzahl und Anteil je Entgeltgruppe (Tabelle)
 > Aggregierte Tabelle mit Beschäftigtenzahl und Anteil am Gesamtbestand je Entgeltgruppe. Werte unter dem Datenschutzschwellwert erscheinen als `<5`.
@@ -164,6 +180,8 @@ aggregation:
 format:
   Geschlecht: decimal
 ```
+
+_Hier ist Platz für Freitext._
 
 ::: {.callout-tip title='Fazit'}
 _Hier ist Platz für ein Kapitelfazit._
@@ -193,6 +211,8 @@ aggregation:
   y: count
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Wie viele qualifizierte Bewerbungen gehen je Führungsebene ein?
 > Datenquelle: Bewerbungsmanagement-Software · Personenkreis: Qualifizierte Bewerbungen · Datensatz: Zeitraum_Bewerbung
 
@@ -207,6 +227,8 @@ aggregation:
   y: count
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Wie viele interne und externe qualifizierte Bewerbungen?
 > Datenquelle: Bewerbungsmanagement-Software · Personenkreis: Qualifizierte Bewerbungen · Datensatz: Zeitraum_Bewerbung
 
@@ -220,6 +242,8 @@ filter: Qualifizierte Bewerbungen
 aggregation:
   y: count
 ```
+
+_Hier ist Platz für Freitext._
 
 #### Wie viele qualifizierte Bewerbungen je Organisationseinheit?
 > Datenquelle: Bewerbungsmanagement-Software · Personenkreis: Qualifizierte Bewerbungen · Datensatz: Zeitraum_Bewerbung
@@ -236,6 +260,8 @@ aggregation:
   y: count
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Wie viele Männer und Frauen werden in den Entgelt-/Besoldungsgruppen eingestellt?
 > Datenquelle: PVS · Personenkreis: Einstellungen · Datensatz: Zeitraum_Einstellung
 
@@ -251,6 +277,8 @@ aggregation:
   y: count
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Wie viele Männer und Frauen werden in den QEs eingestellt?
 > Datenquelle: PVS · Personenkreis: Einstellungen · Datensatz: Zeitraum_Einstellung
 
@@ -265,6 +293,8 @@ filter: Einstellungen
 aggregation:
   y: count
 ```
+
+_Hier ist Platz für Freitext._
 
 ::: {.callout-tip title='Fazit'}
 _Hier ist Platz für ein Kapitelfazit._
@@ -294,6 +324,8 @@ aggregation:
   y: count
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Wie viele Männer und Frauen sind in den Führungsebenen?
 > Datenquelle: PVS · Personenkreis: Führungskräfte · Datensatz: Stichtag
 
@@ -307,6 +339,8 @@ filter: Führungskraft (aktiv)
 aggregation:
   y: count
 ```
+
+_Hier ist Platz für Freitext._
 
 #### Wie viele Führungskräfte in den Organisationseinheiten?
 > Datenquelle: PVS · Personenkreis: Führungskräfte · Datensatz: Stichtag
@@ -323,6 +357,8 @@ aggregation:
   y: count
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Wie viele Führungskräfte arbeiten in Tandem je QE?
 > Datenquelle: PVS · Personenkreis: Führungskräfte · Datensatz: Stichtag
 
@@ -337,6 +373,8 @@ filter: Führungskraft (aktiv)
 aggregation:
   y: share_group
 ```
+
+_Hier ist Platz für Freitext._
 
 #### Wie viele Führungskräfte arbeiten in Tandem je Führungsebene?
 > Datenquelle: PVS · Personenkreis: Führungskräfte · Datensatz: Stichtag
@@ -353,6 +391,8 @@ aggregation:
   y: share_group
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Wie viele Männer und Frauen führen in Teilzeit?
 > Datenquelle: PVS · Personenkreis: Führungskräfte · Datensatz: Stichtag
 
@@ -367,6 +407,8 @@ filter: Führungskraft (aktiv)
 aggregation:
   y: count
 ```
+
+_Hier ist Platz für Freitext._
 
 ::: {.callout-tip title='Fazit'}
 _Hier ist Platz für ein Kapitelfazit._
@@ -395,6 +437,8 @@ aggregation:
   y: count
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Wie viele Männer und Frauen in welchen Arbeitszeitanteilen?
 > Datenquelle: PVS · Personenkreis: Alle · Datensatz: Stichtag
 
@@ -410,6 +454,8 @@ filter: Alle
 aggregation:
   y: count
 ```
+
+_Hier ist Platz für Freitext._
 
 ::: {.callout-tip title='Fazit'}
 _Hier ist Platz für ein Kapitelfazit._
@@ -441,6 +487,8 @@ aggregation:
   y: count
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Wie lange sind Männer und Frauen in Elternzeit?
 > Datenquelle: PVS · Personenkreis: Personen in Elternzeit · Datensatz: Zeitraum_Beurlaubung
 
@@ -456,6 +504,8 @@ aggregation:
   y: mean
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Wie viele Personen in Elternzeit je Entgelt-/Besoldungsgruppe?
 > Datenquelle: PVS · Personenkreis: Personen in Elternzeit · Datensatz: Stichtag
 
@@ -470,6 +520,8 @@ filter: Personen in Elternzeit
 aggregation:
   y: count
 ```
+
+_Hier ist Platz für Freitext._
 
 ::: {.callout-tip title='Fazit'}
 _Hier ist Platz für ein Kapitelfazit._
@@ -498,6 +550,8 @@ aggregation:
   y: mean
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Beurteilung verbeamteter Personen — Teilzeit vs. Vollzeit
 > Datenquelle: PVS · Personenkreis: Beamte · Datensatz: Stichtag
 
@@ -512,6 +566,8 @@ filter: Beamte
 aggregation:
   y: mean
 ```
+
+_Hier ist Platz für Freitext._
 
 #### Beurteilung verbeamteter Personen je Organisationseinheit
 > Datenquelle: PVS · Personenkreis: Beamte · Datensatz: Stichtag
@@ -528,6 +584,8 @@ aggregation:
   y: mean
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Beurteilung Tarifbeschäftigter nach QE
 > Datenquelle: PVS · Personenkreis: Tarifbeschäftigte · Datensatz: Stichtag
 
@@ -542,6 +600,8 @@ filter: Tarifbeschäftigte
 aggregation:
   y: mean
 ```
+
+_Hier ist Platz für Freitext._
 
 #### Beurteilung Tarifbeschäftigter — Teilzeit vs. Vollzeit
 > Datenquelle: PVS · Personenkreis: Tarifbeschäftigte · Datensatz: Stichtag
@@ -558,6 +618,8 @@ aggregation:
   y: mean
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Beurteilung Tarifbeschäftigter je Organisationseinheit
 > Datenquelle: PVS · Personenkreis: Tarifbeschäftigte · Datensatz: Stichtag
 
@@ -572,6 +634,8 @@ filter: Tarifbeschäftigte
 aggregation:
   y: mean
 ```
+
+_Hier ist Platz für Freitext._
 
 ::: {.callout-tip title='Fazit'}
 _Hier ist Platz für ein Kapitelfazit._
@@ -602,6 +666,8 @@ aggregation:
   y: share_group
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Beförderungen je Besoldungsgruppe — Beamte
 > Datenquelle: PVS · Personenkreis: Beamte · Datensatz: Zeitraum_Befoerderung
 
@@ -616,6 +682,8 @@ filter: Beamte
 aggregation:
   y: share_group
 ```
+
+_Hier ist Platz für Freitext._
 
 #### Höhergruppierungen nach Maßnahmenart
 > Datenquelle: PVS · Personenkreis: Tarifbeschäftigte · Datensatz: Zeitraum_Befoerderung
@@ -632,6 +700,8 @@ aggregation:
   y: count
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Höhergruppierungen auf Antrag
 > Datenquelle: PVS · Personenkreis: Höhergruppierung genehmigt · Datensatz: Zeitraum_Befoerderung
 
@@ -646,6 +716,8 @@ filter: Höhergruppierung genehmigt
 aggregation:
   y: count
 ```
+
+_Hier ist Platz für Freitext._
 
 ::: {.callout-tip title='Fazit'}
 _Hier ist Platz für ein Kapitelfazit._
@@ -674,6 +746,8 @@ aggregation:
   y: share_group
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Anteil bewilligter Qualifizierungen je Qualifikationsart
 > Datenquelle: PVS · Personenkreis: Alle · Datensatz: Zeitraum_Qualifikation
 
@@ -688,6 +762,8 @@ filter: Alle
 aggregation:
   y: share_group
 ```
+
+_Hier ist Platz für Freitext._
 
 ::: {.callout-tip title='Fazit'}
 _Hier ist Platz für ein Kapitelfazit._
@@ -713,6 +789,8 @@ filter: Alle
 aggregation:
   y: share_group
 ```
+
+_Hier ist Platz für Freitext._
 
 ::: {.callout-tip title='Fazit'}
 _Hier ist Platz für ein Kapitelfazit._
@@ -741,6 +819,8 @@ aggregation:
   y: mean
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Durchschnittliche Leistungskomponente je QE
 > Datenquelle: PVS · Personenkreis: Alle · Datensatz: Zeitraum_Leistungskomponente
 
@@ -756,6 +836,8 @@ aggregation:
   y: mean
 ```
 
+_Hier ist Platz für Freitext._
+
 #### Durchschnittliche Leistungskomponente — Teilzeit vs. Vollzeit
 > Datenquelle: PVS · Personenkreis: Alle · Datensatz: Zeitraum_Leistungskomponente
 
@@ -770,6 +852,8 @@ filter: Alle
 aggregation:
   y: mean
 ```
+
+_Hier ist Platz für Freitext._
 
 #### Aggregierte Tabelle: Leistungskomponenten je Entgeltgruppe
 > Tabelle mit Anzahl Auszahlungen und Mittelwert der Leistungskomponente je Entgeltgruppe.
@@ -788,6 +872,8 @@ aggregation:
 format:
   Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB): decimal
 ```
+
+_Hier ist Platz für Freitext._
 
 ::: {.callout-tip title='Fazit'}
 _Hier ist Platz für ein Kapitelfazit._

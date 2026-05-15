@@ -17,6 +17,9 @@
 ## README
 - [ ] Fill the README
 
+## Parameters
+- Data validation only throws warning
+
 ## Design
 - [ ] Prepare generic CSS
 - [ ] Apply ondatix theme
@@ -25,13 +28,15 @@
 - [ ] Create generic config
 - [ ] Create StMAS config
 - [ ] Create config specification
+- [ ] Add section numbering option and toc option
+- [ ] Add parameter logic (parameters are set in config, but can be overwritten by users)
 
 ## Charts and Tables
 - [ ] Accessible charts
   - [ ] Actual numbers in the charts?
   - [ ] Titles?
 - [ ] Well-formed tables
-  - [ ] Format
+  - [ ] Format (centered or block)
   - [ ] Config options
 
 ## Modules

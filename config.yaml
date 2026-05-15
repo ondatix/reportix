@@ -2,7 +2,7 @@ parameters:
   title:
     label: "Titel"
     type: text
-    default: "Geleichstellungskonzept"
+    default: "Gleichstellungskonzept"
   office:
     label: "Behörde"
     type: text

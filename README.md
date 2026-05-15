@@ -1,22 +1,127 @@
-# ondatix autoreport
+# reportix (by ondatix)
 
-TODO: Description
+Fully client-side web app for automated report generation. Upload an Excel workbook and a Markdown template, fill in a parameter form, and export a styled `.docx` — all in the browser, no server, no network at runtime.
 
-## Setup, Requirements & Deployment
+## Why
 
-TODO
+Many reporting workflows (HR equality reports, internal KPIs, compliance summaries) need to combine sensitive tabular data with a fixed narrative structure. reportix lets a developer ship that structure as a bundled config + template, and lets a non-technical user produce the finished `.docx` themselves without the data ever leaving their machine.
 
-## Config
+## Features
 
-TODO
+- **Fully offline** — no backend, no fetch, no third-party CDN at runtime. Browser CSP enforces this.
+- **Markdown templates** with embedded chart / table YAML blocks and Pandoc-style callouts.
+- **Six chart types**: `bar`, `line`, `pie`, `doughnut`, `scatter`, `pyramid`, `distance` (dumbbell plot).
+- **Long-form data support**: `color: <column>` pivots a single dataset into one series per distinct value.
+- **Aggregation**: `count`, `sum`, `mean`, `min`, `max`, `median`, `share_total`, `share_group`, `identity` — for both charts and tables.
+- **Row filtering**: `filter: <bool-column>` keeps only matching rows before aggregation.
+- **Data protection**: aggregated values below a configurable threshold are masked (`<5` in tables, clamped + masked tooltip in charts) for count-like operations.
+- **Accessible by default**: WCAG-AA colour palettes, colorblind-safe defaults, semantic HTML, auto-generated alt text for every chart.
+- **Configurable export**: fonts, page layout, headers/footers, page numbers, callout colours and backgrounds, all driven by `config.yaml`.
+- **Per-block error isolation**: a malformed chart or table is replaced with a red "TBD" note; the rest of the report still renders.
 
-## Template
+## Requirements
 
-TODO
+**To develop or build:**
+- **Node.js ≥ 20** (Vite 8 requires Node 20.19+ or 22.12+)
+- **npm** (ships with Node)
+
+**To use the built app:**
+- A modern evergreen browser (Chrome, Firefox, Safari, Edge — anything supporting ES2022 and the Canvas 2D API)
+- An `.xlsx` workbook matching the sheets and columns declared in `config.yaml`
+- A Markdown template (see [Template Format](#template-format))
+
+**To deploy:**
+- Any static host (Netlify, Vercel, Cloudflare Pages, GitHub Pages, S3+CloudFront, nginx, …). The build output in `dist/` is fully static — no runtime, no environment variables, no secrets.
+
+## Quick Start
+
+```bash
+npm install         # install dependencies
+npm run dev         # start the dev server (http://localhost:5173)
+npm run build       # production build (output: dist/)
+npm run preview     # preview the production build locally
+```
+
+The dev server reloads on save. The production build under `dist/` is a fully static bundle deployable to any CDN or static host.
+
+## How It Works
+
+The app runs a strict pipeline:
+
+1. **Load config** — `/config.yaml` is bundled at build time and parsed on startup.
+2. **Upload data** — user picks one `.xlsx` per data source declared in the config. Each source is validated against its expected sheet names and column lists; mismatches surface as actionable errors.
+3. **Upload template** — user picks a Markdown file with embedded chart/table blocks.
+4. **Fill parameters** — a form is generated from the config's `parameters` section.
+5. **Render preview** — Markdown becomes semantic HTML; chart / table YAML blocks become Chart.js canvases and accessible `<table>`s with auto-generated alt text.
+6. **Export DOCX** — the rendered DOM is walked and serialised to a `.docx` file with the configured page layout, fonts, callouts, and chart images.
+
+No step talks to a server. The XLSX is read in-browser via SheetJS; the DOCX is built in-browser via [docx](https://www.npmjs.com/package/docx) and saved via [FileSaver](https://www.npmjs.com/package/file-saver).
+
+## Configuration (`config.yaml`)
+
+The config is the entry point — a developer edits it, the end user never touches it. It declares:
+
+- **`parameters`** — form fields shown before report generation (`text`, `number`, `date`, `select`, `multiselect`, `boolean`). The names `palette` and `font` get special UI widgets (illustrated radios).
+- **`data`** — expected data sources, each with sheet names and required columns. Used to validate the uploaded workbook.
+- **`template.file`** — path to the Markdown template (informational; the user uploads the actual file).
+- **`export`** — DOCX styling: filename, locale, document metadata, fonts, heading sizes/colours, paragraph spacing, page size & margins, page numbers, header/footer text, table borders, **callout box colours and backgrounds** (`definition_box`, `summary_box`).
+- **`charts`** — Chart.js defaults: animation, aspect ratio, fonts, title/legend/tooltip placement, axis grid colours, line/bar element styling.
+- **`data_protection.smallest_group`** — privacy threshold for aggregated counts/shares (default 5).
+
+See [CLAUDE.md](CLAUDE.md) for the full schema with annotated examples.
+
+## Template Format
+
+Templates are plain Markdown. Charts and tables are fenced code blocks with a typed language tag and a YAML body.
+
+````markdown
+# {{title}}
+
+::: {.callout-note title='Definitionen'}
+**Geschlecht:** Im Datensatz wird zwischen männlich und weiblich unterschieden.
+:::
+
+## Headcount by pay grade
+
+```chart
+data: Stichtag
+type: pyramid
+y: Entgeltgruppe / Besoldungsgruppe
+color: Geschlecht
+title: Headcount by pay grade and gender
+aggregation:
+  y: count
+```
+
+```table
+data: Stichtag
+columns: [Entgeltgruppe / Besoldungsgruppe, PersNr]
+aggregation:
+  Entgeltgruppe / Besoldungsgruppe: identity
+  PersNr: count
+```
+````
+
+Parameters from the form are interpolated as `{{paramName}}` anywhere in the text.
+
+See [CLAUDE.md](CLAUDE.md) for the chart/table YAML schema, the full list of supported types, aggregation operations, and the callout syntax.
 
 ## Modules
 
-TODO
+Each utility is a self-contained module under `src/modules/` with a clean public API, so it can be extracted and reused independently. There is no hard coupling between modules — they're orchestrated by `src/app.ts`.
+
+| Module | Responsibility |
+|---|---|
+| `config/` | Parse `/config.yaml` (bundled via `?raw` import) into a typed `AppConfig`. |
+| `data-loader/` | Read `.xlsx` files via SheetJS, validate sheets and columns. |
+| `parameters/` | Render the form from `AppConfig.parameters`, collect typed values. |
+| `template/` | Parse Markdown into typed blocks (`text` / `chart` / `table`). |
+| `aggregation/` | Aggregation ops, row filtering, data-protection helpers. |
+| `palettes/` | Curated accessible colour palettes (Okabe-Ito, Tol Bright/Muted, IBM, grayscale). |
+| `fonts/` | Curated accessible system fonts (Verdana, Tahoma, Arial, Georgia). |
+| `renderer/` | Markdown→HTML (`text.ts`), Chart.js (`chart.ts`), HTML tables (`table.ts`), orchestration (`index.ts`). |
+| `alt-text/` | Spec-derived chart alt text generation — fully offline, no LLM. |
+| `exporter/` | DOM → docx conversion (paragraphs, headings, lists, tables, callouts, embedded chart images). |
 
 ## Security & Privacy
 
@@ -58,6 +163,45 @@ For other hosts, translate `public/_headers` to the equivalent config (e.g. `ver
 
 HTTPS must be enforced at the hosting level. Enable "Force HTTPS" in your hosting provider's dashboard (Netlify, Vercel, Cloudflare Pages, and GitHub Pages all provide free automatic TLS). The `Strict-Transport-Security` header in `public/_headers` instructs browsers to always use HTTPS for this domain and opts the domain into browser preload lists once submitted to [hstspreload.org](https://hstspreload.org).
 
+### Data protection
+
+The `data_protection.smallest_group` threshold (default 5) masks small aggregated counts/sums/shares to prevent re-identification of individuals in tables and charts. Means, medians, min and max are not masked because they do not reveal group sizes.
+
 ## Accessibility
 
-TODO
+The generated report output is built to be accessible:
+
+- **Semantic HTML** — `<h1>`–`<h6>`, `<p>`, `<table>`, `<figure>`/`<figcaption>`. DOM reading order matches visual order.
+- **Colorblind-safe palettes** — the default Okabe-Ito (Wong 2011) palette and all bundled alternatives are tested against deuteranopia, protanopia, and tritanopia simulations. Colour is never the sole encoding — chart shapes (e.g. distance plot uses circle + square markers) and labels reinforce it.
+- **Alt text on every chart** — auto-derived from the chart spec and the resolved data (chart type, axes, aggregation, filter, range, trend), no network call required. Overridable via the `alt:` field.
+- **Accessible tables** — `<th scope="col">`, `<caption>`, no layout tables. Complex tables get a caption.
+- **Curated fonts** — the bundled font picker offers system fonts on accessibility shortlists (Verdana, Tahoma, Arial, Georgia).
+- **DOCX exports** preserve alt text, heading structure, and table semantics.
+
+## License
+
+Apache License 2.0 — see [LICENSE](LICENSE).
+
+## Project Layout
+
+```
+src/
+├── app.ts                # pipeline orchestration
+├── main.ts               # entry point
+├── style.css             # preview styling
+└── modules/
+    ├── config/
+    ├── data-loader/
+    ├── parameters/
+    ├── template/
+    ├── aggregation/
+    ├── palettes/
+    ├── fonts/
+    ├── renderer/         # text, chart, table, index
+    ├── alt-text/
+    └── exporter/
+config.yaml               # bundled at build time
+templates/                # example Markdown templates
+public/_headers           # Netlify / static-host security headers
+vite.config.ts            # Vite + SRI plugin
+```

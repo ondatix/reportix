@@ -1,4 +1,4 @@
-# autoreportix
+# reportix
 
 Fully client-side web app for automated report generation. Built with Vite.js. No server-side rendering, no backend — all logic runs in the browser.
 
@@ -437,3 +437,4 @@ generateAltText(spec: ChartSpec, data?: DataSet): string
 - Keep all processing client-side — do not introduce server-side dependencies
 - Each module exposes a clean public API so it can be extracted and reused in isolation
 - `.env` and `.env*.local` are gitignored — do not hardcode secrets
+- **After any change, check `README.md` and update it if necessary.** The README documents user-facing features (chart types, aggregation ops, callout syntax, config keys, modules, security posture). If a change adds, removes, or renames any of those, the README must be updated in the same commit. CLAUDE.md is the canonical reference for the full schema and behaviour — keep the README's summary aligned with it.
