@@ -106,12 +106,10 @@ template:
   # within the bundled `templates/` directory; `label` is what the user sees.
   # The app hard-fails at startup if any referenced file isn't bundled.
   files:
-    - label: "Test Template"
+    - label: "Feature showcase"
       file: test_template.md
-    # - label: "Extended Report"
-    #   file: extended_template.md
-    # - label: "Quick Summary"
-    #   file: summary_template.md
+    - label: "Executive summary"
+      file: summary_template.md
 
 data_protection:
   smallest_group: 5  # bound by parameters.smallest_group
