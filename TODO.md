@@ -15,14 +15,14 @@
 
 
 ## README
-- [ ] Fill the README
+- [x] Fill the README
 
 ## Parameters
 - Data validation only throws warning
 
 ## Design
-- [ ] Prepare generic CSS
-- [ ] Apply ondatix theme
+- [x] Prepare generic CSS
+- [x] Apply ondatix theme
 
 ## Config
 - [ ] Create generic config

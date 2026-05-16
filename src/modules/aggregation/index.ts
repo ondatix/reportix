@@ -161,3 +161,153 @@ export function firstValue(rows: DataSet, field: string): unknown {
   }
   return "";
 }
+
+// ── Pivots ──────────────────────────────────────────────────────────
+// Pure data-shape transformations used by both the chart renderer and the
+// alt-text module so both consume the same source of truth.
+
+/** Bucket rows by the string value of `field`, preserving first-seen order. */
+export function groupRowsBy(data: DataSet, field: string): Map<string, DataSet> {
+  const groups = new Map<string, DataSet>();
+  for (const row of data) {
+    const key = String(row[field] ?? "");
+    if (key === "") continue;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(row);
+  }
+  return groups;
+}
+
+/**
+ * Pivot long-form rows to wide-form: labels = unique x values (insertion
+ * order), one series per distinct color value, y aggregated per (x, group)
+ * using `op`.
+ */
+export function pivotByGroup(
+  data: DataSet,
+  xField: string,
+  yField: string,
+  colorField: string,
+  op: AggregationOp,
+  total: number
+): { labels: string[]; series: { name: string; data: number[] }[] } {
+  const labels: string[] = [];
+  const seen = new Set<string>();
+  const groups = new Map<string, Map<string, DataSet>>();
+
+  for (const row of data) {
+    const x = String(row[xField] ?? "");
+    if (x === "") continue;
+    const c = String(row[colorField] ?? "");
+    if (c === "") continue;
+
+    if (!seen.has(x)) {
+      seen.add(x);
+      labels.push(x);
+    }
+    if (!groups.has(c)) groups.set(c, new Map());
+    const m = groups.get(c)!;
+    if (!m.has(x)) m.set(x, []);
+    m.get(x)!.push(row);
+  }
+
+  const series = [...groups.entries()].map(([name, m]) => ({
+    name,
+    data: labels.map((x) => aggregateField(m.get(x) ?? [], yField, op, total)),
+  }));
+  return { labels, series };
+}
+
+/** Group raw rows into one {x, y} dataset per distinct color value (scatter). */
+export function groupScatter(
+  data: DataSet,
+  xField: string,
+  yField: string,
+  colorField: string
+): { name: string; points: { x: number; y: number }[] }[] {
+  const groups = new Map<string, { x: number; y: number }[]>();
+  for (const row of data) {
+    const c = String(row[colorField] ?? "");
+    if (c === "") continue;
+    const x = Number(row[xField]);
+    const y = Number(row[yField]);
+    if (Number.isNaN(x) || Number.isNaN(y)) continue;
+    if (!groups.has(c)) groups.set(c, []);
+    groups.get(c)!.push({ x, y });
+  }
+  return [...groups.entries()].map(([name, points]) => ({ name, points }));
+}
+
+/** Aggregate by color group: one number per distinct value, using `op`. */
+export function aggregateByGroup(
+  data: DataSet,
+  yField: string | undefined,
+  colorField: string,
+  op: AggregationOp,
+  total: number
+): { labels: string[]; values: number[] } {
+  const groups = new Map<string, DataSet>();
+  for (const row of data) {
+    const c = String(row[colorField] ?? "");
+    if (c === "") continue;
+    if (!groups.has(c)) groups.set(c, []);
+    groups.get(c)!.push(row);
+  }
+  const labels = [...groups.keys()];
+  const values = labels.map((k) => aggregateField(groups.get(k)!, yField, op, total));
+  return { labels, values };
+}
+
+/**
+ * Pyramid pivot: bucket raw rows per (category, side) so any aggregation op
+ * can be applied. Validates exactly two distinct split values.
+ */
+export function aggregatePyramid(
+  data: DataSet,
+  yField: string,
+  splitField: string,
+  valueField: string | undefined,
+  op: AggregationOp,
+  total: number
+): { categories: string[]; leftKey: string; rightKey: string; left: number[]; right: number[] } {
+  const buckets = new Map<string, [DataSet, DataSet]>();
+  let leftKey: string | null = null;
+  let rightKey: string | null = null;
+  const extras = new Set<string>();
+
+  for (const row of data) {
+    const cat = String(row[yField] ?? "");
+    if (cat === "") continue;
+    const split = String(row[splitField] ?? "");
+    if (split === "") continue;
+
+    if (leftKey === null) leftKey = split;
+    else if (rightKey === null && split !== leftKey) rightKey = split;
+    else if (split !== leftKey && split !== rightKey) extras.add(split);
+
+    if (!buckets.has(cat)) buckets.set(cat, [[], []]);
+    const pair = buckets.get(cat)!;
+    if (split === leftKey) pair[0].push(row);
+    else if (split === rightKey) pair[1].push(row);
+  }
+
+  if (leftKey === null || rightKey === null) {
+    throw new Error(
+      `Pyramid chart needs exactly 2 distinct values in "${splitField}", found ${leftKey === null ? 0 : 1}.`
+    );
+  }
+  if (extras.size > 0) {
+    throw new Error(
+      `Pyramid chart needs exactly 2 distinct values in "${splitField}". Extra values found: ${[...extras].join(", ")}.`
+    );
+  }
+
+  const categories = [...buckets.keys()];
+  return {
+    categories,
+    leftKey,
+    rightKey,
+    left: categories.map((c) => aggregateField(buckets.get(c)![0], valueField, op, total)),
+    right: categories.map((c) => aggregateField(buckets.get(c)![1], valueField, op, total)),
+  };
+}

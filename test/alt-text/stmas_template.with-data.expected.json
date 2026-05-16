@@ -1,0 +1,207 @@
+[
+  {
+    "index": 0,
+    "title": "Geschlechterverteilung",
+    "alt": "Geschlechterverteilung. Pie chart comparing the share (% of total) of Geschlecht, grouped by Geschlecht. Data points: weiblich: 51.3%; männlich: 48.7%."
+  },
+  {
+    "index": 1,
+    "title": "Männer und Frauen in den Organisationseinheiten",
+    "alt": "Männer und Frauen in den Organisationseinheiten. Distance plot comparing the count of Organisationseinheit by Organisationseinheit, grouped by Geschlecht. Data points: Organisationseinheit Finanzen, weiblich: 161; Organisationseinheit Finanzen, männlich: 139; Organisationseinheit Bauamt, weiblich: 153; Organisationseinheit Bauamt, männlich: 156; Organisationseinheit IT, weiblich: 147; Organisationseinheit IT, männlich: 153; Organisationseinheit Ordnungsamt, weiblich: 160; Organisationseinheit Ordnungsamt, männlich: 150; Organisationseinheit Personal, weiblich: 149; Organisationseinheit Personal, männlich: 132."
+  },
+  {
+    "index": 2,
+    "title": "Tarifbeschäftigte vs. Beamte",
+    "alt": "Tarifbeschäftigte vs. Beamte. Bar chart comparing the count of Beamte / Tarifbeschäftigte by Beamte / Tarifbeschäftigte, grouped by Geschlecht."
+  },
+  {
+    "index": 3,
+    "title": "Befristete vs. unbefristete Arbeitsverhältnisse",
+    "alt": "Befristete vs. unbefristete Arbeitsverhältnisse. Bar chart comparing the count of Befristet / Unbefristet by Befristet / Unbefristet, grouped by Geschlecht (filtered to Tarifbeschäftigte). Data points: Befristet / Unbefristet Befristet, weiblich: 309; Befristet / Unbefristet Befristet, männlich: 291; Befristet / Unbefristet Unbefristet, weiblich: 461; Befristet / Unbefristet Unbefristet, männlich: 439."
+  },
+  {
+    "index": 4,
+    "title": "Männer und Frauen in den Entgelt- und Besoldungsgruppen",
+    "alt": "Männer und Frauen in den Entgelt- und Besoldungsgruppen. Distance plot comparing the count of Entgeltgruppe / Besoldungsgruppe by Entgeltgruppe / Besoldungsgruppe, grouped by Geschlecht. Data points: Entgeltgruppe / Besoldungsgruppe E8, weiblich: 133; Entgeltgruppe / Besoldungsgruppe E8, männlich: 127; Entgeltgruppe / Besoldungsgruppe E10, weiblich: 122; Entgeltgruppe / Besoldungsgruppe E10, männlich: 120; Entgeltgruppe / Besoldungsgruppe E6, weiblich: 130; Entgeltgruppe / Besoldungsgruppe E6, männlich: 118; Entgeltgruppe / Besoldungsgruppe E12, weiblich: 138; Entgeltgruppe / Besoldungsgruppe E12, männlich: 121; Entgeltgruppe / Besoldungsgruppe A9, weiblich: 122; Entgeltgruppe / Besoldungsgruppe A9, männlich: 127; Entgeltgruppe / Besoldungsgruppe A11, weiblich: 125; Entgeltgruppe / Besoldungsgruppe A11, männlich: 117."
+  },
+  {
+    "index": 5,
+    "title": "Qualifikationsebenen nach Geschlecht",
+    "alt": "Qualifikationsebenen nach Geschlecht. Pyramid chart comparing the count of QE split by Geschlecht. Data points: QE 1: weiblich 154, männlich 162; QE 3: weiblich 314, männlich 282; QE 2: weiblich 170, männlich 133; QE 4: weiblich 132, männlich 153."
+  },
+  {
+    "index": 6,
+    "title": "QE-Aufstieg im Vergleich zur Einstiegs-QE",
+    "alt": "QE-Aufstieg im Vergleich zur Einstiegs-QE. Pyramid chart comparing the count of QE-Aufstieg split by Geschlecht."
+  },
+  {
+    "index": 7,
+    "title": "Auszubildende in den Ausbildungsbereichen",
+    "alt": "Auszubildende in den Ausbildungsbereichen. Bar chart comparing the count of Ausbildungsbereich by Ausbildungsbereich, grouped by Geschlecht (filtered to Auszubildende). Data points: Ausbildungsbereich Technik, weiblich: 217; Ausbildungsbereich Technik, männlich: 181; Ausbildungsbereich Soziales, weiblich: 183; Ausbildungsbereich Soziales, männlich: 170; Ausbildungsbereich IT, weiblich: 190; Ausbildungsbereich IT, männlich: 206; Ausbildungsbereich Verwaltung, weiblich: 180; Ausbildungsbereich Verwaltung, männlich: 173."
+  },
+  {
+    "index": 8,
+    "title": "Qualifizierte Bewerbungen nach Qualifikationsebene",
+    "alt": "Qualifizierte Bewerbungen nach Qualifikationsebene. Pyramid chart comparing the count of QE split by Geschlecht (filtered to Qualifizierte Bewerbungen). Data points: QE 3: männlich 209, weiblich 182; QE 4: männlich 103, weiblich 102; QE 2: männlich 103, weiblich 106; QE 1: männlich 92, weiblich 103."
+  },
+  {
+    "index": 9,
+    "title": "Qualifizierte Bewerbungen je Führungsebene",
+    "alt": "Qualifizierte Bewerbungen je Führungsebene. Pyramid chart comparing the count of Führungsebene split by Geschlecht (filtered to Qualifizierte Bewerbungen). Data points: Führungsebene 2: weiblich 55, männlich 65; Führungsebene 3: weiblich 35, männlich 37; Führungsebene 1: weiblich 82, männlich 107."
+  },
+  {
+    "index": 10,
+    "title": "Interne vs. externe qualifizierte Bewerbungen",
+    "alt": "Interne vs. externe qualifizierte Bewerbungen. Pyramid chart comparing the count of Intern / Extern split by Geschlecht (filtered to Qualifizierte Bewerbungen). Data points: Intern / Extern Intern: männlich 343, weiblich 350; Intern / Extern Extern: männlich 164, weiblich 143."
+  },
+  {
+    "index": 11,
+    "title": "Bewerbungen je Organisationseinheit",
+    "alt": "Bewerbungen je Organisationseinheit. Distance plot comparing the count of Organisationseinheit by Organisationseinheit, grouped by Geschlecht (filtered to Qualifizierte Bewerbungen). Data points: Organisationseinheit Finanzen, männlich: 100; Organisationseinheit Finanzen, weiblich: 104; Organisationseinheit Bauamt, männlich: 106; Organisationseinheit Bauamt, weiblich: 89; Organisationseinheit IT, männlich: 101; Organisationseinheit IT, weiblich: 102; Organisationseinheit Ordnungsamt, männlich: 100; Organisationseinheit Ordnungsamt, weiblich: 104; Organisationseinheit Personal, männlich: 100; Organisationseinheit Personal, weiblich: 94."
+  },
+  {
+    "index": 12,
+    "title": "Neueinstellungen nach Entgelt-/Besoldungsgruppe",
+    "alt": "Neueinstellungen nach Entgelt-/Besoldungsgruppe. Bar chart comparing the count of Entgeltgruppe / Besoldungsgruppe by Entgeltgruppe / Besoldungsgruppe, grouped by Geschlecht (filtered to Einstellungen). Data points: Entgeltgruppe / Besoldungsgruppe E8, weiblich: 8; Entgeltgruppe / Besoldungsgruppe E8, männlich: 4; Entgeltgruppe / Besoldungsgruppe A9, weiblich: 15; Entgeltgruppe / Besoldungsgruppe A9, männlich: 4; Entgeltgruppe / Besoldungsgruppe E6, weiblich: 10; Entgeltgruppe / Besoldungsgruppe E6, männlich: 11; Entgeltgruppe / Besoldungsgruppe E10, weiblich: 8; Entgeltgruppe / Besoldungsgruppe E10, männlich: 10; Entgeltgruppe / Besoldungsgruppe E12, weiblich: 12; Entgeltgruppe / Besoldungsgruppe E12, männlich: 5; Entgeltgruppe / Besoldungsgruppe A11, weiblich: 5; Entgeltgruppe / Besoldungsgruppe A11, männlich: 8."
+  },
+  {
+    "index": 13,
+    "title": "Neueinstellungen nach Qualifikationsebene",
+    "alt": "Neueinstellungen nach Qualifikationsebene. Bar chart comparing the count of QE by QE, grouped by Geschlecht (filtered to Einstellungen). Data points: QE 1, weiblich: 16; QE 1, männlich: 4; QE 3, weiblich: 21; QE 3, männlich: 20; QE 2, weiblich: 11; QE 2, männlich: 9; QE 4, weiblich: 10; QE 4, männlich: 9."
+  },
+  {
+    "index": 14,
+    "title": "Beschäftigte in leitenden Funktionen",
+    "alt": "Beschäftigte in leitenden Funktionen. Pyramid chart comparing the count of Führungskraft (aktiv) split by Geschlecht. Data points: Führungskraft (aktiv) Nein: weiblich 488, männlich 457; Führungskraft (aktiv) Ja: weiblich 282, männlich 273."
+  },
+  {
+    "index": 15,
+    "title": "Führungsebenen nach Geschlecht",
+    "alt": "Führungsebenen nach Geschlecht. Pyramid chart comparing the count of Führungsebene split by Geschlecht (filtered to Führungskraft (aktiv)). Data points: Führungsebene 1: weiblich 142, männlich 135; Führungsebene 2: weiblich 91, männlich 91; Führungsebene 3: weiblich 49, männlich 47."
+  },
+  {
+    "index": 16,
+    "title": "Führungskräfte in den Organisationseinheiten",
+    "alt": "Führungskräfte in den Organisationseinheiten. Distance plot comparing the count of Organisationseinheit by Organisationseinheit, grouped by Geschlecht (filtered to Führungskraft (aktiv)). Data points: Organisationseinheit Bauamt, weiblich: 62; Organisationseinheit Bauamt, männlich: 66; Organisationseinheit IT, weiblich: 56; Organisationseinheit IT, männlich: 51; Organisationseinheit Finanzen, weiblich: 55; Organisationseinheit Finanzen, männlich: 49; Organisationseinheit Personal, weiblich: 58; Organisationseinheit Personal, männlich: 55; Organisationseinheit Ordnungsamt, weiblich: 51; Organisationseinheit Ordnungsamt, männlich: 52."
+  },
+  {
+    "index": 17,
+    "title": "Anteil Führung in Tandem (in der Gruppe) je QE",
+    "alt": "Anteil Führung in Tandem (in der Gruppe) je QE. Pyramid chart comparing the share within group of QE split by Geschlecht (filtered to Führungskraft (aktiv)). Data points: QE 3: weiblich 7.0%, männlich 9.7%; QE 1: weiblich 6.6%, männlich 9.8%; QE 2: weiblich 6.7%, männlich 9.8%; QE 4: weiblich 6.4%, männlich 2.9%."
+  },
+  {
+    "index": 18,
+    "title": "Anteil Führung in Tandem je Führungsebene",
+    "alt": "Anteil Führung in Tandem je Führungsebene. Pyramid chart comparing the share within group of Führungsebene split by Geschlecht (filtered to Führungskraft (aktiv)). Data points: Führungsebene 1: weiblich 5.6%, männlich 10.4%; Führungsebene 2: weiblich 11.0%, männlich 5.5%; Führungsebene 3: weiblich 2.0%, männlich 6.4%."
+  },
+  {
+    "index": 19,
+    "title": "Führung in Teilzeit",
+    "alt": "Führung in Teilzeit. Bar chart comparing the count of Teilzeit / Vollzeit by Teilzeit / Vollzeit, grouped by Geschlecht (filtered to Führungskraft (aktiv)). Data points: Teilzeit / Vollzeit Vollzeit, weiblich: 108; Teilzeit / Vollzeit Vollzeit, männlich: 104; Teilzeit / Vollzeit Teilzeit, weiblich: 174; Teilzeit / Vollzeit Teilzeit, männlich: 169."
+  },
+  {
+    "index": 20,
+    "title": "Teilzeit vs. Vollzeit",
+    "alt": "Teilzeit vs. Vollzeit. Bar chart comparing the count of Teilzeit / Vollzeit by Teilzeit / Vollzeit, grouped by Geschlecht. Data points: Teilzeit / Vollzeit Teilzeit, weiblich: 484; Teilzeit / Vollzeit Teilzeit, männlich: 467; Teilzeit / Vollzeit Vollzeit, weiblich: 286; Teilzeit / Vollzeit Vollzeit, männlich: 263."
+  },
+  {
+    "index": 21,
+    "title": "Arbeitszeitanteile nach Geschlecht",
+    "alt": "Arbeitszeitanteile nach Geschlecht. Bar chart comparing the count of Arbeitszeitanteil by Arbeitszeitanteil, grouped by Geschlecht. Data points: Arbeitszeitanteil 50, weiblich: 52; Arbeitszeitanteil 50, männlich: 61; Arbeitszeitanteil 100, weiblich: 286; Arbeitszeitanteil 100, männlich: 263; Arbeitszeitanteil 80, weiblich: 118; Arbeitszeitanteil 80, männlich: 125; Arbeitszeitanteil 60, weiblich: 57; Arbeitszeitanteil 60, männlich: 62; Arbeitszeitanteil 40, weiblich: 64; Arbeitszeitanteil 40, männlich: 46; Arbeitszeitanteil 70, weiblich: 124; Arbeitszeitanteil 70, männlich: 115; Arbeitszeitanteil 90, weiblich: 69; Arbeitszeitanteil 90, männlich: 58."
+  },
+  {
+    "index": 22,
+    "title": "Beurlaubungen aus familiären Gründen",
+    "alt": "Beurlaubungen aus familiären Gründen. Bar chart comparing the count of Beurlaubung by Beurlaubung, grouped by Geschlecht."
+  },
+  {
+    "index": 23,
+    "title": "Durchschnittliche Dauer der Elternzeit (Tage) je QE",
+    "alt": "Durchschnittliche Dauer der Elternzeit (Tage) je QE. Pyramid chart comparing the mean of QE split by Geschlecht (filtered to Personen in Elternzeit). Data points: QE 4: weiblich 238, männlich 186.20; QE 3: weiblich 199.50, männlich 214.14; QE 1: weiblich 199.82, männlich 192.18; QE 2: weiblich 161.70, männlich 172.31."
+  },
+  {
+    "index": 24,
+    "title": "In Elternzeit nach Entgeltgruppe",
+    "alt": "In Elternzeit nach Entgeltgruppe. Distance plot comparing the count of Entgeltgruppe / Besoldungsgruppe by Entgeltgruppe / Besoldungsgruppe, grouped by Geschlecht (filtered to Personen in Elternzeit). Data points: Entgeltgruppe / Besoldungsgruppe E8, weiblich: 133; Entgeltgruppe / Besoldungsgruppe E8, männlich: 127; Entgeltgruppe / Besoldungsgruppe E10, weiblich: 122; Entgeltgruppe / Besoldungsgruppe E10, männlich: 120; Entgeltgruppe / Besoldungsgruppe E6, weiblich: 130; Entgeltgruppe / Besoldungsgruppe E6, männlich: 118; Entgeltgruppe / Besoldungsgruppe E12, weiblich: 138; Entgeltgruppe / Besoldungsgruppe E12, männlich: 121; Entgeltgruppe / Besoldungsgruppe A9, weiblich: 122; Entgeltgruppe / Besoldungsgruppe A9, männlich: 127; Entgeltgruppe / Besoldungsgruppe A11, weiblich: 125; Entgeltgruppe / Besoldungsgruppe A11, männlich: 117."
+  },
+  {
+    "index": 25,
+    "title": "Durchschnittliche Beurteilung Beamte nach QE",
+    "alt": "Durchschnittliche Beurteilung Beamte nach QE. Distance plot comparing the mean of Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung by QE, grouped by Geschlecht (filtered to Beamte). Data points: QE 1, weiblich: 11.43; QE 1, männlich: 11.28; QE 3, weiblich: 11.05; QE 3, männlich: 10.87; QE 2, weiblich: 11.02; QE 2, männlich: 11.29; QE 4, weiblich: 11.49; QE 4, männlich: 10.91."
+  },
+  {
+    "index": 26,
+    "title": "Beurteilung Beamte — Teilzeit vs. Vollzeit",
+    "alt": "Beurteilung Beamte — Teilzeit vs. Vollzeit. Bar chart comparing the mean of Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung by Teilzeit / Vollzeit, grouped by Geschlecht (filtered to Beamte). Data points: Teilzeit / Vollzeit Teilzeit, weiblich: 11.13; Teilzeit / Vollzeit Teilzeit, männlich: 10.94; Teilzeit / Vollzeit Vollzeit, weiblich: 11.30; Teilzeit / Vollzeit Vollzeit, männlich: 11.23."
+  },
+  {
+    "index": 27,
+    "title": "Beurteilung Beamte je Organisationseinheit",
+    "alt": "Beurteilung Beamte je Organisationseinheit. Distance plot comparing the mean of Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung by Organisationseinheit, grouped by Geschlecht (filtered to Beamte). Data points: Organisationseinheit Finanzen, weiblich: 11.11; Organisationseinheit Finanzen, männlich: 11.02; Organisationseinheit Bauamt, weiblich: 11.35; Organisationseinheit Bauamt, männlich: 11.05; Organisationseinheit IT, weiblich: 11.20; Organisationseinheit IT, männlich: 11.00; Organisationseinheit Ordnungsamt, weiblich: 11.10; Organisationseinheit Ordnungsamt, männlich: 10.98; Organisationseinheit Personal, weiblich: 11.22; Organisationseinheit Personal, männlich: 11.18."
+  },
+  {
+    "index": 28,
+    "title": "Durchschnittliche Beurteilung Tarifbeschäftigte nach QE",
+    "alt": "Durchschnittliche Beurteilung Tarifbeschäftigte nach QE. Distance plot comparing the mean of Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung by QE, grouped by Geschlecht (filtered to Tarifbeschäftigte). Data points: QE 1, weiblich: 11.43; QE 1, männlich: 11.28; QE 3, weiblich: 11.05; QE 3, männlich: 10.87; QE 2, weiblich: 11.02; QE 2, männlich: 11.29; QE 4, weiblich: 11.49; QE 4, männlich: 10.91."
+  },
+  {
+    "index": 29,
+    "title": "Beurteilung Tarifbeschäftigte — Teilzeit vs. Vollzeit",
+    "alt": "Beurteilung Tarifbeschäftigte — Teilzeit vs. Vollzeit. Bar chart comparing the mean of Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung by Teilzeit / Vollzeit, grouped by Geschlecht (filtered to Tarifbeschäftigte). Data points: Teilzeit / Vollzeit Teilzeit, weiblich: 11.13; Teilzeit / Vollzeit Teilzeit, männlich: 10.94; Teilzeit / Vollzeit Vollzeit, weiblich: 11.30; Teilzeit / Vollzeit Vollzeit, männlich: 11.23."
+  },
+  {
+    "index": 30,
+    "title": "Beurteilung Tarifbeschäftigte je Organisationseinheit",
+    "alt": "Beurteilung Tarifbeschäftigte je Organisationseinheit. Distance plot comparing the mean of Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung by Organisationseinheit, grouped by Geschlecht (filtered to Tarifbeschäftigte). Data points: Organisationseinheit Finanzen, weiblich: 11.11; Organisationseinheit Finanzen, männlich: 11.02; Organisationseinheit Bauamt, weiblich: 11.35; Organisationseinheit Bauamt, männlich: 11.05; Organisationseinheit IT, weiblich: 11.20; Organisationseinheit IT, männlich: 11.00; Organisationseinheit Ordnungsamt, weiblich: 11.10; Organisationseinheit Ordnungsamt, männlich: 10.98; Organisationseinheit Personal, weiblich: 11.22; Organisationseinheit Personal, männlich: 11.18."
+  },
+  {
+    "index": 31,
+    "title": "Anteil Beförderungen je QE — Beamte",
+    "alt": "Anteil Beförderungen je QE — Beamte. Bar chart comparing the share within group of Beförderung (ja/nein) by QE, grouped by Geschlecht (filtered to Beamte). Data points: QE 3, weiblich: 0.0%; QE 3, männlich: 0.0%; QE 2, weiblich: 0.0%; QE 2, männlich: 0.0%; QE 4, weiblich: 0.0%; QE 4, männlich: 0.0%; QE 1, weiblich: 0.0%; QE 1, männlich: 0.0%."
+  },
+  {
+    "index": 32,
+    "title": "Anteil Beförderungen je Besoldungsgruppe — Beamte",
+    "alt": "Anteil Beförderungen je Besoldungsgruppe — Beamte. Bar chart comparing the share within group of Beförderung (ja/nein) by Entgeltgruppe / Besoldungsgruppe, grouped by Geschlecht (filtered to Beamte). Data points: Entgeltgruppe / Besoldungsgruppe E10, weiblich: 0.0%; Entgeltgruppe / Besoldungsgruppe E10, männlich: 0.0%; Entgeltgruppe / Besoldungsgruppe E8, weiblich: 0.0%; Entgeltgruppe / Besoldungsgruppe E8, männlich: 0.0%; Entgeltgruppe / Besoldungsgruppe A11, weiblich: 0.0%; Entgeltgruppe / Besoldungsgruppe A11, männlich: 0.0%; Entgeltgruppe / Besoldungsgruppe E12, weiblich: 0.0%; Entgeltgruppe / Besoldungsgruppe E12, männlich: 0.0%; Entgeltgruppe / Besoldungsgruppe A9, weiblich: 0.0%; Entgeltgruppe / Besoldungsgruppe A9, männlich: 0.0%; Entgeltgruppe / Besoldungsgruppe E6, weiblich: 0.0%; Entgeltgruppe / Besoldungsgruppe E6, männlich: 0.0%."
+  },
+  {
+    "index": 33,
+    "title": "Höhergruppierungen nach Maßnahmenart",
+    "alt": "Höhergruppierungen nach Maßnahmenart. Bar chart comparing the count of Maßnahmenart by Maßnahmenart, grouped by Geschlecht (filtered to Tarifbeschäftigte). Data points: Maßnahmenart Höhergruppierung, weiblich: 22; Maßnahmenart Höhergruppierung, männlich: 29; Maßnahmenart Beförderung, weiblich: 22; Maßnahmenart Beförderung, männlich: 27."
+  },
+  {
+    "index": 34,
+    "title": "Höhergruppierungen — auf Antrag vs. dienstseitig",
+    "alt": "Höhergruppierungen — auf Antrag vs. dienstseitig. Bar chart comparing the count of Maßnahmenantrag by Maßnahmenantrag, grouped by Geschlecht (filtered to Höhergruppierung genehmigt). Data points: Maßnahmenantrag Nein, weiblich: 22; Maßnahmenantrag Nein, männlich: 24; Maßnahmenantrag Ja, weiblich: 22; Maßnahmenantrag Ja, männlich: 32."
+  },
+  {
+    "index": 35,
+    "title": "Anteil abgeschlossener Qualifizierungen je Art",
+    "alt": "Anteil abgeschlossener Qualifizierungen je Art. Distance plot comparing the share within group of Qualifizierungsmaßnahme abgeschlossen (ja / nein) by Qualifikationsart, grouped by Geschlecht. Data points: Qualifikationsart EQ, männlich: 0.0%; Qualifikationsart EQ, weiblich: 0.0%; Qualifikationsart BQ, männlich: 0.0%; Qualifikationsart BQ, weiblich: 0.0%; Qualifikationsart AQ, männlich: 0.0%; Qualifikationsart AQ, weiblich: 0.0%."
+  },
+  {
+    "index": 36,
+    "title": "Anteil bewilligter Qualifizierungen je Art",
+    "alt": "Anteil bewilligter Qualifizierungen je Art. Distance plot comparing the share within group of Qualifizierungsmaßnahme bewilligt (ja / nein) by Qualifikationsart, grouped by Geschlecht. Data points: Qualifikationsart EQ, männlich: 0.0%; Qualifikationsart EQ, weiblich: 0.0%; Qualifikationsart BQ, männlich: 0.0%; Qualifikationsart BQ, weiblich: 0.0%; Qualifikationsart AQ, männlich: 0.0%; Qualifikationsart AQ, weiblich: 0.0%."
+  },
+  {
+    "index": 37,
+    "title": "Anteil Fortbildungsteilnahme — Teilzeit vs. Vollzeit",
+    "alt": "Anteil Fortbildungsteilnahme — Teilzeit vs. Vollzeit. Bar chart comparing the share within group of Teilnahme an Fortbildung (ja / nein) by Arbeitszeitmodell, grouped by Geschlecht."
+  },
+  {
+    "index": 38,
+    "title": "Ø Leistungskomponente je Entgeltgruppe",
+    "alt": "Ø Leistungskomponente je Entgeltgruppe. Distance plot comparing the mean of Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB) by Entgeltgruppe / Besoldungsgruppe, grouped by Geschlecht. Data points: Entgeltgruppe / Besoldungsgruppe E6, weiblich: 0; Entgeltgruppe / Besoldungsgruppe E6, männlich: 0; Entgeltgruppe / Besoldungsgruppe A11, weiblich: 0; Entgeltgruppe / Besoldungsgruppe A11, männlich: 0; Entgeltgruppe / Besoldungsgruppe A9, weiblich: 0; Entgeltgruppe / Besoldungsgruppe A9, männlich: 0; Entgeltgruppe / Besoldungsgruppe E12, weiblich: 0; Entgeltgruppe / Besoldungsgruppe E12, männlich: 0; Entgeltgruppe / Besoldungsgruppe E8, weiblich: 0; Entgeltgruppe / Besoldungsgruppe E8, männlich: 0; Entgeltgruppe / Besoldungsgruppe E10, weiblich: 0; Entgeltgruppe / Besoldungsgruppe E10, männlich: 0."
+  },
+  {
+    "index": 39,
+    "title": "Ø Leistungskomponente je QE",
+    "alt": "Ø Leistungskomponente je QE. Pyramid chart comparing the mean of QE split by Geschlecht. Data points: QE 2: weiblich 0, männlich 0; QE 1: weiblich 0, männlich 0; QE 4: weiblich 0, männlich 0; QE 3: weiblich 0, männlich 0."
+  },
+  {
+    "index": 40,
+    "title": "Ø Leistungskomponente — Teilzeit vs. Vollzeit",
+    "alt": "Ø Leistungskomponente — Teilzeit vs. Vollzeit. Bar chart comparing the mean of Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB) by Arbeitszeitmodell, grouped by Geschlecht. Data points: Arbeitszeitmodell Vollzeit, weiblich: 0; Arbeitszeitmodell Vollzeit, männlich: 0; Arbeitszeitmodell Teilzeit, weiblich: 0; Arbeitszeitmodell Teilzeit, männlich: 0."
+  }
+]

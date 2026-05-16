@@ -19,6 +19,7 @@ export function initApp(root: HTMLElement): void {
   const config = loadConfig();
 
   root.innerHTML = `
+    <img src="../img/ondatix_Logo_hell.png" alt="Reportix Logo" class="logo" height="80" align="right"/><br>
     <h1>reportix</h1>
     <div id="step-data" class="step">
       <h2>1. Load Data Files</h2>

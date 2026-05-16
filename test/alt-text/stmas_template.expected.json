@@ -1,0 +1,207 @@
+[
+  {
+    "index": 0,
+    "title": "Geschlechterverteilung",
+    "alt": "Geschlechterverteilung. Pie chart comparing the share (% of total) of Geschlecht, grouped by Geschlecht."
+  },
+  {
+    "index": 1,
+    "title": "Männer und Frauen in den Organisationseinheiten",
+    "alt": "Männer und Frauen in den Organisationseinheiten. Distance plot comparing the count of Organisationseinheit by Organisationseinheit, grouped by Geschlecht."
+  },
+  {
+    "index": 2,
+    "title": "Tarifbeschäftigte vs. Beamte",
+    "alt": "Tarifbeschäftigte vs. Beamte. Bar chart comparing the count of Beamte / Tarifbeschäftigte by Beamte / Tarifbeschäftigte, grouped by Geschlecht."
+  },
+  {
+    "index": 3,
+    "title": "Befristete vs. unbefristete Arbeitsverhältnisse",
+    "alt": "Befristete vs. unbefristete Arbeitsverhältnisse. Bar chart comparing the count of Befristet / Unbefristet by Befristet / Unbefristet, grouped by Geschlecht (filtered to Tarifbeschäftigte)."
+  },
+  {
+    "index": 4,
+    "title": "Männer und Frauen in den Entgelt- und Besoldungsgruppen",
+    "alt": "Männer und Frauen in den Entgelt- und Besoldungsgruppen. Distance plot comparing the count of Entgeltgruppe / Besoldungsgruppe by Entgeltgruppe / Besoldungsgruppe, grouped by Geschlecht."
+  },
+  {
+    "index": 5,
+    "title": "Qualifikationsebenen nach Geschlecht",
+    "alt": "Qualifikationsebenen nach Geschlecht. Pyramid chart comparing the count of QE split by Geschlecht."
+  },
+  {
+    "index": 6,
+    "title": "QE-Aufstieg im Vergleich zur Einstiegs-QE",
+    "alt": "QE-Aufstieg im Vergleich zur Einstiegs-QE. Pyramid chart comparing the count of QE-Aufstieg split by Geschlecht."
+  },
+  {
+    "index": 7,
+    "title": "Auszubildende in den Ausbildungsbereichen",
+    "alt": "Auszubildende in den Ausbildungsbereichen. Bar chart comparing the count of Ausbildungsbereich by Ausbildungsbereich, grouped by Geschlecht (filtered to Auszubildende)."
+  },
+  {
+    "index": 8,
+    "title": "Qualifizierte Bewerbungen nach Qualifikationsebene",
+    "alt": "Qualifizierte Bewerbungen nach Qualifikationsebene. Pyramid chart comparing the count of QE split by Geschlecht (filtered to Qualifizierte Bewerbungen)."
+  },
+  {
+    "index": 9,
+    "title": "Qualifizierte Bewerbungen je Führungsebene",
+    "alt": "Qualifizierte Bewerbungen je Führungsebene. Pyramid chart comparing the count of Führungsebene split by Geschlecht (filtered to Qualifizierte Bewerbungen)."
+  },
+  {
+    "index": 10,
+    "title": "Interne vs. externe qualifizierte Bewerbungen",
+    "alt": "Interne vs. externe qualifizierte Bewerbungen. Pyramid chart comparing the count of Intern / Extern split by Geschlecht (filtered to Qualifizierte Bewerbungen)."
+  },
+  {
+    "index": 11,
+    "title": "Bewerbungen je Organisationseinheit",
+    "alt": "Bewerbungen je Organisationseinheit. Distance plot comparing the count of Organisationseinheit by Organisationseinheit, grouped by Geschlecht (filtered to Qualifizierte Bewerbungen)."
+  },
+  {
+    "index": 12,
+    "title": "Neueinstellungen nach Entgelt-/Besoldungsgruppe",
+    "alt": "Neueinstellungen nach Entgelt-/Besoldungsgruppe. Bar chart comparing the count of Entgeltgruppe / Besoldungsgruppe by Entgeltgruppe / Besoldungsgruppe, grouped by Geschlecht (filtered to Einstellungen)."
+  },
+  {
+    "index": 13,
+    "title": "Neueinstellungen nach Qualifikationsebene",
+    "alt": "Neueinstellungen nach Qualifikationsebene. Bar chart comparing the count of QE by QE, grouped by Geschlecht (filtered to Einstellungen)."
+  },
+  {
+    "index": 14,
+    "title": "Beschäftigte in leitenden Funktionen",
+    "alt": "Beschäftigte in leitenden Funktionen. Pyramid chart comparing the count of Führungskraft (aktiv) split by Geschlecht."
+  },
+  {
+    "index": 15,
+    "title": "Führungsebenen nach Geschlecht",
+    "alt": "Führungsebenen nach Geschlecht. Pyramid chart comparing the count of Führungsebene split by Geschlecht (filtered to Führungskraft (aktiv))."
+  },
+  {
+    "index": 16,
+    "title": "Führungskräfte in den Organisationseinheiten",
+    "alt": "Führungskräfte in den Organisationseinheiten. Distance plot comparing the count of Organisationseinheit by Organisationseinheit, grouped by Geschlecht (filtered to Führungskraft (aktiv))."
+  },
+  {
+    "index": 17,
+    "title": "Anteil Führung in Tandem (in der Gruppe) je QE",
+    "alt": "Anteil Führung in Tandem (in der Gruppe) je QE. Pyramid chart comparing the share within group of QE split by Geschlecht (filtered to Führungskraft (aktiv))."
+  },
+  {
+    "index": 18,
+    "title": "Anteil Führung in Tandem je Führungsebene",
+    "alt": "Anteil Führung in Tandem je Führungsebene. Pyramid chart comparing the share within group of Führungsebene split by Geschlecht (filtered to Führungskraft (aktiv))."
+  },
+  {
+    "index": 19,
+    "title": "Führung in Teilzeit",
+    "alt": "Führung in Teilzeit. Bar chart comparing the count of Teilzeit / Vollzeit by Teilzeit / Vollzeit, grouped by Geschlecht (filtered to Führungskraft (aktiv))."
+  },
+  {
+    "index": 20,
+    "title": "Teilzeit vs. Vollzeit",
+    "alt": "Teilzeit vs. Vollzeit. Bar chart comparing the count of Teilzeit / Vollzeit by Teilzeit / Vollzeit, grouped by Geschlecht."
+  },
+  {
+    "index": 21,
+    "title": "Arbeitszeitanteile nach Geschlecht",
+    "alt": "Arbeitszeitanteile nach Geschlecht. Bar chart comparing the count of Arbeitszeitanteil by Arbeitszeitanteil, grouped by Geschlecht."
+  },
+  {
+    "index": 22,
+    "title": "Beurlaubungen aus familiären Gründen",
+    "alt": "Beurlaubungen aus familiären Gründen. Bar chart comparing the count of Beurlaubung by Beurlaubung, grouped by Geschlecht."
+  },
+  {
+    "index": 23,
+    "title": "Durchschnittliche Dauer der Elternzeit (Tage) je QE",
+    "alt": "Durchschnittliche Dauer der Elternzeit (Tage) je QE. Pyramid chart comparing the mean of QE split by Geschlecht (filtered to Personen in Elternzeit)."
+  },
+  {
+    "index": 24,
+    "title": "In Elternzeit nach Entgeltgruppe",
+    "alt": "In Elternzeit nach Entgeltgruppe. Distance plot comparing the count of Entgeltgruppe / Besoldungsgruppe by Entgeltgruppe / Besoldungsgruppe, grouped by Geschlecht (filtered to Personen in Elternzeit)."
+  },
+  {
+    "index": 25,
+    "title": "Durchschnittliche Beurteilung Beamte nach QE",
+    "alt": "Durchschnittliche Beurteilung Beamte nach QE. Distance plot comparing the mean of Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung by QE, grouped by Geschlecht (filtered to Beamte)."
+  },
+  {
+    "index": 26,
+    "title": "Beurteilung Beamte — Teilzeit vs. Vollzeit",
+    "alt": "Beurteilung Beamte — Teilzeit vs. Vollzeit. Bar chart comparing the mean of Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung by Teilzeit / Vollzeit, grouped by Geschlecht (filtered to Beamte)."
+  },
+  {
+    "index": 27,
+    "title": "Beurteilung Beamte je Organisationseinheit",
+    "alt": "Beurteilung Beamte je Organisationseinheit. Distance plot comparing the mean of Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung by Organisationseinheit, grouped by Geschlecht (filtered to Beamte)."
+  },
+  {
+    "index": 28,
+    "title": "Durchschnittliche Beurteilung Tarifbeschäftigte nach QE",
+    "alt": "Durchschnittliche Beurteilung Tarifbeschäftigte nach QE. Distance plot comparing the mean of Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung by QE, grouped by Geschlecht (filtered to Tarifbeschäftigte)."
+  },
+  {
+    "index": 29,
+    "title": "Beurteilung Tarifbeschäftigte — Teilzeit vs. Vollzeit",
+    "alt": "Beurteilung Tarifbeschäftigte — Teilzeit vs. Vollzeit. Bar chart comparing the mean of Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung by Teilzeit / Vollzeit, grouped by Geschlecht (filtered to Tarifbeschäftigte)."
+  },
+  {
+    "index": 30,
+    "title": "Beurteilung Tarifbeschäftigte je Organisationseinheit",
+    "alt": "Beurteilung Tarifbeschäftigte je Organisationseinheit. Distance plot comparing the mean of Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung by Organisationseinheit, grouped by Geschlecht (filtered to Tarifbeschäftigte)."
+  },
+  {
+    "index": 31,
+    "title": "Anteil Beförderungen je QE — Beamte",
+    "alt": "Anteil Beförderungen je QE — Beamte. Bar chart comparing the share within group of Beförderung (ja/nein) by QE, grouped by Geschlecht (filtered to Beamte)."
+  },
+  {
+    "index": 32,
+    "title": "Anteil Beförderungen je Besoldungsgruppe — Beamte",
+    "alt": "Anteil Beförderungen je Besoldungsgruppe — Beamte. Bar chart comparing the share within group of Beförderung (ja/nein) by Entgeltgruppe / Besoldungsgruppe, grouped by Geschlecht (filtered to Beamte)."
+  },
+  {
+    "index": 33,
+    "title": "Höhergruppierungen nach Maßnahmenart",
+    "alt": "Höhergruppierungen nach Maßnahmenart. Bar chart comparing the count of Maßnahmenart by Maßnahmenart, grouped by Geschlecht (filtered to Tarifbeschäftigte)."
+  },
+  {
+    "index": 34,
+    "title": "Höhergruppierungen — auf Antrag vs. dienstseitig",
+    "alt": "Höhergruppierungen — auf Antrag vs. dienstseitig. Bar chart comparing the count of Maßnahmenantrag by Maßnahmenantrag, grouped by Geschlecht (filtered to Höhergruppierung genehmigt)."
+  },
+  {
+    "index": 35,
+    "title": "Anteil abgeschlossener Qualifizierungen je Art",
+    "alt": "Anteil abgeschlossener Qualifizierungen je Art. Distance plot comparing the share within group of Qualifizierungsmaßnahme abgeschlossen (ja / nein) by Qualifikationsart, grouped by Geschlecht."
+  },
+  {
+    "index": 36,
+    "title": "Anteil bewilligter Qualifizierungen je Art",
+    "alt": "Anteil bewilligter Qualifizierungen je Art. Distance plot comparing the share within group of Qualifizierungsmaßnahme bewilligt (ja / nein) by Qualifikationsart, grouped by Geschlecht."
+  },
+  {
+    "index": 37,
+    "title": "Anteil Fortbildungsteilnahme — Teilzeit vs. Vollzeit",
+    "alt": "Anteil Fortbildungsteilnahme — Teilzeit vs. Vollzeit. Bar chart comparing the share within group of Teilnahme an Fortbildung (ja / nein) by Arbeitszeitmodell, grouped by Geschlecht."
+  },
+  {
+    "index": 38,
+    "title": "Ø Leistungskomponente je Entgeltgruppe",
+    "alt": "Ø Leistungskomponente je Entgeltgruppe. Distance plot comparing the mean of Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB) by Entgeltgruppe / Besoldungsgruppe, grouped by Geschlecht."
+  },
+  {
+    "index": 39,
+    "title": "Ø Leistungskomponente je QE",
+    "alt": "Ø Leistungskomponente je QE. Pyramid chart comparing the mean of QE split by Geschlecht."
+  },
+  {
+    "index": 40,
+    "title": "Ø Leistungskomponente — Teilzeit vs. Vollzeit",
+    "alt": "Ø Leistungskomponente — Teilzeit vs. Vollzeit. Bar chart comparing the mean of Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB) by Arbeitszeitmodell, grouped by Geschlecht."
+  }
+]

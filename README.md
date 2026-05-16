@@ -173,7 +173,7 @@ The generated report output is built to be accessible:
 
 - **Semantic HTML** — `<h1>`–`<h6>`, `<p>`, `<table>`, `<figure>`/`<figcaption>`. DOM reading order matches visual order.
 - **Colorblind-safe palettes** — the default Okabe-Ito (Wong 2011) palette and all bundled alternatives are tested against deuteranopia, protanopia, and tritanopia simulations. Colour is never the sole encoding — chart shapes (e.g. distance plot uses circle + square markers) and labels reinforce it.
-- **Alt text on every chart** — auto-derived from the chart spec and the resolved data (chart type, axes, aggregation, filter, range, trend), no network call required. Overridable via the `alt:` field.
+- **Alt text on every chart** — auto-derived from the chart spec and the resolved data: chart type, axes, aggregation op, filter, plus an explicit enumeration of every aggregated data point. No network call required. Overridable via `alt:` (full replacement) or `alt-intro:` (introductory sentence prepended to the auto text).
 - **Accessible tables** — `<th scope="col">`, `<caption>`, no layout tables. Complex tables get a caption.
 - **Curated fonts** — the bundled font picker offers system fonts on accessibility shortlists (Verdana, Tahoma, Arial, Georgia).
 - **DOCX exports** preserve alt text, heading structure, and table semantics.

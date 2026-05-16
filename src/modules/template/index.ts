@@ -25,12 +25,18 @@ export function parseTemplate(markdown: string): TemplateBlock[] {
 
     const blockType = match[1] as "chart" | "table";
     const yamlBody = match[2];
-    const spec = YAML.parse(yamlBody);
+    const spec = YAML.parse(yamlBody) as Record<string, unknown>;
+
+    // Normalise kebab-case aliases to the camelCase fields used in code.
+    if ("alt-intro" in spec && !("altIntro" in spec)) {
+      spec.altIntro = spec["alt-intro"];
+      delete spec["alt-intro"];
+    }
 
     if (blockType === "chart") {
-      blocks.push({ type: "chart", spec: spec as ChartSpec });
+      blocks.push({ type: "chart", spec: spec as unknown as ChartSpec });
     } else {
-      blocks.push({ type: "table", spec: spec as TableSpec });
+      blocks.push({ type: "table", spec: spec as unknown as TableSpec });
     }
 
     lastIndex = matchStart + match[0].length;

@@ -294,7 +294,16 @@ export interface ChartSpec {
    */
   filter?: string;
   title?: string;
+  /**
+   * Explicit alt text. When set, bypasses auto-generation entirely.
+   */
   alt?: string;
+  /**
+   * Optional introductory sentence prepended to the auto-generated alt
+   * text. Useful for describing the chart's role in the surrounding
+   * document. YAML may use either `altIntro:` or `alt-intro:`.
+   */
+  altIntro?: string;
   caption?: string;
 }
 

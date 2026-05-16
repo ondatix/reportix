@@ -409,7 +409,8 @@ The generated report output must be accessible. The following measures apply acr
 - Exported files preserve alt texts and heading structure where the format supports it
 
 **Template YAML fields supporting accessibility**
-- `alt:` — explicit alt text for charts and images
+- `alt:` — explicit alt text for charts (bypasses auto-generation entirely)
+- `alt-intro:` (alias `altIntro:`) — optional introductory sentence prepended to the auto-generated alt text; useful for describing the chart's role in the surrounding document
 - `caption:` — visible caption for charts and tables
 
 ## Alt Text Module
@@ -417,12 +418,13 @@ The generated report output must be accessible. The following measures apply acr
 A dedicated submodule responsible for generating descriptive alt texts for charts and graphics. Fully offline — no network requests. Independent of the renderers and reusable in other projects.
 
 **Inputs**
-- The resolved YAML chart spec (chart type, title, axis labels)
-- The resolved dataset (used to derive data range and trend)
+- The resolved YAML chart spec (chart type, title, axis labels, aggregation, filter, optional `altIntro`)
+- The resolved dataset (used to enumerate every aggregated data point)
 
 **Generation strategy**
-- Derive alt text from the spec and data: chart type, what is being measured, axis labels, data range (min/max), and overall trend (increasing/decreasing/stable)
-- The `alt:` field in the YAML spec always takes precedence and bypasses generation entirely
+- Derive alt text from the spec and data: chart type, what is being measured (aggregation op + y field), how it is broken down (x axis, color grouping, filter), and when data is provided, an explicit enumeration of every aggregated data point shown in the chart.
+- The optional `altIntro` is prepended verbatim.
+- The `alt:` field in the YAML spec always takes precedence and bypasses generation entirely.
 
 **Output**
 - A plain-text string suitable for an HTML `alt` attribute or DOCX alt text property

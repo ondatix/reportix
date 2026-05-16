@@ -1,8 +1,20 @@
 :root {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: "Funnel Sans", -apple-system, sans-serif;
   line-height: 1.6;
-  color: #1a1a1a;
-  background: #fafafa;
+  --purple-full: #B6A6F6;
+  --purple-medium: #d8d1fA;
+  --purple-light: #F0EDFD;
+  --seafoam-full: #5BC4A0;
+  --seafoam-medium: #AEDECE;
+  --seafoam-light: #E5F7F1;
+  --sunshine-full: #FFC947;
+  --sunshine-medium: #FFE09A;
+  --sunshine-light: #FFF6E0;
+  --black: #232528;
+  --white: #FFFFFF;
+  --deep-violet: #2D1B4E;
+  color: var(--black);
+  background: var(--white);
 }
 
 #app {
@@ -12,22 +24,22 @@
 }
 
 h1 {
-  border-bottom: 2px solid #0072B2;
+  border-bottom: 2px solid var(--deep-violet);
   padding-bottom: 0.5rem;
 }
 
 .step {
   margin: 1.5rem 0;
   padding: 1rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--purple-light);
   border-radius: 6px;
-  background: #fff;
+  background: var(--white);
 }
 
 .step h2 {
   margin-top: 0;
   font-size: 1.2rem;
-  color: #333;
+  color: var(--deep-violet);
 }
 
 label {
@@ -55,14 +67,14 @@ input[type="file"] {
 .parameter-field select {
   width: 100%;
   padding: 0.4rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--purple-light);
   border-radius: 4px;
   font-size: 1rem;
 }
 
 /* Palette parameter — illustrated radio group */
 .palette-field {
-  border: 1px solid #ccc;
+  border: 1px solid var(--purple-light);
   border-radius: 4px;
   padding: 0.5rem 0.75rem 0.75rem;
   margin: 0;
@@ -86,12 +98,12 @@ input[type="file"] {
 }
 
 .palette-option:hover {
-  background: #f5f5f5;
+  background: var(--purple-light);
 }
 
 .palette-option:has(input:checked) {
-  border-color: #0072B2;
-  background: #f0f7fc;
+  border-color: var(--purple-full);
+  background: var(--purple-medium);
 }
 
 .palette-option input[type="radio"] {
@@ -102,7 +114,7 @@ input[type="file"] {
 .palette-name {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.9rem;
-  color: #333;
+  color: var(--deep-violet);
 }
 
 .palette-swatches {
@@ -115,12 +127,12 @@ input[type="file"] {
   width: 1.1rem;
   height: 1.1rem;
   border-radius: 3px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--purple-medium);
 }
 
 /* Font parameter — illustrated radio group */
 .font-field {
-  border: 1px solid #ccc;
+  border: 1px solid var(--purple-light);
   border-radius: 4px;
   padding: 0.5rem 0.75rem 0.75rem;
   margin: 0;
@@ -144,12 +156,12 @@ input[type="file"] {
 }
 
 .font-option:hover {
-  background: #f5f5f5;
+  background: var(--purple-light);
 }
 
 .font-option:has(input:checked) {
-  border-color: #0072B2;
-  background: #f0f7fc;
+  border-color: var(--purple-full);
+  background: var(--purple-medium);
 }
 
 .font-option input[type="radio"] {
@@ -159,15 +171,15 @@ input[type="file"] {
 
 .font-sample {
   font-size: 1.05rem;
-  color: #1a1a1a;
+  color: var(--black);
 }
 
 /* Pandoc-style callout boxes */
 .callout {
   margin: 1rem 0;
   padding: 0.75rem 1rem;
-  border-left: 4px solid #888;
-  background: #f5f5f5;
+  border-left: 4px solid var(--black);
+  background: var(--purple-light);
   border-radius: 4px;
 }
 
@@ -181,17 +193,17 @@ input[type="file"] {
 }
 
 /* Variants follow Quarto callout colour conventions */
-.callout-note    { border-left-color: #1f77b4; background: #eaf2fb; }
-.callout-tip     { border-left-color: #2ca02c; background: #ebf6ec; }
-.callout-warning { border-left-color: #ff7f0e; background: #fdf1e3; }
-.callout-caution { border-left-color: #d62728; background: #fbe9e9; }
-.callout-important { border-left-color: #9467bd; background: #f3edf8; }
+.callout-note      { border-left-color: var(--purple-full);   background: var(--purple-light); }
+.callout-tip       { border-left-color: var(--seafoam-full);  background: var(--seafoam-light); }
+.callout-warning   { border-left-color: var(--sunshine-full); background: var(--sunshine-light); }
+.callout-caution   { border-left-color: var(--sunshine-full); background: var(--sunshine-medium); }
+.callout-important { border-left-color: var(--deep-violet);   background: var(--purple-medium); }
 
 button {
   margin-top: 1rem;
   padding: 0.6rem 1.2rem;
-  background: #0072B2;
-  color: #fff;
+  background: var(--seafoam-full);
+  color: var(--white);
   border: none;
   border-radius: 4px;
   font-size: 1rem;
@@ -199,15 +211,15 @@ button {
 }
 
 button:hover {
-  background: #005a8c;
+  background: var(--deep-violet);
 }
 
 /* Report preview */
 .report-preview {
   padding: 1rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--purple-light);
   border-radius: 6px;
-  background: #fff;
+  background: var(--white);
 }
 
 .report-preview section {
@@ -221,7 +233,7 @@ button:hover {
 .report-preview figcaption {
   text-align: center;
   font-style: italic;
-  color: #555;
+  color: var(--black);
   margin-top: 0.5rem;
 }
 
@@ -234,27 +246,27 @@ button:hover {
 .report-preview th,
 .report-preview td {
   padding: 0.5rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--purple-light);
   text-align: left;
 }
 
 .report-preview th {
-  background: #f0f0f0;
+  background: var(--purple-light);
   font-weight: 600;
 }
 
 .report-preview .error {
-  color: #d32f2f;
+  color: var(--deep-violet);
   font-style: italic;
 }
 
 .report-preview .tbd-note {
   margin: 1rem 0;
   padding: 0.6rem 0.9rem;
-  background: #fbe9e9;
-  border-left: 4px solid #d32f2f;
+  background: var(--sunshine-light);
+  border-left: 4px solid var(--sunshine-full);
   border-radius: 4px;
-  color: #b71c1c;
+  color: var(--deep-violet);
   font-style: italic;
   font-weight: 500;
 }
