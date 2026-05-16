@@ -64,10 +64,10 @@ parameters:
     label: "Output filename"
     type: text
     bind: export.filename
-  locale:
-    label: "Locale"
-    type: text
-    bind: export.locale
+  # locale:
+  #   label: "Locale"
+  #   type: text
+  #   bind: export.locale
   doc_subject:
     label: "Document subject"
     type: text
@@ -80,6 +80,14 @@ parameters:
     label: "Smallest group threshold"
     type: number
     bind: data_protection.smallest_group
+  section_numbering:
+    label: "Number headings (1., 1.1., …)"
+    type: boolean
+    bind: export.section_numbering
+  toc:
+    label: "Include table of contents"
+    type: boolean
+    bind: export.toc
 
 data:
   Dataset:
@@ -94,7 +102,16 @@ data:
           - Col B
 
 template:
-  file: report_template.md
+  # Step 2 shows a radio chooser of the entries below. `file` is the filename
+  # within the bundled `templates/` directory; `label` is what the user sees.
+  # The app hard-fails at startup if any referenced file isn't bundled.
+  files:
+    - label: "Test Template"
+      file: test_template.md
+    # - label: "Extended Report"
+    #   file: extended_template.md
+    # - label: "Quick Summary"
+    #   file: summary_template.md
 
 data_protection:
   smallest_group: 5  # bound by parameters.smallest_group
@@ -102,6 +119,8 @@ data_protection:
 export:
   filename: report.docx        # bound by parameters.filename
   locale: de-DE                # bound by parameters.locale
+  section_numbering: false     # bound by parameters.section_numbering
+  toc: false                   # bound by parameters.toc
 
   document:
     title: Report

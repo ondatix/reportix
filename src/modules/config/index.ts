@@ -3,7 +3,7 @@
  * Usable independently in other projects.
  */
 import { parse as parseYAML } from "yaml";
-import type { AppConfig, ParameterDef, DataSourceDef, SheetDef, TemplateDef, ExportConfig, ChartDefaults, DataProtectionConfig } from "../types";
+import type { AppConfig, ParameterDef, DataSourceDef, SheetDef, TemplateDef, TemplateOption, ExportConfig, ChartDefaults, DataProtectionConfig } from "../types";
 
 export function parseConfig(yamlString: string): AppConfig {
   const raw = parseYAML(yamlString) as Record<string, unknown>;
@@ -36,9 +36,14 @@ export function parseConfig(yamlString: string): AppConfig {
   }
 
   const tplRaw = (raw.template ?? {}) as Record<string, unknown>;
-  const template: TemplateDef = {
-    file: String(tplRaw.file ?? ""),
-  };
+  const filesRaw = tplRaw.files as Array<Record<string, unknown>> | undefined;
+  const templateFiles: TemplateOption[] = (filesRaw ?? [])
+    .map((f) => ({
+      label: String(f.label ?? f.file ?? ""),
+      file: String(f.file ?? ""),
+    }))
+    .filter((f) => f.file.length > 0);
+  const template: TemplateDef = { files: templateFiles };
 
   let exportConfig: ExportConfig | undefined;
   if (raw.export && typeof raw.export === "object") {
@@ -60,6 +65,8 @@ export function parseConfig(yamlString: string): AppConfig {
     exportConfig = {
       filename: e.filename as string | undefined,
       locale: e.locale as string | undefined,
+      sectionNumbering: e.section_numbering as boolean | undefined,
+      toc: e.toc as boolean | undefined,
 
       document: docRaw
         ? {

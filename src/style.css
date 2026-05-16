@@ -270,3 +270,33 @@ button:hover {
   font-style: italic;
   font-weight: 500;
 }
+
+.data-warnings {
+  margin: 0.75rem 0;
+  padding: 0.6rem 0.9rem;
+  background: var(--sunshine-light);
+  border-left: 4px solid var(--sunshine-full);
+  border-radius: 4px;
+  color: var(--deep-violet);
+}
+
+.template-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.35rem 0;
+  cursor: pointer;
+}
+
+.template-option .template-name {
+  font-weight: 500;
+}
+
+.data-warnings ul {
+  margin: 0.4rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.data-warnings li {
+  margin: 0.15rem 0;
+}

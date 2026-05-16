@@ -24,8 +24,11 @@ import {
   NumberFormat,
   LineRuleType,
   ShadingType,
+  TableOfContents,
+  LevelFormat,
   convertMillimetersToTwip,
 } from "docx";
+import type { INumberingOptions } from "docx";
 import { saveAs } from "file-saver";
 import type { ExportConfig, CalloutBoxConfig } from "../types";
 
@@ -80,10 +83,16 @@ interface ResolvedSettings {
   tableBorderColor: string;
   tableBorderSize: number;
   tableCellPadding: number;
+  // structure
+  sectionNumbering: boolean;
+  toc: boolean;
   // Callout box overrides (per-class).
   definitionBox?: CalloutBoxConfig;
   summaryBox?: CalloutBoxConfig;
 }
+
+/** Reference id used to bind the multilevel numbering scheme to heading styles. */
+const HEADING_NUMBERING_REF = "heading-numbering";
 
 function pt(points: number): number {
   return points * 2; // pt → half-points
@@ -170,9 +179,37 @@ function resolveSettings(c?: ExportConfig): ResolvedSettings {
     tableBorderColor: c?.table?.borderColor ?? "999999",
     tableBorderSize: c?.table?.borderSize ?? 4,
     tableCellPadding: c?.table?.cellPadding ?? 80,
+    sectionNumbering: c?.sectionNumbering ?? false,
+    toc: c?.toc ?? false,
     definitionBox: c?.definitionBox,
     summaryBox: c?.summaryBox,
   };
+}
+
+/**
+ * Multilevel decimal numbering applied to heading1..4 when section_numbering
+ * is enabled. `text: "%1."` numbers H1 as "1.", H2 as "1.1.", etc.
+ */
+function buildHeadingNumbering(): INumberingOptions {
+  return {
+    config: [
+      {
+        reference: HEADING_NUMBERING_REF,
+        levels: [
+          { level: 0, format: LevelFormat.DECIMAL, text: "%1.", alignment: AlignmentType.LEFT },
+          { level: 1, format: LevelFormat.DECIMAL, text: "%1.%2.", alignment: AlignmentType.LEFT },
+          { level: 2, format: LevelFormat.DECIMAL, text: "%1.%2.%3.", alignment: AlignmentType.LEFT },
+          { level: 3, format: LevelFormat.DECIMAL, text: "%1.%2.%3.%4.", alignment: AlignmentType.LEFT },
+        ],
+      },
+    ],
+  };
+}
+
+function headingNumberingProp(level: number): {
+  numbering: { reference: string; level: number };
+} {
+  return { numbering: { reference: HEADING_NUMBERING_REF, level } };
 }
 
 // ── Public API ───────────────────────────────────────────────────────
@@ -182,7 +219,32 @@ export async function exportToDocx(
   config?: ExportConfig
 ): Promise<void> {
   const s = resolveSettings(config);
-  const children = convertChildren(container, s);
+  const bodyChildren = convertChildren(container, s);
+  const sectionChildren: (Paragraph | Table | TableOfContents)[] = [];
+
+  if (s.toc) {
+    sectionChildren.push(
+      new Paragraph({
+        heading: HeadingLevel.HEADING_1,
+        children: [new TextRun({ text: "Table of Contents", font: s.headingFamily })],
+      }),
+      new TableOfContents("Table of Contents", {
+        hyperlink: true,
+        headingStyleRange: "1-4",
+      }),
+      new Paragraph({ children: [new TextRun({ text: "", break: 1 })] })
+    );
+  }
+  sectionChildren.push(...bodyChildren);
+
+  // When section numbering is on, bind heading styles to a multilevel
+  // numbering ref so Word renders "1.", "1.1.", etc. automatically.
+  const numberingClause = s.sectionNumbering
+    ? { paragraph: { ...headingNumberingProp(0) } }
+    : {};
+  const heading2Numbering = s.sectionNumbering ? headingNumberingProp(1) : {};
+  const heading3Numbering = s.sectionNumbering ? headingNumberingProp(2) : {};
+  const heading4Numbering = s.sectionNumbering ? headingNumberingProp(3) : {};
 
   const doc = new Document({
     title: s.title,
@@ -190,6 +252,8 @@ export async function exportToDocx(
     creator: s.creator,
     description: s.description,
     keywords: s.keywords,
+
+    numbering: s.sectionNumbering ? buildHeadingNumbering() : undefined,
 
     styles: {
       default: {
@@ -211,19 +275,19 @@ export async function exportToDocx(
         },
         heading1: {
           run: { font: s.headingFamily, size: s.h1Size, color: s.headingColor, bold: true },
-          paragraph: { spacing: { before: 240, after: 120 } },
+          paragraph: { spacing: { before: 240, after: 120 }, ...numberingClause.paragraph },
         },
         heading2: {
           run: { font: s.headingFamily, size: s.h2Size, color: s.headingColor, bold: true },
-          paragraph: { spacing: { before: 200, after: 80 } },
+          paragraph: { spacing: { before: 200, after: 80 }, ...heading2Numbering },
         },
         heading3: {
           run: { font: s.headingFamily, size: s.h3Size, color: s.headingColor, bold: true },
-          paragraph: { spacing: { before: 160, after: 60 } },
+          paragraph: { spacing: { before: 160, after: 60 }, ...heading3Numbering },
         },
         heading4: {
           run: { font: s.headingFamily, size: s.h4Size, color: s.headingColor, bold: true },
-          paragraph: { spacing: { before: 120, after: 40 } },
+          paragraph: { spacing: { before: 120, after: 40 }, ...heading4Numbering },
         },
       },
     },
@@ -267,7 +331,7 @@ export async function exportToDocx(
             children: [buildFooter(s)],
           }),
         },
-        children,
+        children: sectionChildren,
       },
     ],
   });

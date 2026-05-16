@@ -35,8 +35,20 @@ export interface DataSourceDef {
   sheets: SheetDef[];
 }
 
-export interface TemplateDef {
+export interface TemplateOption {
+  /** Human-readable name shown in the template chooser. */
+  label: string;
+  /** Filename within the bundled `templates/` directory (e.g. `report_template.md`). */
   file: string;
+}
+
+export interface TemplateDef {
+  /**
+   * Choices presented in Step 2. Each entry references a Markdown file
+   * under the `templates/` directory bundled at build time. Hard-fails on
+   * startup if any referenced file isn't present in the bundle.
+   */
+  files: TemplateOption[];
 }
 
 export interface ExportConfig {
@@ -136,6 +148,20 @@ export interface ExportConfig {
     /** Default cell padding in twips (~80 twips ≈ 1.5 mm). */
     cellPadding?: number;
   };
+
+  /**
+   * Number all headings using a multilevel decimal scheme (1., 1.1., 1.1.1., …).
+   * Implemented via a docx multilevel numbering config bound to each heading
+   * style. Disabled by default.
+   */
+  sectionNumbering?: boolean;
+
+  /**
+   * Insert a Word table-of-contents field at the start of the document.
+   * Word will prompt to "update fields" the first time the document is
+   * opened — the TOC entries materialise then. Disabled by default.
+   */
+  toc?: boolean;
 
   /**
    * Styling for `::: {.callout-note} … :::` blocks (used for definition
