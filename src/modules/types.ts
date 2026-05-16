@@ -15,6 +15,15 @@ export interface ParameterDef {
   type: ParameterType;
   default?: string | number | boolean;
   options?: string[];
+  /**
+   * Dotted path into the resolved AppConfig (e.g. `export.font.size`).
+   * When set, the form prefills from the value at that path and the user-
+   * entered value overrides the preset at runtime. Bound entries do not
+   * carry their own `default:` — the bound leaf is the single source of
+   * truth. Omit `bind` for standalone parameters (template variables that
+   * don't map to a config setting, e.g. `title`, `office`).
+   */
+  bind?: string;
 }
 
 export interface SheetDef {
@@ -152,6 +161,11 @@ export interface CalloutBoxConfig {
 
 /** Global chart rendering defaults applied to every chart. */
 export interface ChartDefaults {
+  /**
+   * Palette ID used by every chart (e.g. `okabe-ito`). Resolved at render
+   * time via the palettes module. Overridable via the `palette` parameter.
+   */
+  palette?: string;
   /** Disable animation — recommended for report generation. */
   animation?: boolean;
   /** width:height ratio (default 2). */

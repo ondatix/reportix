@@ -17,6 +17,7 @@ export function parseConfig(yamlString: string): AppConfig {
         type: (v.type as ParameterDef["type"]) ?? "text",
         default: v.default as ParameterDef["default"],
         options: v.options as string[] | undefined,
+        bind: v.bind as string | undefined,
       };
     }
   }
@@ -172,6 +173,7 @@ export function parseConfig(yamlString: string): AppConfig {
     const barRaw = elemRaw?.bar as Record<string, unknown> | undefined;
 
     charts = {
+      palette: c.palette as string | undefined,
       animation: c.animation as boolean | undefined,
       aspectRatio: c.aspect_ratio as number | undefined,
 

@@ -31,7 +31,7 @@ h1 {
 .step {
   margin: 1.5rem 0;
   padding: 1rem;
-  border: 1px solid var(--purple-light);
+  border: 1px solid var(--purple-medium);
   border-radius: 6px;
   background: var(--white);
 }
@@ -67,14 +67,14 @@ input[type="file"] {
 .parameter-field select {
   width: 100%;
   padding: 0.4rem;
-  border: 1px solid var(--purple-light);
+  border: 1px solid var(--purple-medium);
   border-radius: 4px;
   font-size: 1rem;
 }
 
 /* Palette parameter — illustrated radio group */
 .palette-field {
-  border: 1px solid var(--purple-light);
+  border: 1px solid var(--purple-medium);
   border-radius: 4px;
   padding: 0.5rem 0.75rem 0.75rem;
   margin: 0;
@@ -203,7 +203,7 @@ button {
   margin-top: 1rem;
   padding: 0.6rem 1.2rem;
   background: var(--seafoam-full);
-  color: var(--white);
+  color: var(--deep-violet);
   border: none;
   border-radius: 4px;
   font-size: 1rem;
@@ -211,13 +211,13 @@ button {
 }
 
 button:hover {
-  background: var(--deep-violet);
+  background: var(--sunshine-full);
 }
 
 /* Report preview */
 .report-preview {
   padding: 1rem;
-  border: 1px solid var(--purple-light);
+  border: 1px solid var(--purple-medium);
   border-radius: 6px;
   background: var(--white);
 }

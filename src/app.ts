@@ -7,6 +7,7 @@ import { loadDataSources } from "./modules/data-loader";
 import {
   buildParameterForm,
   collectParameterValues,
+  applyParameterOverrides,
 } from "./modules/parameters";
 import { parseTemplate } from "./modules/template";
 import { renderBlocks } from "./modules/renderer";
@@ -108,10 +109,10 @@ export function initApp(root: HTMLElement): void {
       root.querySelector<HTMLElement>("#params-container")!;
     stepParams.hidden = false;
 
-    const form = buildParameterForm(config.parameters, paramsContainer);
+    const form = buildParameterForm(config.parameters, paramsContainer, config);
     form.addEventListener("submit", (e) => {
       e.preventDefault();
-      const paramValues = collectParameterValues(form, config.parameters);
+      const paramValues = collectParameterValues(form, config.parameters, config);
       generatePreview(templateText, paramValues);
     });
   }
@@ -127,28 +128,35 @@ export function initApp(root: HTMLElement): void {
     previewContainer.innerHTML = "";
     stepPreview.hidden = false;
 
+    // Merge user-entered values into the config tree at each parameter's
+    // `bind:` path. Standalone params (no bind) remain in paramValues for
+    // the template renderer to consume.
+    const resolved = applyParameterOverrides(config, paramValues);
+
     const blocks = parseTemplate(tplText);
-    const palette = getPalette(paramValues.palette as string | undefined);
+    const palette = getPalette(resolved.charts?.palette);
     const font = getFont(paramValues.font as string | undefined);
 
     // Apply font to preview (covers tables and inline text via inheritance).
     previewContainer.style.fontFamily = font.cssStack;
 
-    // Override chart and export font with the user's selection.
+    // The `font` parameter is curated (CSS stack + DOCX name + display name)
+    // and not a 1:1 string override, so it bypasses the bind mechanism: inject
+    // the resolved docxName into the chart/export font fields here.
     const chartDefaults = {
-      ...(config.charts ?? {}),
-      font: { ...(config.charts?.font ?? {}), family: font.docxName },
+      ...(resolved.charts ?? {}),
+      font: { ...(resolved.charts?.font ?? {}), family: font.docxName },
     };
     const exportConfig = {
-      ...(config.export ?? {}),
+      ...(resolved.export ?? {}),
       font: {
-        ...(config.export?.font ?? {}),
+        ...(resolved.export?.font ?? {}),
         family: font.docxName,
         headingFamily: font.docxName,
       },
     };
 
-    renderBlocks(blocks, dataStore, paramValues, previewContainer, chartDefaults, palette, config.dataProtection);
+    renderBlocks(blocks, dataStore, paramValues, previewContainer, chartDefaults, palette, resolved.dataProtection);
 
     // Export button
     const exportBtn = root.querySelector<HTMLButtonElement>("#export-btn")!;

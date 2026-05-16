@@ -1,4 +1,5 @@
 parameters:
+  # — Standalone parameters (template variables, not bound to config leaves) —
   title:
     label: "Title"
     type: text
@@ -7,17 +8,9 @@ parameters:
     label: "Company"
     type: text
     default: "Clever Analytics"
-  palette:
-    label: "Chart color palette"
-    type: select
-    default: okabe-ito
-    options:
-      - okabe-ito   # Okabe & Ito / Wong (2011) — 8-colour standard
-      - tol-bright  # Paul Tol — Bright (7)
-      - tol-muted   # Paul Tol — Muted (9)
-      - ibm         # IBM Design Language colourblind-safe (5)
-      - grayscale   # Print-safe maximum-contrast fallback
   font:
+    # Curated theme: maps to CSS stack + DOCX family + display name via the
+    # fonts module; not a 1:1 string override, so it stays standalone.
     label: "Font"
     type: select
     default: arial
@@ -26,6 +19,67 @@ parameters:
       - tahoma    # Compact accessible sans
       - arial     # Universal sans
       - georgia   # Accessible serif option
+
+  # — Bound overrides — `bind:` points at a config leaf. The form prefills
+  #   from that leaf; the user-entered value overrides the preset at runtime.
+  #   Bound entries carry no `default:` (the bound leaf is the source of truth).
+  palette:
+    label: "Chart color palette"
+    type: select
+    bind: charts.palette
+    options:
+      - okabe-ito   # Okabe & Ito / Wong (2011) — 8-colour standard
+      - tol-bright  # Paul Tol — Bright (7)
+      - tol-muted   # Paul Tol — Muted (9)
+      - ibm         # IBM Design Language colourblind-safe (5)
+      - grayscale   # Print-safe maximum-contrast fallback
+  font_size:
+    label: "Body font size (pt)"
+    type: number
+    bind: export.font.size
+  heading_color:
+    label: "Heading color (hex without #)"
+    type: text
+    bind: export.headings.color
+  page_orientation:
+    label: "Page orientation"
+    type: select
+    bind: export.page.orientation
+    options:
+      - portrait
+      - landscape
+  header_text:
+    label: "Header text"
+    type: text
+    bind: export.header.text
+  footer_text:
+    label: "Footer text"
+    type: text
+    bind: export.footer.text
+  page_numbers:
+    label: "Show page numbers"
+    type: boolean
+    bind: export.page_numbers.show
+  filename:
+    label: "Output filename"
+    type: text
+    bind: export.filename
+  locale:
+    label: "Locale"
+    type: text
+    bind: export.locale
+  doc_subject:
+    label: "Document subject"
+    type: text
+    bind: export.document.subject
+  doc_creator:
+    label: "Document creator"
+    type: text
+    bind: export.document.creator
+  smallest_group:
+    label: "Smallest group threshold"
+    type: number
+    bind: data_protection.smallest_group
 
 data:
   Dataset:
@@ -43,67 +97,67 @@ template:
   file: report_template.md
 
 data_protection:
-  smallest_group: 5  # aggregated values < this are masked as "<5" in tables and clamped in charts
+  smallest_group: 5  # bound by parameters.smallest_group
 
 export:
-  filename: report.docx
-  locale: de-DE
+  filename: report.docx        # bound by parameters.filename
+  locale: de-DE                # bound by parameters.locale
 
   document:
     title: Report
-    subject: ""
-    creator: ""
+    subject: ""                # bound by parameters.doc_subject
+    creator: ""                # bound by parameters.doc_creator
     description: ""
     keywords: ""
 
   font:
-    family: Arial
-    size: 11        # pt
-    heading_family: Arial
-    color: "1A1A1A"  # hex without #
+    family: Arial              # overridden at runtime by the `font` parameter
+    size: 11                   # bound by parameters.font_size
+    heading_family: Arial      # overridden at runtime by the `font` parameter
+    color: "1A1A1A"
 
   headings:
-    color: "1F3864"  # dark blue; hex without #
-    h1_size: 20      # pt
+    color: "1F3864"            # bound by parameters.heading_color
+    h1_size: 20                # pt
     h2_size: 16
     h3_size: 13
     h4_size: 12
 
   paragraph:
-    alignment: left          # left | center | right | justify
-    spacing_before: 0        # twips
-    spacing_after: 120       # twips (~6 pt)
-    line_spacing: 276        # twips (276 ≈ single at 11 pt)
+    alignment: left            # left | center | right | justify
+    spacing_before: 0          # twips
+    spacing_after: 120         # twips (~6 pt)
+    line_spacing: 276          # twips (276 ≈ single at 11 pt)
 
   page:
-    orientation: portrait    # portrait | landscape
+    orientation: portrait      # bound by parameters.page_orientation
     # A4 in twips (1 mm ≈ 56.7 twips); remove to use orientation defaults
     width: 11906
     height: 16838
     margin:
-      top: 1418      # ~25 mm
+      top: 1418                # ~25 mm
       right: 1418
       bottom: 1418
       left: 1418
-      header: 709    # ~12 mm from top edge to header
-      footer: 709    # ~12 mm from bottom edge to footer
+      header: 709              # ~12 mm from top edge to header
+      footer: 709              # ~12 mm from bottom edge to footer
 
   page_numbers:
-    show: true
+    show: true                 # bound by parameters.page_numbers
     start: 1
-    format: decimal  # decimal | upperRoman | lowerRoman | upperLetter | lowerLetter
+    format: decimal            # decimal | upperRoman | lowerRoman | upperLetter | lowerLetter
 
   header:
-    text: ""         # static text shown in the page header (left-aligned)
+    text: ""                   # bound by parameters.header_text
 
   footer:
-    text: ""         # static text shown left of the page numbers
+    text: ""                   # bound by parameters.footer_text
 
   table:
-    border_style: single    # single | double | dashed | dotted | thick | none
-    border_color: "AAAAAA"  # hex without #
-    border_size: 4          # eighths of a point
-    cell_padding: 80        # twips (~1.5 mm)
+    border_style: single       # single | double | dashed | dotted | thick | none
+    border_color: "AAAAAA"     # hex without #
+    border_size: 4             # eighths of a point
+    cell_padding: 80           # twips (~1.5 mm)
 
   # Callout boxes — applies to DOCX export.
   # definition_box styles `::: {.callout-note} … :::` (used for Definitionen).
@@ -111,30 +165,31 @@ export:
   # `color`      = accent (left border + title), 6-digit hex without #
   # `background` = true → pale tint derived from `color`; false → no fill
   definition_box:
-    color: "1F77B4"      # blue accent
+    color: "1F77B4"            # blue accent
     background: true
   summary_box:
-    color: "2CA02C"      # green accent
+    color: "2CA02C"            # green accent
     background: true
 
 charts:
-  animation: false         # disable animation (recommended for reports)
-  aspect_ratio: 2.0        # width:height ratio of every chart
+  palette: okabe-ito           # bound by parameters.palette
+  animation: false             # disable animation (recommended for reports)
+  aspect_ratio: 2.0            # width:height ratio of every chart
 
   font:
-    family: Arial
-    size: 12               # pt
-    color: "555555"        # hex without #; used for tick labels and legend
+    family: Arial              # overridden at runtime by the `font` parameter
+    size: 12                   # pt
+    color: "555555"            # hex without #; used for tick labels and legend
 
   title:
-    position: top          # top | bottom | left | right
-    align: center          # start | center | end
-    color: "1A1A1A"        # hex without #
+    position: top              # top | bottom | left | right
+    align: center              # start | center | end
+    color: "1A1A1A"            # hex without #
 
   legend:
     display: true
-    position: top          # top | bottom | left | right
-    align: center          # start | center | end
+    position: top              # top | bottom | left | right
+    align: center              # start | center | end
 
   tooltip:
     enabled: true
@@ -144,17 +199,17 @@ charts:
       begin_at_zero: false
       grid_display: true
       grid_color: "rgba(0,0,0,0.08)"
-      tick_color: "888888"  # hex without #
+      tick_color: "888888"     # hex without #
     y:
       begin_at_zero: true
       grid_display: true
       grid_color: "rgba(0,0,0,0.08)"
-      tick_color: "888888"  # hex without #
+      tick_color: "888888"     # hex without #
 
   elements:
     line:
-      tension: 0.0          # 0 = straight lines, ~0.4 = smooth curves
-      point_radius: 3       # point marker size in px
+      tension: 0.0             # 0 = straight lines, ~0.4 = smooth curves
+      point_radius: 3          # point marker size in px
     bar:
-      border_radius: 0      # rounded bar corners in px
-      bar_percentage: 0.9   # fraction of category slot used by bars (0–1)
+      border_radius: 0         # rounded bar corners in px
+      bar_percentage: 0.9      # fraction of category slot used by bars (0–1)

@@ -1,4 +1,6 @@
-# reportix (by ondatix)
+<img src="img/ondatix_Logo_dunkel.png" alt="Reportix Logo" class="logo" height="80" align="right"/><br><br>
+
+# reportix
 
 Fully client-side web app for automated report generation. Upload an Excel workbook and a Markdown template, fill in a parameter form, and export a styled `.docx` — all in the browser, no server, no network at runtime.
 
@@ -62,7 +64,7 @@ No step talks to a server. The XLSX is read in-browser via SheetJS; the DOCX is 
 
 The config is the entry point — a developer edits it, the end user never touches it. It declares:
 
-- **`parameters`** — form fields shown before report generation (`text`, `number`, `date`, `select`, `multiselect`, `boolean`). The names `palette` and `font` get special UI widgets (illustrated radios).
+- **`parameters`** — form fields shown before report generation (`text`, `number`, `date`, `select`, `multiselect`, `boolean`). Each entry is either **standalone** (template variable, prefilled from `default:`) or **bound** to a config leaf via `bind: <dotted.path>` — bound entries prefill from the path's preset and write the user's value back to that path at runtime, letting most styling and metadata keys be overridden per report. The names `palette` and `font` get special UI widgets (illustrated radios).
 - **`data`** — expected data sources, each with sheet names and required columns. Used to validate the uploaded workbook.
 - **`template.file`** — path to the Markdown template (informational; the user uploads the actual file).
 - **`export`** — DOCX styling: filename, locale, document metadata, fonts, heading sizes/colours, paragraph spacing, page size & margins, page numbers, header/footer text, table borders, **callout box colours and backgrounds** (`definition_box`, `summary_box`).
