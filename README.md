@@ -34,6 +34,7 @@ Many reporting workflows (HR equality reports, internal KPIs, compliance summari
 - Any static host (Netlify, Vercel, Cloudflare Pages, GitHub Pages, S3+CloudFront, nginx, …). The build output in `dist/` is fully static — no runtime, no environment variables, no secrets.
 
 ## Quick Start
+Open a terminal/shell in the repository root to use these commands, when you need them.
 
 ```bash
 npm install         # install dependencies

@@ -1,12 +1,12 @@
 parameters:
   title:
-    label: "Titel"
+    label: "Title"
     type: text
-    default: "Gleichstellungskonzept"
+    default: "Report"
   office:
-    label: "Behörde"
+    label: "Company"
     type: text
-    default: "Staatsministerium für Familie, Arbeit und Soziales"
+    default: "Clever Analytics"
   palette:
     label: "Chart color palette"
     type: select
@@ -28,82 +28,16 @@ parameters:
       - georgia   # Accessible serif option
 
 data:
-  Gleichstellungsdatensatz:
+  Dataset:
     sheets:
-      - sheet: Stichtag
+      - sheet: Sheet 1
         columns:
-          - PersNr
-          - Geschlecht
-          - Entgeltgruppe / Besoldungsgruppe
-          - QE
-          - Einstiegs-QE
-          - Teilzeit / Vollzeit
-          - Arbeitszeitanteil
-          - Führungsebene
-          - Organisationseinheit
-          - Ausbildungsbereich
-          - Führung in Tandem
-          - Führungskraft (aktiv)
-          - Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung
-          - Ab- oder Anwesenheitsart
-          - Befristet / Unbefristet
-      - sheet: Zeitraum_Beurlaubung
+          - Col 1
+          - Col 2
+      - sheet: Sheet 2
         columns:
-          - PersNr
-          - Geschlecht
-          - Entgeltgruppe / Besoldungsgruppe
-          - QE
-          - Arbeitszeitmodell
-          - Führungsebene
-          - Dauer der Elternzeit (Tage)
-      - sheet: Zeitraum_Bewerbung
-        columns:
-          - BewerberID
-          - Geschlecht
-          - Entgeltgruppe / Besoldungsgruppe
-          - QE
-          - Führungsebene
-          - Intern / Extern
-          - Organisationseinheit
-      - sheet: Zeitraum_Einstellung
-        columns:
-          - PersNr
-          - Geschlecht
-          - Entgeltgruppe / Besoldungsgruppe
-          - QE			
-      - sheet: Zeitraum_Fortbildung
-        columns:
-          - PersNr
-          - Geschlecht
-          - Entgeltgruppe / Besoldungsgruppe
-          - QE
-      - sheet: Zeitraum_Qualifikation
-        columns:
-          - PersNr
-          - Geschlecht
-          - Entgeltgruppe / Besoldungsgruppe
-          - QE
-          - Arbeitszeitmodell
-          - Qualifikationsart	
-      - sheet: Zeitraum_Leistungskomponente
-        columns:
-          - PersNr
-          - Geschlecht
-          - Entgeltgruppe / Besoldungsgruppe
-          - QE
-          - Arbeitszeitmodell
-          - Führungsebene
-          - Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB) 
-      - sheet: Zeitraum_Befoerderung
-        columns:
-          - PersNr
-          - Geschlecht
-          - Entgeltgruppe / Besoldungsgruppe
-          - QE
-          - Arbeitszeitmodell
-          - Führungsebene
-          - Maßnahmenantrag
-          - Maßnahmenart
+          - Col A
+          - Col B
 
 template:
   file: report_template.md
