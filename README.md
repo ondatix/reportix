@@ -105,8 +105,6 @@ aggregation:
 
 Parameters from the form are interpolated as `{{paramName}}` anywhere in the text.
 
-See [CLAUDE.md](CLAUDE.md) for the chart/table YAML schema, the full list of supported types, aggregation operations, and the callout syntax.
-
 ## Modules
 
 Each utility is a self-contained module under `src/modules/` with a clean public API, so it can be extracted and reused independently. There is no hard coupling between modules — they're orchestrated by `src/app.ts`.
