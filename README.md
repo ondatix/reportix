@@ -71,8 +71,6 @@ The config is the entry point — a developer edits it, the end user never touch
 - **`charts`** — Chart.js defaults: animation, aspect ratio, fonts, title/legend/tooltip placement, axis grid colours, line/bar element styling.
 - **`data_protection.smallest_group`** — privacy threshold for aggregated counts/shares (default 5).
 
-See [CLAUDE.md](CLAUDE.md) for the full schema with annotated examples.
-
 ## Template Format
 
 Templates are plain Markdown. Charts and tables are fenced code blocks with a typed language tag and a YAML body.
