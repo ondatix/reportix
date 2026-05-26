@@ -1,5 +1,13 @@
-# Preface {.unnumbered}
+# Wilkommen {.unnumbered}
 
-This is a Quarto book.
+Dies ist das Nutzerhandbuch für die Erstellung von Gleichstellungskonzepten in Bayern mit Reportix.
 
-To learn more about Quarto books visit <https://quarto.org/docs/books>.
+::: {.grid .gap-3 .pb-3 .pt-4}
+::: {.g-col-12 .g-col-sm-4}
+[Qick Start](quick-start.qmd){#btn-guide .btn-action .btn-secondary .btn .btn-lg .w-100 role="button"}
+:::
+::: {.g-col-12 .g-col-sm-4 .mb-2}
+[Handbuch](datenvorbereitung.qmd){#btn-guide .btn-action .btn-secondary .btn .btn-lg .w-100 role="button"}
+::: 
+::: 
+:::

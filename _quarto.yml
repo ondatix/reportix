@@ -3,13 +3,20 @@ project:
 
 book:
   title: "Reportix Handbuch"
-  author: "Norah Jones"
-  date: "26.5.2026"
+  date: last-modified
   chapters:
     - index.qmd
-    - intro.qmd
-    - summary.qmd
-    - references.qmd
+    - quick-start.qmd
+    - part: "Handbuch"
+      chapters: 
+        - datenvorbereitung.qmd
+    - referenzen.qmd
+  favicon: images/ondatix_Bildmarke_dunkler_Hintergrund_PNG.png
+  navbar: 
+    background: white
+    logo: images/ondatix_Logo_V1_heller_Hintergrund_PNG.png
+
+lang: de
 
 bibliography: references.bib
 
