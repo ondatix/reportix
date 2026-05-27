@@ -1,0 +1,49 @@
+# Musterkonzept
+
+Das Musterkonzept bildet den gemeinsamen Rahmen aller Gleichstellungskonzepte in Bayern. 
+Es gibt eine Struktur des Konzeptes vor, die mit allen Stellen abgestimmt ist,  und stellt vorformulierte Inhalte für zentrale Bausteine bereit, die in jedem Gleichstellungskonzept enthalten sein müssen.
+Es kann unabhängig von Reportix genutzt werden.
+
+## Das Musterkonzept als Baukasten {#das-musterkonzept-als-baukasten}
+
+Das Musterkonzept ist nicht als einengendes Korsett gedacht, sondern soll die Erstellung vereinfachen und den wichtigen Raum schaffen, weitere Inhalte hinzuzufügen.
+
+
+::: {.grid}
+
+::: {.g-col-4}
+::: {.callout-note icon=false}
+## Pflichtinhalte
+
+Für alle verpflichtende Inhalte.
+:::
+:::
+
+::: {.g-col-4}
+::: {.callout-tip icon=false}
+## Optionale Inhalte
+
+Empfohlene aber nicht verpflichtende Inhalte.
+:::
+:::
+
+::: {.g-col-4}
+::: {.callout-important icon=false}
+## Zusätzliche Inhalte
+
+Weitere - möglicherweise dienststellenspezifische - Inhalte sind erwünscht.
+:::
+:::
+
+:::
+
+
+Welche Inhalte in das jeweilige Gleichstellungskonzept aufgenommen werden, wird von der/dem/den zuständigen Gleichstellungsbeauftragten der jeweiligen Dienststelle bestimmt.
+
+**Detailgrad bei optionalen Inhalten:**  
+Optionale Inhalte können so einfach oder detailliert gehandhabt werden, wie Sie das möchten. Zum Beispiel können Sie bei Bewerbungen lediglich die Anzahl an Männern und Frauen berichten, die sich im Zeitraum beworben haben. Sie können aber auch nach Führungsebene, QE, Fachbereich, interne/externe Bewerbungen, etc. aufschlüsseln, um genauere Informationen zu erhalten. Was für Ihre Dienststelle Sinn macht/aussagekräftig ist, bestimmen bei den optionalen Inhalten Sie.
+
+
+## Wege der Nutzung
+
+...

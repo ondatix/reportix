@@ -1,3 +1,57 @@
 # Datenvorbereitung
 
-TODO
+Für die Datenvorbereitung ist die klare Definition der einzelnen Merkmale der wichtigste Faktor. Diese Definitionen finden Sie im **Musterkonzept**. 
+
+Zusätzlich finden Sie die relevanten Merkmale und deren Zuordnung in ausgewählten Personalverwaltungssystemen in der **Merkmalstabelle**.  
+Bei **Zeitraumdaten** ist das stichtagsbezogene Vorjahr verlangt (soweit nicht anderweitig ausgewiesen). Ist z.B. der Stichtag der 30.06.2026, so wird bei Zeitraumdaten der 01.01.2025-31.12.2025 betrachtet. Ausnahmen sind in der Merkmalstabelle markiert: z.B.: Einstellungen werden für den gesamten Berichtszeitraum (letzter Stichtag (ausgeschlossen) bis aktueller Stichtag (eingeschlossen), i.d.R. 5 Jahre) ausgewiesen. 
+
+## Standards
+Die Daten für die Nutzung des Analysetools müssen klaren Standards entsprechen. Hier gibt es zwei Varianten. Variante 1 ist dabei bevorzugt.
+
+**Variante 1 \- eine Zeile pro Person / Ereignis**:  
+Bei Daten aus dem Personalverwaltungssystem (VIVA, PWS, etc.) können Datensätze exportiert werden, in der jede Zeile eine Person (Stichtagsdaten) oder Ereignis (Zeitraumdaten) repräsentiert und jede Spalte ein Merkmal (z.B. Geschlecht, Arbeitszeitanteil) darstellt. Jeder Datensatz sollte die Personalnummer als eine weitere Spalte enthalten, damit ggf. Datensätze zusammengefügt werden können. Die Personalnummer selbst wird nie in Grafiken oder Tabellen auftauchen.
+
+![][image3]  
+Beispiel Stichtagsdaten:
+
+| Personalnummer | Geschlecht | Arbeitszeitanteil | … |
+| :---- | :---- | :---- | :---- |
+| 1001 | Frau | 1,00 | … |
+| 1011 | Mann | 0,80 | … |
+| 1012 | Frau | 0,75 | … |
+| … | … | … | … |
+
+Beispiel Zeitraumsdaten:
+
+| Personalnummer | Geschlecht | Datum der Beförderung | … |
+| :---- | :---- | :---- | :---- |
+| 1001 | Frau | 01.01.2025 | … |
+| 1001 | Frau | 01.11.2025 | … |
+| 1011 | Mann | 01.04.2025 | … |
+| 1012 | Frau | 01.10.2025 | … |
+| … | … | … | … |
+
+**Variante 2 \- Kreuztabellen**:  
+Kreuztabellen, die nach Geschlecht und einem weiteren Merkmal aufschlüsseln. Zeigen das Geschlecht in den Spalten und das Merkmal in den Zeilen.
+
+Beispiel:
+
+| Arbeitszeitmodell | Frauen | Männer |
+| :---- | :---- | :---- |
+| Vollzeit | 1000 | 1200 |
+| Teilzeit | 980 | 510 |
+
+Weitere Aufgliederung nach mehr als zwei Merkmalen ist ebenso möglich.
+
+Beispiel:
+
+| QE | Arbeitszeitmodell | Frauen | Männer |
+| :---- | :---- | :---- | :---- |
+| 1\. QE | Vollzeit | 100 | 120 |
+| 1\. QE | Teilzeit | 12 | 5 |
+| 2\. QE | Vollzeit | 200 | 290 |
+| 2\. QE | Teilzeit | 90 | 70 |
+| **…** | **…** | … | … |
+
+
+

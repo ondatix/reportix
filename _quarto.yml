@@ -9,8 +9,8 @@ book:
     - quick-start.qmd
     - part: "Handbuch"
       chapters: 
+        - musterkonzept.qmd
         - datenvorbereitung.qmd
-    - referenzen.qmd
   favicon: images/ondatix_Bildmarke_dunkler_Hintergrund_PNG.png
   navbar: 
     background: white
@@ -18,15 +18,12 @@ book:
 
 lang: de
 
-bibliography: references.bib
-
 format:
   html:
     theme:
       - cosmo
-      - brand
-  pdf:
-    documentclass: scrreprt
+      - brand.scss
+    css: styles.scss
 
 
 
