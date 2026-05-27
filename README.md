@@ -21,6 +21,8 @@ Jedes Kapitel im Buch ist ein eigenes `.qmd`-File in diesem Repository.
 Um Texte im Buch zu ändern, editiere das jeweilige `.qmd`-File in einem beliebigen Editor (z.B. RStudio oder VS Code). 
 Die erste Seite im Buch ist `index.qmd`.
 
+Editiere niemals Text im Ordner `_book/`, da diese überschrieben werden, wenn das Buch neu gerendered werden (siehe unten).
+
 ### Struktur ändern
 Um die Struktur des Buches zu ändern, editiere `_quarto.yml`. 
 Hier kannst du z.B. Kapitel vertauschen oder ein anderes Logo festlegen.
@@ -38,6 +40,7 @@ Um die finalen Ausgabeformate (HTML, PDF oder ePub) ohne den Vorschau-Server zu 
 quarto render
 ```
 Die fertig kompilierten Dateien liegen anschließend im Ordner `_book/`.
+Dieser Ordner is nicht unter Versionskontrolle, da er ohnehin automatisch generiert wird.
 Mehr Hilfe zum rendern [hier](https://quarto.org/docs/cli/render.html#examples).
 
 ## Mitwirken (Contributing)

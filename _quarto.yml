@@ -11,6 +11,12 @@ book:
       chapters: 
         - musterkonzept.qmd
         - datenvorbereitung.qmd
+    - noch-fragen.qmd
+    - ueber-reportix.qmd
+  page-footer:
+    center: 
+      - text: "Impressum"
+        href: impressum.qmd
   favicon: images/ondatix_Bildmarke_dunkler_Hintergrund_PNG.png
   navbar: 
     background: white
@@ -21,9 +27,9 @@ lang: de
 format:
   html:
     theme:
-      - cosmo
-      - brand.scss
-    css: styles.scss
+      - cosmo       # 1. Basis Bootstrap theme
+      - brand.scss  # 2. Eigene Farben für feste Bestandteile
+    css: styles.scss  # 3. Font
 
 
 

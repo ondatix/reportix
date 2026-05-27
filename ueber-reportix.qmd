@@ -1,0 +1,6 @@
+# Über reportix {.unnumbered}
+
+**reportix** wird von der ondatix Datenwerkstatt GmbH entwickelt.
+
+[![](images/ondatix_Logo_V1_heller_Hintergrund_PNG.png){fig-alt="ondatix Logo" width=30%}](https://ondatix.org)
+
