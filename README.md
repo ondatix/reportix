@@ -35,10 +35,17 @@ quarto preview
 Dies rendert das Buch und öffnet eine Live-Vorschau in deinem Webbrowser.
 
 ### Rendern (Erstellen)
-Um die finalen Ausgabeformate (HTML, PDF oder ePub) ohne den Vorschau-Server zu erstellen, nutze diesen Befehl:
+Um das finale Ausgabeformat (oder Formate) ohne den Vorschau-Server zu erstellen, nutze diesen Befehl:
 ```bash
 quarto render
 ```
+Dies rendert in alle Formate, die unter `format:` im `_quarto.qml` gelistet sind.
+
+Du kannst auch nur ein Format generieren (z.B. nur PDF):
+```bash
+quarto render --to pdf
+```
+
 Die fertig kompilierten Dateien liegen anschließend im Ordner `_book/`.
 Dieser Ordner is nicht unter Versionskontrolle, da er ohnehin automatisch generiert wird.
 Mehr Hilfe zum rendern [hier](https://quarto.org/docs/cli/render.html#examples).
