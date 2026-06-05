@@ -26,6 +26,7 @@ lang: de
 
 format:
   html:
+    from: markdown+smart
     theme:
       - cosmo       # 1. Basis Bootstrap theme
       - brand.scss  # 2. Eigene Farben für feste Bestandteile
