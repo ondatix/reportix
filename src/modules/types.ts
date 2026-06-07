@@ -15,6 +15,15 @@ export interface ParameterDef {
   type: ParameterType;
   default?: string | number | boolean;
   options?: string[];
+  /**
+   * Dotted path into the resolved AppConfig (e.g. `export.font.size`).
+   * When set, the form prefills from the value at that path and the user-
+   * entered value overrides the preset at runtime. Bound entries do not
+   * carry their own `default:` — the bound leaf is the single source of
+   * truth. Omit `bind` for standalone parameters (template variables that
+   * don't map to a config setting, e.g. `title`, `office`).
+   */
+  bind?: string;
 }
 
 export interface SheetDef {
@@ -26,8 +35,20 @@ export interface DataSourceDef {
   sheets: SheetDef[];
 }
 
-export interface TemplateDef {
+export interface TemplateOption {
+  /** Human-readable name shown in the template chooser. */
+  label: string;
+  /** Filename within the bundled `templates/` directory (e.g. `report_template.md`). */
   file: string;
+}
+
+export interface TemplateDef {
+  /**
+   * Choices presented in Step 2. Each entry references a Markdown file
+   * under the `templates/` directory bundled at build time. Hard-fails on
+   * startup if any referenced file isn't present in the bundle.
+   */
+  files: TemplateOption[];
 }
 
 export interface ExportConfig {
@@ -129,6 +150,20 @@ export interface ExportConfig {
   };
 
   /**
+   * Number all headings using a multilevel decimal scheme (1., 1.1., 1.1.1., …).
+   * Implemented via a docx multilevel numbering config bound to each heading
+   * style. Disabled by default.
+   */
+  sectionNumbering?: boolean;
+
+  /**
+   * Insert a Word table-of-contents field at the start of the document.
+   * Word will prompt to "update fields" the first time the document is
+   * opened — the TOC entries materialise then. Disabled by default.
+   */
+  toc?: boolean;
+
+  /**
    * Styling for `::: {.callout-note} … :::` blocks (used for definition
    * boxes in the stmas template). The accent colour drives the left
    * border and title text; `background: true` adds a pale tint derived
@@ -152,6 +187,11 @@ export interface CalloutBoxConfig {
 
 /** Global chart rendering defaults applied to every chart. */
 export interface ChartDefaults {
+  /**
+   * Palette ID used by every chart (e.g. `okabe-ito`). Resolved at render
+   * time via the palettes module. Overridable via the `palette` parameter.
+   */
+  palette?: string;
   /** Disable animation — recommended for report generation. */
   animation?: boolean;
   /** width:height ratio (default 2). */

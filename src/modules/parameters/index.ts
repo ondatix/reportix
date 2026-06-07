@@ -1,30 +1,110 @@
 /**
  * Parameters module — generates a form from config parameter definitions
  * and collects user input.
+ *
+ * Each parameter is either:
+ *   • Standalone — a template variable (e.g. `title`, `office`). The form
+ *     default comes from `def.default`. The collected value is consumed
+ *     by the template renderer via `paramValues[key]`.
+ *   • Bound — `def.bind` is a dotted path into the AppConfig (e.g.
+ *     `export.font.size`). The form prefills from the value at that path,
+ *     and `applyParameterOverrides` writes the user-entered value back to
+ *     the same path so downstream modules (exporter, renderers) read the
+ *     overridden value.
+ *
  * Usable independently in other projects.
  */
-import type { ParameterDef, ParameterValues } from "../types";
+import type { AppConfig, ParameterDef, ParameterValues } from "../types";
 import { PALETTES } from "../palettes";
 import { FONTS } from "../fonts";
 
+/**
+ * Resolve the default value to prefill into the form for a single parameter.
+ * Bound parameters read from the config tree at `def.bind`; standalone
+ * parameters fall back to `def.default`.
+ */
+export function resolveParamDefault(
+  def: ParameterDef,
+  config: AppConfig
+): unknown {
+  if (def.bind) return getAtPath(config as unknown as Record<string, unknown>, def.bind);
+  return def.default;
+}
+
+/**
+ * Return a new AppConfig with every bound parameter's user-entered value
+ * written back to its `bind` path. Standalone parameters are not merged
+ * into the config — they remain in `values` for the template renderer.
+ * The input config is not mutated.
+ */
+export function applyParameterOverrides(
+  config: AppConfig,
+  values: ParameterValues
+): AppConfig {
+  const clone = structuredClone(config);
+  for (const [key, def] of Object.entries(config.parameters)) {
+    if (!def.bind) continue;
+    const v = values[key];
+    if (v === undefined) continue;
+    setAtPath(clone as unknown as Record<string, unknown>, def.bind, v);
+  }
+  return clone;
+}
+
+function getAtPath(
+  obj: Record<string, unknown>,
+  path: string
+): unknown {
+  const parts = path.split(".");
+  let cur: unknown = obj;
+  for (const p of parts) {
+    if (cur && typeof cur === "object" && p in (cur as Record<string, unknown>)) {
+      cur = (cur as Record<string, unknown>)[p];
+    } else {
+      return undefined;
+    }
+  }
+  return cur;
+}
+
+function setAtPath(
+  obj: Record<string, unknown>,
+  path: string,
+  value: unknown
+): void {
+  const parts = path.split(".");
+  let cur: Record<string, unknown> = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    const p = parts[i];
+    if (typeof cur[p] !== "object" || cur[p] === null) {
+      cur[p] = {};
+    }
+    cur = cur[p] as Record<string, unknown>;
+  }
+  cur[parts[parts.length - 1]] = value;
+}
+
 export function buildParameterForm(
   parameters: Record<string, ParameterDef>,
-  container: HTMLElement
+  container: HTMLElement,
+  config: AppConfig
 ): HTMLFormElement {
   const form = document.createElement("form");
   form.className = "parameter-form";
 
   for (const [key, def] of Object.entries(parameters)) {
+    const initial = resolveParamDefault(def, config);
+
     // Convention: a select named "palette" renders as an illustrated radio group
     // showing each palette's swatches inline.
     if (key === "palette" && def.type === "select") {
-      form.appendChild(buildPaletteField(key, def));
+      form.appendChild(buildPaletteField(key, def, initial));
       continue;
     }
 
     // Convention: a select named "font" renders each option in its own typeface.
     if (key === "font" && def.type === "select") {
-      form.appendChild(buildFontField(key, def));
+      form.appendChild(buildFontField(key, def, initial));
       continue;
     }
 
@@ -47,7 +127,7 @@ export function buildParameterForm(
           const option = document.createElement("option");
           option.value = opt;
           option.textContent = opt;
-          if (def.default === opt) option.selected = true;
+          if (initial === opt) option.selected = true;
           sel.appendChild(option);
         }
         input = sel;
@@ -59,8 +139,8 @@ export function buildParameterForm(
         sel.id = `param-${key}`;
         sel.name = key;
         sel.multiple = true;
-        const defaults: string[] = Array.isArray(def.default)
-          ? (def.default as string[])
+        const defaults: string[] = Array.isArray(initial)
+          ? (initial as string[])
           : [];
         for (const opt of def.options ?? []) {
           const option = document.createElement("option");
@@ -78,7 +158,7 @@ export function buildParameterForm(
         cb.type = "checkbox";
         cb.id = `param-${key}`;
         cb.name = key;
-        cb.checked = Boolean(def.default);
+        cb.checked = Boolean(initial);
         input = cb;
         break;
       }
@@ -88,7 +168,7 @@ export function buildParameterForm(
         inp.type = "number";
         inp.id = `param-${key}`;
         inp.name = key;
-        if (def.default !== undefined) inp.value = String(def.default);
+        if (initial !== undefined && initial !== null) inp.value = String(initial);
         input = inp;
         break;
       }
@@ -98,7 +178,7 @@ export function buildParameterForm(
         inp.type = "date";
         inp.id = `param-${key}`;
         inp.name = key;
-        if (def.default !== undefined) inp.value = String(def.default);
+        if (initial !== undefined && initial !== null) inp.value = String(initial);
         input = inp;
         break;
       }
@@ -109,7 +189,7 @@ export function buildParameterForm(
         inp.type = "text";
         inp.id = `param-${key}`;
         inp.name = key;
-        if (def.default !== undefined) inp.value = String(def.default);
+        if (initial !== undefined && initial !== null) inp.value = String(initial);
         input = inp;
         break;
       }
@@ -133,7 +213,11 @@ export function buildParameterForm(
  * the palette's name and a horizontal strip of its actual colour swatches.
  * Falls back gracefully for any option ID that has no matching palette.
  */
-function buildPaletteField(key: string, def: ParameterDef): HTMLElement {
+function buildPaletteField(
+  key: string,
+  def: ParameterDef,
+  initial: unknown
+): HTMLElement {
   const fieldset = document.createElement("fieldset");
   fieldset.className = "parameter-field palette-field";
 
@@ -141,7 +225,7 @@ function buildPaletteField(key: string, def: ParameterDef): HTMLElement {
   legend.textContent = def.label;
   fieldset.appendChild(legend);
 
-  const defaultId = typeof def.default === "string" ? def.default : undefined;
+  const defaultId = typeof initial === "string" ? initial : undefined;
 
   for (const opt of def.options ?? []) {
     const optionId = `param-${key}-${opt}`;
@@ -184,7 +268,11 @@ function buildPaletteField(key: string, def: ParameterDef): HTMLElement {
  * Render a font parameter as a fieldset of radio buttons, each label rendered
  * in the actual typeface so users can compare legibility before choosing.
  */
-function buildFontField(key: string, def: ParameterDef): HTMLElement {
+function buildFontField(
+  key: string,
+  def: ParameterDef,
+  initial: unknown
+): HTMLElement {
   const fieldset = document.createElement("fieldset");
   fieldset.className = "parameter-field font-field";
 
@@ -192,7 +280,7 @@ function buildFontField(key: string, def: ParameterDef): HTMLElement {
   legend.textContent = def.label;
   fieldset.appendChild(legend);
 
-  const defaultId = typeof def.default === "string" ? def.default : undefined;
+  const defaultId = typeof initial === "string" ? initial : undefined;
 
   for (const opt of def.options ?? []) {
     const optionId = `param-${key}-${opt}`;
@@ -223,19 +311,22 @@ function buildFontField(key: string, def: ParameterDef): HTMLElement {
 
 export function collectParameterValues(
   form: HTMLFormElement,
-  parameters: Record<string, ParameterDef>
+  parameters: Record<string, ParameterDef>,
+  config: AppConfig
 ): ParameterValues {
   const formData = new FormData(form);
   const values: ParameterValues = {};
 
   for (const [key, def] of Object.entries(parameters)) {
+    const fallback = resolveParamDefault(def, config);
     switch (def.type) {
       case "boolean": {
         values[key] = formData.has(key);
         break;
       }
       case "number": {
-        values[key] = Number(formData.get(key) ?? def.default ?? 0);
+        const raw = formData.get(key);
+        values[key] = raw === null || raw === "" ? Number(fallback ?? 0) : Number(raw);
         break;
       }
       case "multiselect": {
@@ -243,7 +334,8 @@ export function collectParameterValues(
         break;
       }
       default: {
-        values[key] = (formData.get(key) as string) ?? String(def.default ?? "");
+        const raw = formData.get(key);
+        values[key] = (raw as string | null) ?? String(fallback ?? "");
         break;
       }
     }

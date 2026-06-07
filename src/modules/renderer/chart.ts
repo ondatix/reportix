@@ -385,6 +385,31 @@ function renderGrouped(
 
 // ── Tooltip helpers ──────────────────────────────────────────────────
 
+/**
+ * Build the `plugins.title` block from a ChartSpec + ChartDefaults.
+ * Returns `{ display: false }` when the spec has no title, so the caller
+ * can splat the result into every option builder without a conditional.
+ * Centralising this keeps title styling consistent across chart types.
+ */
+function buildTitlePlugin(
+  spec: ChartSpec,
+  d?: ChartDefaults
+): NonNullable<NonNullable<ChartOptions["plugins"]>["title"]> {
+  // Comment this out to get chart titles.
+  return { display: false };
+  // if (!spec.title) return { display: false };
+  // const fontColor = d?.font?.color ? `#${d.font.color}` : undefined;
+  // const fontSpec = d?.font ? { family: d.font.family, size: d.font.size } : undefined;
+  // return {
+  //   display: true,
+  //   text: spec.title,
+  //   position: (d?.title?.position ?? "top") as "top" | "bottom" | "left" | "right",
+  //   align: (d?.title?.align ?? "center") as "start" | "center" | "end",
+  //   color: d?.title?.color ? `#${d.title.color}` : fontColor,
+  //   font: fontSpec,
+  // };
+}
+
 /** Build a tooltip label callback that masks privacy-suppressed values as `<{threshold}`. */
 function tooltipLabel(threshold: number, protection: ProtectionMap, abs = false) {
   return (ctx: TooltipItem<"bar" | "line" | "pie" | "doughnut" | "scatter">) => {
@@ -418,16 +443,7 @@ function buildPyramidOptions(
     maintainAspectRatio: true,
 
     plugins: {
-      title: spec.title
-        ? {
-            display: true,
-            text: spec.title,
-            position: (d?.title?.position ?? "top") as "top" | "bottom" | "left" | "right",
-            align: (d?.title?.align ?? "center") as "start" | "center" | "end",
-            color: d?.title?.color ? `#${d.title.color}` : fontColor,
-            font: fontSpec,
-          }
-        : { display: false },
+      title: buildTitlePlugin(spec, d),
 
       legend: {
         display: d?.legend?.display ?? true,
@@ -498,16 +514,7 @@ function buildDistanceOptions(
     maintainAspectRatio: true,
 
     plugins: {
-      title: spec.title
-        ? {
-            display: true,
-            text: spec.title,
-            position: (d?.title?.position ?? "top") as "top" | "bottom" | "left" | "right",
-            align: (d?.title?.align ?? "center") as "start" | "center" | "end",
-            color: d?.title?.color ? `#${d.title.color}` : fontColor,
-            font: fontSpec,
-          }
-        : { display: false },
+      title: buildTitlePlugin(spec, d),
 
       legend: {
         display: d?.legend?.display ?? true,
@@ -575,16 +582,7 @@ function buildOptions(
     maintainAspectRatio: true,
 
     plugins: {
-      title: spec.title
-        ? {
-            display: true,
-            text: spec.title,
-            position: (d?.title?.position ?? "top") as "top" | "bottom" | "left" | "right",
-            align: (d?.title?.align ?? "center") as "start" | "center" | "end",
-            color: d?.title?.color ? `#${d.title.color}` : fontColor,
-            font: fontSpec,
-          }
-        : { display: false },
+      title: buildTitlePlugin(spec, d),
 
       legend: {
         display: d?.legend?.display ?? yFields.length > 1,

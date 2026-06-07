@@ -31,7 +31,7 @@ h1 {
 .step {
   margin: 1.5rem 0;
   padding: 1rem;
-  border: 1px solid var(--purple-light);
+  border: 1px solid var(--purple-medium);
   border-radius: 6px;
   background: var(--white);
 }
@@ -67,14 +67,14 @@ input[type="file"] {
 .parameter-field select {
   width: 100%;
   padding: 0.4rem;
-  border: 1px solid var(--purple-light);
+  border: 1px solid var(--purple-medium);
   border-radius: 4px;
   font-size: 1rem;
 }
 
 /* Palette parameter — illustrated radio group */
 .palette-field {
-  border: 1px solid var(--purple-light);
+  border: 1px solid var(--purple-medium);
   border-radius: 4px;
   padding: 0.5rem 0.75rem 0.75rem;
   margin: 0;
@@ -203,7 +203,7 @@ button {
   margin-top: 1rem;
   padding: 0.6rem 1.2rem;
   background: var(--seafoam-full);
-  color: var(--white);
+  color: var(--deep-violet);
   border: none;
   border-radius: 4px;
   font-size: 1rem;
@@ -211,13 +211,13 @@ button {
 }
 
 button:hover {
-  background: var(--deep-violet);
+  background: var(--sunshine-full);
 }
 
 /* Report preview */
 .report-preview {
   padding: 1rem;
-  border: 1px solid var(--purple-light);
+  border: 1px solid var(--purple-medium);
   border-radius: 6px;
   background: var(--white);
 }
@@ -269,4 +269,34 @@ button:hover {
   color: var(--deep-violet);
   font-style: italic;
   font-weight: 500;
+}
+
+.data-warnings {
+  margin: 0.75rem 0;
+  padding: 0.6rem 0.9rem;
+  background: var(--sunshine-light);
+  border-left: 4px solid var(--sunshine-full);
+  border-radius: 4px;
+  color: var(--deep-violet);
+}
+
+.template-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.35rem 0;
+  cursor: pointer;
+}
+
+.template-option .template-name {
+  font-weight: 500;
+}
+
+.data-warnings ul {
+  margin: 0.4rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.data-warnings li {
+  margin: 0.15rem 0;
 }

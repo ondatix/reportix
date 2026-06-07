@@ -2,217 +2,227 @@
 
 **{{office}}**
 
-Dieses Testtemplate führt jeden vom Renderer unterstützten Block einmal aus: Parametersubstitution im Text, sechs Diagrammtypen (`bar`, `line`, `pie`, `doughnut`, `scatter`, `pyramid`), die `color`-Gruppierung sowie Aggregationen (`count`, `sum`, `mean`, `median`, `min`, `max`, `identity`) in Diagrammen und Tabellen.
+This test template exercises every block type the renderer supports: parameter substitution in text, six chart types (`bar`, `line`, `pie`, `doughnut`, `scatter`, `pyramid`), the `color` grouping pivot, and the full set of aggregation operations (`count`, `sum`, `mean`, `median`, `min`, `max`, `identity`) across both charts and tables.
 
 ---
 
-## 1. Personalbestand zum Stichtag
+## 1. Workforce snapshot
 
-### 1.1 Geschlechterverteilung (doughnut + color grouping)
+### 1.1 Gender distribution (doughnut + color grouping)
 
 ```chart
-data: Stichtag
+data: Headcount
 type: doughnut
-color: Geschlecht
-title: Geschlechterverteilung
-caption: Anteil der Beschäftigten nach Geschlecht (Zeilenzählung)
+color: Gender
+title: Gender distribution
+caption: Share of staff by gender (row count)
 ```
 
-### 1.2 Personalpyramide nach Entgeltgruppe (pyramid)
+### 1.2 Workforce pyramid by pay grade (pyramid)
 
 ```chart
-data: Stichtag
+data: Headcount
 type: pyramid
-y: Entgeltgruppe / Besoldungsgruppe
-color: Geschlecht
-title: Personalpyramide nach Entgeltgruppe und Geschlecht
-caption: Beschäftigte je Entgeltgruppe, links/rechts nach Geschlecht
+y: PayGrade
+color: Gender
+title: Headcount pyramid by pay grade and gender
+caption: Staff per pay grade, split left/right by gender
 ```
 
-### 1.3 Beschäftigte je Qualifikationsebene (bar + color + count)
+### 1.3 Staff per qualification level (bar + color + count)
 
 ```chart
-data: Stichtag
+data: Headcount
 type: bar
-x: QE
-y: PersNr
-color: Geschlecht
-title: Beschäftigte nach Qualifikationsebene und Geschlecht
+x: Level
+y: EmployeeID
+color: Gender
+title: Headcount by qualification level and gender
 aggregation:
   y: count
 ```
 
-### 1.4 Anteile nach Führungsebene (pie + color + count)
+### 1.4 Share of leadership tiers (pie)
 
 ```chart
-data: Stichtag
+data: Headcount
 type: pie
-color: Führungsebene
-title: Verteilung der Führungsebenen
+color: LeadershipTier
+title: Distribution across leadership tiers
 ```
 
-### 1.5 Übersicht je Entgeltgruppe (table mit GROUP BY)
+### 1.5 Summary per pay grade (table with GROUP BY)
 
 ```table
-data: Stichtag
+data: Headcount
 columns:
-  - Entgeltgruppe / Besoldungsgruppe
-  - PersNr
-  - Arbeitszeitanteil
-caption: Anzahl Beschäftigte und durchschnittlicher Arbeitszeitanteil je Entgeltgruppe
+  - PayGrade
+  - EmployeeID
+  - FTE
+caption: Headcount and average FTE per pay grade
 aggregation:
-  Entgeltgruppe / Besoldungsgruppe: identity
-  PersNr: count
-  Arbeitszeitanteil: mean
+  PayGrade: identity
+  EmployeeID: count
+  FTE: mean
 format:
-  Arbeitszeitanteil: percent
+  FTE: percent
 ```
 
 ---
 
-## 2. Arbeitszeit & Vereinbarkeit
+## 2. Working time and balance
 
-### 2.1 Durchschnittlicher Arbeitszeitanteil nach Geschlecht (bar + mean)
+### 2.1 Average FTE by gender (bar + mean)
 
 ```chart
-data: Stichtag
+data: Headcount
 type: bar
-x: Geschlecht
-y: Arbeitszeitanteil
-color: Geschlecht
-title: Durchschnittlicher Arbeitszeitanteil nach Geschlecht
+x: Gender
+y: FTE
+color: Gender
+title: Average FTE by gender
 aggregation:
   y: mean
 ```
 
-### 2.2 Durchschnittliche Elternzeit (bar + mean, eigene Datenquelle)
+### 2.2 Average parental leave duration (bar + mean, second source)
 
 ```chart
-data: Zeitraum_Beurlaubung
+data: ParentalLeave
 type: bar
-x: Geschlecht
-y: Dauer der Elternzeit (Tage)
-title: Durchschnittliche Dauer der Elternzeit (Tage)
+x: Gender
+y: DurationDays
+title: Average parental leave duration (days)
 aggregation:
   y: mean
 ```
 
-### 2.3 Streuung der Elternzeit (table mit min / median / max)
+### 2.3 Spread of parental leave (table with median)
 
 ```table
-data: Zeitraum_Beurlaubung
+data: ParentalLeave
 columns:
-  - Geschlecht
-  - Dauer der Elternzeit (Tage)
-caption: Verteilung der Elternzeitdauer in Tagen — Median je Geschlecht
+  - Gender
+  - DurationDays
+caption: Median parental leave duration in days, by gender
 aggregation:
-  Geschlecht: identity
-  Dauer der Elternzeit (Tage): median
+  Gender: identity
+  DurationDays: median
 format:
-  Dauer der Elternzeit (Tage): integer
+  DurationDays: integer
 ```
 
 ---
 
-## 3. Bewerbungen, Einstellungen und Beförderungen
+## 3. Applications, hires, and promotions
 
-### 3.1 Bewerbungen nach Qualifikationsebene (bar + count)
+### 3.1 Applications by qualification level (stacked bar + count)
 
 ```chart
-data: Zeitraum_Bewerbung
+data: Applications
 type: bar
-x: QE
-y: BewerberID
-color: Geschlecht
-title: Bewerbungen je Qualifikationsebene
+x: Level
+y: ApplicantID
+color: Gender
+title: Applications by qualification level
 stacked: true
-
 aggregation:
   y: count
 ```
 
-### 3.2 Einstellungen nach Geschlecht (pie + count)
+### 3.2 Hires by gender (pie + count)
 
 ```chart
-data: Zeitraum_Einstellung
+data: Hires
 type: pie
-color: Geschlecht
-title: Einstellungen nach Geschlecht
+color: Gender
+title: Hires by gender
 ```
 
-### 3.3 Beförderungen nach Führungsebene (line + color + count)
+### 3.3 Promotions across leadership tiers (line + color + count)
 
 ```chart
-data: Zeitraum_Befoerderung
+data: Promotions
 type: line
-x: Führungsebene
-y: PersNr
-color: Geschlecht
-title: Beförderungen nach Führungsebene
+x: LeadershipTier
+y: EmployeeID
+color: Gender
+title: Promotions by leadership tier
 aggregation:
   y: count
 ```
 
 ---
 
-## 4. Leistungskomponenten
+## 4. Performance pay
 
-### 4.1 Mittlere Leistungskomponente nach Geschlecht (bar + mean)
+### 4.1 Average bonus by gender (bar + mean)
 
 ```chart
-data: Zeitraum_Leistungskomponente
+data: PerformancePay
 type: bar
-x: Geschlecht
-y: Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB)
-title: Durchschnittliche Höhe der Leistungskomponente
-stacked: true
+x: Gender
+y: BonusAmount
+title: Average performance bonus
 aggregation:
-  y: count
+  y: mean
 ```
 
-### 4.2 Streudiagramm Arbeitszeitanteil ↔ Leistungskomponente (scatter)
+### 4.2 FTE vs. bonus amount (scatter)
 
 ```chart
-data: Zeitraum_Leistungskomponente
+data: PerformancePay
 type: scatter
-x: Arbeitszeitanteil
-y: Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB)
-color: Geschlecht
-title: Leistungskomponente in Abhängigkeit vom Arbeitszeitanteil
+x: FTE
+y: BonusAmount
+color: Gender
+title: Performance bonus vs. FTE
 ```
 
-### 4.3 Summe je Entgeltgruppe (table mit sum + min + max)
+### 4.3 Totals per pay grade (table with sum + decimal format)
 
 ```table
-data: Zeitraum_Leistungskomponente
+data: PerformancePay
 columns:
-  - Entgeltgruppe / Besoldungsgruppe
-  - Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB)
-caption: Summe, Minimum und Maximum der Leistungskomponente je Entgeltgruppe
+  - PayGrade
+  - BonusAmount
+caption: Total performance bonus per pay grade
 aggregation:
-  Entgeltgruppe / Besoldungsgruppe: identity
-  Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB): sum
+  PayGrade: identity
+  BonusAmount: sum
 format:
-  Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB): decimal
+  BonusAmount: decimal
 ```
 
 ---
 
-## 5. Rohdatenausschnitt (Tabelle ohne Aggregation)
+## 5. Raw-data sample (table without aggregation)
 
-Wenn das Feld `aggregation` weggelassen wird, werden die Zeilen unverändert ausgegeben:
+When the `aggregation` field is omitted, rows render verbatim:
 
 ```table
-data: Stichtag
+data: Headcount
 columns:
-  - PersNr
-  - Geschlecht
-  - Entgeltgruppe / Besoldungsgruppe
-  - QE
-  - Führungsebene
-caption: Erste Datensätze des Stichtag-Sheets
+  - EmployeeID
+  - Gender
+  - PayGrade
+  - Level
+  - LeadershipTier
+caption: First records from the Headcount sheet
 ```
 
 ---
 
-_Bericht erstellt für **{{office}}** — Vorlage: `test_template.md`._
+::: {.callout-note title='Definitions'}
+**FTE** — full-time equivalent, expressed as a fraction of a full workload.
+**PayGrade** — internal compensation band.
+**LeadershipTier** — management responsibility level.
+:::
+
+::: {.callout-tip title='Summary'}
+This template walks through every renderer feature. Replace each section with your own narrative for production reports.
+:::
+
+---
+
+_Report generated for **{{office}}** — template: `test_template.md`._

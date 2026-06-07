@@ -11,22 +11,34 @@ export interface ValidationError {
   message: string;
 }
 
+export interface LoadDataResult {
+  store: DataStore;
+  /**
+   * Non-fatal validation issues: missing files, sheets, or columns. The
+   * pipeline is expected to continue with whatever sheets did load — the
+   * renderer surfaces per-block "TBD" notes for blocks that reference
+   * data that isn't there.
+   */
+  warnings: ValidationError[];
+}
+
 /**
  * Validate and load data from uploaded files against config definitions.
  * Each data source definition declares expected sheets and their columns.
- * Returns the loaded DataStore, or throws with validation details.
+ * Returns whatever sheets did load plus a list of validation warnings.
+ * Never throws — callers decide how to surface the warnings.
  */
 export function loadDataSources(
   files: Map<string, ArrayBuffer>,
   definitions: Record<string, DataSourceDef>
-): DataStore {
+): LoadDataResult {
   const store: DataStore = {};
-  const errors: ValidationError[] = [];
+  const warnings: ValidationError[] = [];
 
   for (const [name, def] of Object.entries(definitions)) {
     const buffer = files.get(name);
     if (!buffer) {
-      errors.push({ source: name, message: `No file provided for "${name}".` });
+      warnings.push({ source: name, message: `No file provided for "${name}".` });
       continue;
     }
 
@@ -35,22 +47,21 @@ export function loadDataSources(
     for (const sheetDef of def.sheets) {
       const sheetErrors = validateSheet(workbook, name, sheetDef);
       if (sheetErrors.length > 0) {
-        errors.push(...sheetErrors);
-        continue;
+        warnings.push(...sheetErrors);
       }
 
-      const sheet = workbook.Sheets[sheetDef.sheet];
-      const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
-      store[sheetDef.sheet] = rows;
+      // Best-effort load: if the sheet is present, store its rows even when
+      // some declared columns are missing. Per-block rendering handles the
+      // downstream consequences.
+      if (workbook.SheetNames.includes(sheetDef.sheet)) {
+        const sheet = workbook.Sheets[sheetDef.sheet];
+        const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
+        store[sheetDef.sheet] = rows;
+      }
     }
   }
 
-  if (errors.length > 0) {
-    const msg = errors.map((e) => `[${e.source}] ${e.message}`).join("\n");
-    throw new Error(`Data validation failed:\n${msg}`);
-  }
-
-  return store;
+  return { store, warnings };
 }
 
 function validateSheet(

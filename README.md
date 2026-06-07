@@ -1,4 +1,6 @@
-# reportix (by ondatix)
+<img src="img/ondatix_Logo_dunkel.png" alt="Reportix Logo" class="logo" height="80" align="right"/><br><br>
+
+# reportix
 
 Fully client-side web app for automated report generation. Upload an Excel workbook and a Markdown template, fill in a parameter form, and export a styled `.docx` — all in the browser, no server, no network at runtime.
 
@@ -50,8 +52,8 @@ The dev server reloads on save. The production build under `dist/` is a fully st
 The app runs a strict pipeline:
 
 1. **Load config** — `/config.yaml` is bundled at build time and parsed on startup.
-2. **Upload data** — user picks one `.xlsx` per data source declared in the config. Each source is validated against its expected sheet names and column lists; mismatches surface as actionable errors.
-3. **Upload template** — user picks a Markdown file with embedded chart/table blocks.
+2. **Upload data** — user picks one `.xlsx` per data source declared in the config. Each source is validated against its expected sheet names and column lists; mismatches surface as non-blocking warnings and the pipeline proceeds with whatever sheets did load (blocks referencing missing data render as red "TBD" notes).
+3. **Choose template** — user picks one of the bundled Markdown templates listed under `template.files` in the config (radio chooser with human-readable labels). Templates live in `templates/` and are bundled at build time.
 4. **Fill parameters** — a form is generated from the config's `parameters` section.
 5. **Render preview** — Markdown becomes semantic HTML; chart / table YAML blocks become Chart.js canvases and accessible `<table>`s with auto-generated alt text.
 6. **Export DOCX** — the rendered DOM is walked and serialised to a `.docx` file with the configured page layout, fonts, callouts, and chart images.
@@ -62,14 +64,12 @@ No step talks to a server. The XLSX is read in-browser via SheetJS; the DOCX is 
 
 The config is the entry point — a developer edits it, the end user never touches it. It declares:
 
-- **`parameters`** — form fields shown before report generation (`text`, `number`, `date`, `select`, `multiselect`, `boolean`). The names `palette` and `font` get special UI widgets (illustrated radios).
+- **`parameters`** — form fields shown before report generation (`text`, `number`, `date`, `select`, `multiselect`, `boolean`). Each entry is either **standalone** (template variable, prefilled from `default:`) or **bound** to a config leaf via `bind: <dotted.path>` — bound entries prefill from the path's preset and write the user's value back to that path at runtime, letting most styling and metadata keys be overridden per report. The names `palette` and `font` get special UI widgets (illustrated radios).
 - **`data`** — expected data sources, each with sheet names and required columns. Used to validate the uploaded workbook.
-- **`template.file`** — path to the Markdown template (informational; the user uploads the actual file).
-- **`export`** — DOCX styling: filename, locale, document metadata, fonts, heading sizes/colours, paragraph spacing, page size & margins, page numbers, header/footer text, table borders, **callout box colours and backgrounds** (`definition_box`, `summary_box`).
+- **`template.files`** — list of bundled Markdown templates shown as a radio chooser in Step 2. Each entry has a `label` (shown to the user) and a `file` (filename within `templates/`). The app hard-fails at startup if any referenced file isn't bundled.
+- **`export`** — DOCX styling: filename, locale, document metadata, fonts, heading sizes/colours, paragraph spacing, page size & margins, page numbers, header/footer text, table borders, **section numbering** (`section_numbering: true` auto-numbers headings as `1.`, `1.1.`, …), **table of contents** (`toc: true` inserts a Word TOC field), **callout box colours and backgrounds** (`definition_box`, `summary_box`).
 - **`charts`** — Chart.js defaults: animation, aspect ratio, fonts, title/legend/tooltip placement, axis grid colours, line/bar element styling.
 - **`data_protection.smallest_group`** — privacy threshold for aggregated counts/shares (default 5).
-
-See [CLAUDE.md](CLAUDE.md) for the full schema with annotated examples.
 
 ## Template Format
 
@@ -104,8 +104,6 @@ aggregation:
 ````
 
 Parameters from the form are interpolated as `{{paramName}}` anywhere in the text.
-
-See [CLAUDE.md](CLAUDE.md) for the chart/table YAML schema, the full list of supported types, aggregation operations, and the callout syntax.
 
 ## Modules
 
