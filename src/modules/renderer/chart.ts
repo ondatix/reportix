@@ -11,6 +11,7 @@ import type { ChartOptions, TooltipItem } from "chart.js";
 import type { ChartSpec, DataSet, ChartDefaults, DataProtectionConfig } from "../types";
 import { generateAltText } from "../alt-text";
 import { getPalette } from "../palettes";
+import { t } from "../i18n";
 import {
   aggregateField,
   applyFilter,
@@ -72,7 +73,7 @@ export function renderChart(
   }
 
   if (!spec.x) {
-    throw new Error(`Chart type "${spec.type}" requires an "x" field.`);
+    throw new Error(t("chart.requiresX", { type: spec.type }));
   }
 
   const yFields = Array.isArray(spec.y) ? spec.y : [spec.y];
@@ -134,11 +135,11 @@ function renderPyramid(
 ): void {
   const splitField = spec.split ?? spec.color;
   if (!splitField) {
-    throw new Error('Pyramid chart requires a "color" (or "split") field — the binary column to split on.');
+    throw new Error(t("chart.pyramidRequiresColor"));
   }
   const yField = Array.isArray(spec.y) ? spec.y[0] : spec.y;
   if (!yField) {
-    throw new Error('Pyramid chart requires a "y" field (the category axis).');
+    throw new Error(t("chart.pyramidRequiresY"));
   }
 
   const op: AggregationOp = spec.aggregation?.y ?? (spec.value ? "sum" : "count");
@@ -200,14 +201,14 @@ function renderDistance(
   threshold: number = 0
 ): void {
   if (!spec.color) {
-    throw new Error('Distance chart requires a "color" field (the binary column to compare).');
+    throw new Error(t("chart.distanceRequiresColor"));
   }
   if (!spec.x) {
-    throw new Error('Distance chart requires an "x" field (the category axis).');
+    throw new Error(t("chart.distanceRequiresX"));
   }
   const yField = Array.isArray(spec.y) ? spec.y[0] : spec.y;
   if (!yField) {
-    throw new Error('Distance chart requires a "y" field (the numeric value).');
+    throw new Error(t("chart.distanceRequiresY"));
   }
 
   const yOp: AggregationOp = spec.aggregation?.y ?? "count";
@@ -216,7 +217,7 @@ function renderDistance(
 
   if (pivot.series.length !== 2) {
     throw new Error(
-      `Distance chart needs exactly 2 distinct values in "${spec.color}", found ${pivot.series.length}.`
+      t("chart.distanceNeeds2", { field: spec.color, count: pivot.series.length })
     );
   }
 
@@ -310,7 +311,7 @@ function renderGrouped(
   const total = data.length;
 
   if (spec.type === "pie" || spec.type === "doughnut") {
-    if (!colorField) throw new Error(`"${spec.type}" chart requires a "color" field.`);
+    if (!colorField) throw new Error(t("chart.requiresColor", { type: spec.type }));
     const agg = aggregateByGroup(data, yField, colorField, yOp, total);
     const protect = shouldProtect(yOp)
       ? applyDataProtection(agg.values, threshold)
@@ -336,14 +337,14 @@ function renderGrouped(
   }
 
   if (!spec.x) {
-    throw new Error(`Chart type "${spec.type}" with grouping requires an "x" field.`);
+    throw new Error(t("chart.groupingRequiresX", { type: spec.type }));
   }
   if (!yField) {
-    throw new Error(`Chart type "${spec.type}" with grouping requires a "y" field.`);
+    throw new Error(t("chart.groupingRequiresY", { type: spec.type }));
   }
 
   if (spec.type === "scatter") {
-    if (!colorField) throw new Error(`Grouped scatter requires a "color" field.`);
+    if (!colorField) throw new Error(t("chart.groupedScatterRequiresColor"));
     const groups = groupScatter(data, spec.x, yField, colorField);
     const datasets = groups.map((g, i) => ({
       label: g.name,

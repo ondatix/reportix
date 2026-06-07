@@ -3,7 +3,25 @@
  * Usable independently in other projects.
  */
 import { parse as parseYAML } from "yaml";
+import { getLocale, DEFAULT_LOCALE } from "../i18n";
 import type { AppConfig, ParameterDef, DataSourceDef, SheetDef, TemplateDef, TemplateOption, ExportConfig, ChartDefaults, DataProtectionConfig } from "../types";
+
+/**
+ * Resolve a possibly-localized string for the active locale. A value may be:
+ *   • a plain string — used verbatim in every language, or
+ *   • a mapping like `{ de: "Titel", en: "Title" }` — the entry for the
+ *     current locale is chosen, falling back to the default locale, then to
+ *     any provided entry, then to `fallback`.
+ * Config is re-parsed when the locale changes, so labels follow the selection.
+ */
+function resolveLocalized(value: unknown, fallback: string): string {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const map = value as Record<string, unknown>;
+    const picked = map[getLocale()] ?? map[DEFAULT_LOCALE] ?? Object.values(map)[0];
+    return String(picked ?? fallback);
+  }
+  return value === undefined || value === null ? fallback : String(value);
+}
 
 export function parseConfig(yamlString: string): AppConfig {
   const raw = parseYAML(yamlString) as Record<string, unknown>;
@@ -13,7 +31,7 @@ export function parseConfig(yamlString: string): AppConfig {
     for (const [key, value] of Object.entries(raw.parameters as Record<string, unknown>)) {
       const v = value as Record<string, unknown>;
       parameters[key] = {
-        label: String(v.label ?? key),
+        label: resolveLocalized(v.label, key),
         type: (v.type as ParameterDef["type"]) ?? "text",
         default: v.default as ParameterDef["default"],
         options: v.options as string[] | undefined,
@@ -39,7 +57,7 @@ export function parseConfig(yamlString: string): AppConfig {
   const filesRaw = tplRaw.files as Array<Record<string, unknown>> | undefined;
   const templateFiles: TemplateOption[] = (filesRaw ?? [])
     .map((f) => ({
-      label: String(f.label ?? f.file ?? ""),
+      label: resolveLocalized(f.label, String(f.file ?? "")),
       file: String(f.file ?? ""),
     }))
     .filter((f) => f.file.length > 0);

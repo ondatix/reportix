@@ -9,6 +9,7 @@ export { renderTable } from "./table";
 import { renderText } from "./text";
 import { renderChart } from "./chart";
 import { renderTable } from "./table";
+import { t } from "../i18n";
 import type { TemplateBlock, DataStore, ParameterValues, ChartDefaults, DataProtectionConfig } from "../types";
 
 export function renderBlocks(
@@ -30,18 +31,18 @@ export function renderBlocks(
       }
 
       case "chart": {
-        safeRender(container, "Diagramm", block.spec.title, () => {
+        safeRender(container, t("render.kind.chart"), block.spec.title, () => {
           const data = dataStore[block.spec.data];
-          if (!data) throw new Error(`Data source "${block.spec.data}" not found.`);
+          if (!data) throw new Error(t("render.dataSourceNotFound", { name: block.spec.data }));
           renderChart(block.spec, data, container, chartDefaults, palette, dataProtection);
         });
         break;
       }
 
       case "table": {
-        safeRender(container, "Tabelle", block.spec.caption, () => {
+        safeRender(container, t("render.kind.table"), block.spec.caption, () => {
           const data = dataStore[block.spec.data];
-          if (!data) throw new Error(`Data source "${block.spec.data}" not found.`);
+          if (!data) throw new Error(t("render.dataSourceNotFound", { name: block.spec.data }));
           renderTable(block.spec, data, container, dataProtection);
         });
         break;
@@ -72,8 +73,8 @@ function safeRender(
     const note = document.createElement("p");
     note.className = "tbd-note";
     note.setAttribute("role", "note");
-    const heading = label ? `${kind} „${label}"` : kind;
-    note.textContent = `⚠ ${heading} — TBD: ${(err as Error).message}`;
+    const heading = label ? t("render.headingWithLabel", { kind, label }) : kind;
+    note.textContent = t("render.tbd", { heading, message: (err as Error).message });
     container.appendChild(note);
   }
 }

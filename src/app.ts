@@ -14,6 +14,7 @@ import { renderBlocks } from "./modules/renderer";
 import { exportToDocx } from "./modules/exporter";
 import { getPalette } from "./modules/palettes";
 import { getFont } from "./modules/fonts";
+import { t, getLocale, setLocale, LOCALES, type Locale } from "./modules/i18n";
 import type { DataStore } from "./modules/types";
 
 /**
@@ -38,46 +39,61 @@ export function initApp(root: HTMLElement): void {
   // Surfaces developer mistakes (typo in filename, file not added to templates/)
   // immediately instead of letting them propagate into an empty preview.
   if (config.template.files.length === 0) {
-    throw new Error(
-      "config.template.files is empty — declare at least one bundled template."
-    );
+    throw new Error(t("error.noTemplates"));
   }
   const missing = config.template.files.filter(
-    (t) => getBundledTemplate(t.file) === undefined
+    (tpl) => getBundledTemplate(tpl.file) === undefined
   );
   if (missing.length > 0) {
     const names = missing.map((m) => `"${m.file}"`).join(", ");
-    const available = Object.keys(BUNDLED_TEMPLATES)
-      .map((k) => k.replace("/templates/", ""))
-      .join(", ");
-    throw new Error(
-      `Template files referenced in config.template.files are not bundled: ${names}. ` +
-        `Available in templates/: ${available || "(none)"}.`
-    );
+    const available =
+      Object.keys(BUNDLED_TEMPLATES)
+        .map((k) => k.replace("/templates/", ""))
+        .join(", ") || "(none)";
+    throw new Error(t("error.templatesMissing", { names, available }));
   }
 
   root.innerHTML = `
     <img src="../img/ondatix_Logo_hell.png" alt="Reportix Logo" class="logo" height="80" align="right"/><br>
     <h1>reportix</h1>
+    <div id="language-bar" class="language-bar">
+      <label for="language-select">${t("ui.language")}: </label>
+      <select id="language-select"></select>
+    </div>
     <div id="step-data" class="step">
-      <h2>1. Load Data Files</h2>
+      <h2>${t("ui.step.data")}</h2>
       <div id="data-inputs"></div>
     </div>
     <div id="step-template" class="step" hidden>
-      <h2>2. Choose Template</h2>
+      <h2>${t("ui.step.template")}</h2>
       <div id="template-choices"></div>
-      <button id="template-continue" type="button">Continue</button>
+      <button id="template-continue" type="button">${t("ui.button.continue")}</button>
     </div>
     <div id="step-params" class="step" hidden>
-      <h2>3. Report Parameters</h2>
+      <h2>${t("ui.step.params")}</h2>
       <div id="params-container"></div>
     </div>
     <div id="step-preview" class="step" hidden>
-      <h2>Report Preview</h2>
+      <h2>${t("ui.step.preview")}</h2>
       <div id="report-preview" class="report-preview"></div>
-      <button id="export-btn">Export as .docx</button>
+      <button id="export-btn">${t("ui.button.export")}</button>
     </div>
   `;
+
+  // Language selector — switching the locale re-initialises the app so every
+  // program text (labels, buttons, error messages) reflects the new language.
+  const languageSelect = root.querySelector<HTMLSelectElement>("#language-select")!;
+  for (const { code, label } of LOCALES) {
+    const option = document.createElement("option");
+    option.value = code;
+    option.textContent = label;
+    if (code === getLocale()) option.selected = true;
+    languageSelect.appendChild(option);
+  }
+  languageSelect.addEventListener("change", () => {
+    setLocale(languageSelect.value as Locale);
+    initApp(root);
+  });
 
   let dataStore: DataStore;
   let templateText: string;
@@ -91,7 +107,7 @@ export function initApp(root: HTMLElement): void {
   for (const [name, def] of Object.entries(config.data)) {
     const expectedSheets = def.sheets.map((s) => s.sheet).join(", ");
     const label = document.createElement("label");
-    label.textContent = `${name} (expected sheets: ${expectedSheets}): `;
+    label.textContent = t("ui.data.expectedSheets", { name, sheets: expectedSheets });
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".xlsx,.xls";
@@ -103,7 +119,7 @@ export function initApp(root: HTMLElement): void {
   dataInputs.appendChild(dataWarnings);
 
   const loadBtn = document.createElement("button");
-  loadBtn.textContent = "Load & Validate Data";
+  loadBtn.textContent = t("ui.button.loadValidate");
   loadBtn.addEventListener("click", async () => {
     dataWarnings.hidden = true;
     dataWarnings.innerHTML = "";
@@ -118,12 +134,12 @@ export function initApp(root: HTMLElement): void {
     dataStore = result.store;
     if (result.warnings.length > 0) {
       const heading = document.createElement("strong");
-      heading.textContent = "Data validation warnings:";
+      heading.textContent = t("ui.data.warningsHeading");
       dataWarnings.appendChild(heading);
       const list = document.createElement("ul");
       for (const w of result.warnings) {
         const li = document.createElement("li");
-        li.textContent = `[${w.source}] ${w.message}`;
+        li.textContent = t("ui.data.warningLine", { source: w.source, message: w.message });
         list.appendChild(li);
       }
       dataWarnings.appendChild(list);

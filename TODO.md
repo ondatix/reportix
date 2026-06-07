@@ -28,7 +28,7 @@
 ## Config
 - [ ] Create generic config
 - [ ] Create StMAS config
-- [ ] Create config specification
+- [x] Create config specification
 - [x] Add section numbering option and toc option
 - [x] Add parameter logic (parameters are set in config, but can be overwritten by users)
 

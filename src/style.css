@@ -28,6 +28,19 @@ h1 {
   padding-bottom: 0.5rem;
 }
 
+.language-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  margin: 0.5rem 0 1rem;
+  font-size: 0.9rem;
+}
+
+.language-bar select {
+  padding: 0.2rem 0.4rem;
+}
+
 .step {
   margin: 1.5rem 0;
   padding: 1rem;

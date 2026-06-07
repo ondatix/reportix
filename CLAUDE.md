@@ -31,6 +31,18 @@ Each utility is a self-contained module usable independently in other projects.
    - 4.4 **Alt text generation** — automatically generate alt texts for charts and graphics (see Alt Text Module)
 5. **Export report** — serialize the rendered report to a file (e.g. `.docx`)
 
+## Internationalization (i18n)
+
+The app ships in **German (default)** and **English**, switchable via a language selector at the top of the UI. A self-contained `i18n` module (`src/modules/i18n/`) holds the active locale and a `t(key, params)` lookup with `{placeholder}` interpolation.
+
+- **Every program-authored string** routes through `t()` — step headings, buttons, data-validation warnings, render/chart/aggregation error messages, the per-block "TBD" note, and the DOCX "Table of Contents" heading.
+- **Default locale is `de`** (`DEFAULT_LOCALE` in the i18n module). `LOCALES` lists the selectable languages with their native display names.
+- **Switching language re-runs `initApp`**, which re-parses the config and re-renders — so all text (including config-driven labels) reflects the new language.
+- **Chart alt text** is localized too: `generateAltText(spec, data?, locale = getLocale())` keeps its own German/English phrase tables so the Alt Text Module stays self-contained while honouring the selection.
+- **Config labels can be localized**: any `label` (parameters and `template.files`) may be a plain string (same in every language) or a per-locale map `{ de: "…", en: "…" }`, resolved against the active locale at parse time. See Config File.
+
+To add UI text: add the key to both `de` and `en` dictionaries in `src/modules/i18n/index.ts` and call `t("your.key", { ...params })`. Missing keys fall back to the default locale, then to the raw key.
+
 ## Config File
 
 A single YAML config file (`/config.yaml` in the project root) is the entry point for the app. It is bundled at build time and **not uploaded by the user** — only developers edit it. It declares what to ask the user, where to find the data, and which template to use.
@@ -55,11 +67,13 @@ template:
 ```yaml
 parameters:
   period:
-    label: "Reporting period"
+    label: "Reporting period"   # plain string: same label in every language
     type: text
     default: "Q1 2026"
   department:
-    label: "Department"
+    label:                      # or a per-locale map, resolved to the active language
+      de: "Abteilung"
+      en: "Department"
     type: select
     options:
       - Sales
@@ -180,6 +194,8 @@ charts:
 ```
 
 **Supported parameter types:** `text`, `number`, `date`, `select`, `multiselect`, `boolean`
+
+**Localized labels:** every `label` (parameter labels and `template.files` labels) accepts either a plain string or a per-locale map `{ de: "…", en: "…" }`. The active language (see Internationalization) selects the entry, falling back to the default locale and then to any provided entry.
 
 **Export settings:**
 - `filename` — output file name (default: `report.docx`)
@@ -440,3 +456,4 @@ generateAltText(spec: ChartSpec, data?: DataSet): string
 - Each module exposes a clean public API so it can be extracted and reused in isolation
 - `.env` and `.env*.local` are gitignored — do not hardcode secrets
 - **After any change, check `README.md` and update it if necessary.** The README documents user-facing features (chart types, aggregation ops, callout syntax, config keys, modules, security posture). If a change adds, removes, or renames any of those, the README must be updated in the same commit. CLAUDE.md is the canonical reference for the full schema and behaviour — keep the README's summary aligned with it.
+- **Whenever `config.yaml` (or the config schema in `src/modules/config/`) changes, update `CONFIG.md` in the same commit.** `CONFIG.md` is the authoritative per-key handbook and must stay in sync with what the parser accepts. It is **bilingual** — keep **both the English and the German version** aligned: any added, removed, renamed, or re-defaulted key must be reflected in both language sections.

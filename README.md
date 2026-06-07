@@ -18,6 +18,7 @@ Many reporting workflows (HR equality reports, internal KPIs, compliance summari
 - **Row filtering**: `filter: <bool-column>` keeps only matching rows before aggregation.
 - **Data protection**: aggregated values below a configurable threshold are masked (`<5` in tables, clamped + masked tooltip in charts) for count-like operations.
 - **Accessible by default**: WCAG-AA colour palettes, colorblind-safe defaults, semantic HTML, auto-generated alt text for every chart.
+- **Bilingual UI (German / English)**: a language selector switches every program text — labels, buttons, validation warnings, error messages, and auto-generated chart alt text. German is the default; English is the second option.
 - **Configurable export**: fonts, page layout, headers/footers, page numbers, callout colours and backgrounds, all driven by `config.yaml`.
 - **Per-block error isolation**: a malformed chart or table is replaced with a red "TBD" note; the rest of the report still renders.
 
@@ -64,7 +65,7 @@ No step talks to a server. The XLSX is read in-browser via SheetJS; the DOCX is 
 
 The config is the entry point — a developer edits it, the end user never touches it. It declares:
 
-- **`parameters`** — form fields shown before report generation (`text`, `number`, `date`, `select`, `multiselect`, `boolean`). Each entry is either **standalone** (template variable, prefilled from `default:`) or **bound** to a config leaf via `bind: <dotted.path>` — bound entries prefill from the path's preset and write the user's value back to that path at runtime, letting most styling and metadata keys be overridden per report. The names `palette` and `font` get special UI widgets (illustrated radios).
+- **`parameters`** — form fields shown before report generation (`text`, `number`, `date`, `select`, `multiselect`, `boolean`). Each entry is either **standalone** (template variable, prefilled from `default:`) or **bound** to a config leaf via `bind: <dotted.path>` — bound entries prefill from the path's preset and write the user's value back to that path at runtime, letting most styling and metadata keys be overridden per report. The names `palette` and `font` get special UI widgets (illustrated radios). Each `label` may be a plain string or a per-locale map `{ de: "…", en: "…" }` resolved to the [selected language](#features).
 - **`data`** — expected data sources, each with sheet names and required columns. Used to validate the uploaded workbook.
 - **`template.files`** — list of bundled Markdown templates shown as a radio chooser in Step 2. Each entry has a `label` (shown to the user) and a `file` (filename within `templates/`). The app hard-fails at startup if any referenced file isn't bundled.
 - **`export`** — DOCX styling: filename, locale, document metadata, fonts, heading sizes/colours, paragraph spacing, page size & margins, page numbers, header/footer text, table borders, **section numbering** (`section_numbering: true` auto-numbers headings as `1.`, `1.1.`, …), **table of contents** (`toc: true` inserts a Word TOC field), **callout box colours and backgrounds** (`definition_box`, `summary_box`).
@@ -111,6 +112,7 @@ Each utility is a self-contained module under `src/modules/` with a clean public
 
 | Module | Responsibility |
 |---|---|
+| `i18n/` | Central translation layer (German / English) with `t(key, params)` lookup; drives all UI text, error messages, and chart alt text. |
 | `config/` | Parse `/config.yaml` (bundled via `?raw` import) into a typed `AppConfig`. |
 | `data-loader/` | Read `.xlsx` files via SheetJS, validate sheets and columns. |
 | `parameters/` | Render the form from `AppConfig.parameters`, collect typed values. |

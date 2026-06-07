@@ -30,6 +30,7 @@ import {
 } from "docx";
 import type { INumberingOptions } from "docx";
 import { saveAs } from "file-saver";
+import { t } from "../i18n";
 import type { ExportConfig, CalloutBoxConfig } from "../types";
 
 // ── Defaults ────────────────────────────────────────────────────────
@@ -226,9 +227,9 @@ export async function exportToDocx(
     sectionChildren.push(
       new Paragraph({
         heading: HeadingLevel.HEADING_1,
-        children: [new TextRun({ text: "Table of Contents", font: s.headingFamily })],
+        children: [new TextRun({ text: t("export.toc"), font: s.headingFamily })],
       }),
-      new TableOfContents("Table of Contents", {
+      new TableOfContents(t("export.toc"), {
         hyperlink: true,
         headingStyleRange: "1-4",
       }),

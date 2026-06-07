@@ -4,6 +4,7 @@
  * table renderer (GROUP BY semantics). Self-contained and reusable.
  */
 import type { DataSet } from "../types";
+import { t } from "../i18n";
 
 export type AggregationOp =
   | "identity"
@@ -293,12 +294,12 @@ export function aggregatePyramid(
 
   if (leftKey === null || rightKey === null) {
     throw new Error(
-      `Pyramid chart needs exactly 2 distinct values in "${splitField}", found ${leftKey === null ? 0 : 1}.`
+      t("agg.pyramidNeeds2", { field: splitField, count: leftKey === null ? 0 : 1 })
     );
   }
   if (extras.size > 0) {
     throw new Error(
-      `Pyramid chart needs exactly 2 distinct values in "${splitField}". Extra values found: ${[...extras].join(", ")}.`
+      t("agg.pyramidExtra", { field: splitField, extras: [...extras].join(", ") })
     );
   }
 

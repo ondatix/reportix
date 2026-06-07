@@ -1,27 +1,36 @@
 parameters:
   # — Standalone parameters (template variables, not bound to config leaves) —
+  # `label` may be a plain string (same in every language) or a per-locale
+  # map like `{ de: "Titel", en: "Title" }`. The active language selects the
+  # entry; config is re-parsed when the user switches languages.
   title:
-    label: "Titel"
+    label:
+      de: "Titel"
+      en: "Title"
     type: text
     default: "Gleichstellungskonzept"
   office:
-    label: "Behörde"
+    label:
+      de: "Behörde"
+      en: "Authority"
     type: text
     default: "Staatsministerium für Familie, Arbeit und Soziales"
-  palette:
-    label: "Chart color palette"
-    type: select
-    default: okabe-ito
-    options:
-      - okabe-ito   # Okabe & Ito / Wong (2011) — 8-colour standard
-      - tol-bright  # Paul Tol — Bright (7)
-      - tol-muted   # Paul Tol — Muted (9)
-      - ibm         # IBM Design Language colourblind-safe (5)
-      - grayscale   # Print-safe maximum-contrast fallback
+  # palette:
+  #   label: "Chart color palette"
+  #   type: select
+  #   default: okabe-ito
+  #   options:
+  #     - okabe-ito   # Okabe & Ito / Wong (2011) — 8-colour standard
+  #     - tol-bright  # Paul Tol — Bright (7)
+  #     - tol-muted   # Paul Tol — Muted (9)
+  #     - ibm         # IBM Design Language colourblind-safe (5)
+  #     - grayscale   # Print-safe maximum-contrast fallback
   font:
     # Curated theme: maps to CSS stack + DOCX family + display name via the
     # fonts module; not a 1:1 string override, so it stays standalone.
-    label: "Font"
+    label:
+      de: "Schriftart"
+      en: "Font"
     type: select
     default: arial
     options:
@@ -34,7 +43,9 @@ parameters:
   #   from that leaf; the user-entered value overrides the preset at runtime.
   #   Bound entries carry no `default:` (the bound leaf is the source of truth).
   palette:
-    label: "Chart color palette"
+    label:
+      de: "Farbpalette des Diagramms"
+      en: "Chart color palette"
     type: select
     bind: charts.palette
     options:
@@ -44,34 +55,48 @@ parameters:
       - ibm         # IBM Design Language colourblind-safe (5)
       - grayscale   # Print-safe maximum-contrast fallback
   font_size:
-    label: "Body font size (pt)"
+    label:
+      de: "Schriftgröße des Texts (pt)"
+      en: "Body font size (pt)"
     type: number
     bind: export.font.size
   heading_color:
-    label: "Heading color (hex without #)"
+    label:
+      de: "Überschriftenfarbe (Hex ohne #)"
+      en: "Heading color (hex without #)"
     type: text
     bind: export.headings.color
   page_orientation:
-    label: "Page orientation"
+    label:
+      de: "Seitenausrichtung"
+      en: "Page orientation"
     type: select
     bind: export.page.orientation
     options:
       - portrait
       - landscape
   header_text:
-    label: "Header text"
+    label:
+      de: "Kopfzeilentext"
+      en: "Header text"
     type: text
     bind: export.header.text
   footer_text:
-    label: "Footer text"
+    label:
+      de: "Fußzeilentext"
+      en: "Footer text"
     type: text
     bind: export.footer.text
   page_numbers:
-    label: "Show page numbers"
+    label:
+      de: "Seitenzahlen anzeigen"
+      en: "Show page numbers"
     type: boolean
     bind: export.page_numbers.show
   filename:
-    label: "Output filename"
+    label:
+      de: "Dateiname der Ausgabe"
+      en: "Output filename"
     type: text
     bind: export.filename
   # locale:
@@ -79,23 +104,33 @@ parameters:
   #   type: text
   #   bind: export.locale
   doc_subject:
-    label: "Document subject"
+    label:
+      de: "Dokumentbetreff"
+      en: "Document subject"
     type: text
     bind: export.document.subject
   doc_creator:
-    label: "Document creator"
+    label:
+      de: "Dokumentersteller"
+      en: "Document creator"
     type: text
     bind: export.document.creator
   smallest_group:
-    label: "Smallest group threshold"
+    label:
+      de: "Schwellenwert kleinste Gruppe"
+      en: "Smallest group threshold"
     type: number
     bind: data_protection.smallest_group
   section_numbering:
-    label: "Number headings (1., 1.1., …)"
+    label:
+      de: "Überschriften nummerieren (1., 1.1., …)"
+      en: "Number headings (1., 1.1., …)"
     type: boolean
     bind: export.section_numbering
   toc:
-    label: "Include table of contents"
+    label:
+      de: "Inhaltsverzeichnis einfügen"
+      en: "Include table of contents"
     type: boolean
     bind: export.toc
 
@@ -182,10 +217,14 @@ template:
   # within the bundled `templates/` directory; `label` is what the user sees.
   # The app hard-fails at startup if any referenced file isn't bundled.
   files:
-    - label: "Feature showcase"
-      file: test_template.md
-    - label: "Executive summary"
-      file: summary_template.md
+    - label:
+        de: "Gleichstellungskonzept (vollständig)"
+        en: "Equality concept (full)"
+      file: template_full.md
+    - label:
+        de: "Gleichstellungskonzept (verpflichtend)"
+        en: "Equality concept (mandatory)"
+      file: template_mandatory.md
 
 data_protection:
   smallest_group: 5  # bound by parameters.smallest_group

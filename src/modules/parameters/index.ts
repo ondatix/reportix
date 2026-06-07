@@ -17,6 +17,7 @@
 import type { AppConfig, ParameterDef, ParameterValues } from "../types";
 import { PALETTES } from "../palettes";
 import { FONTS } from "../fonts";
+import { t } from "../i18n";
 
 /**
  * Resolve the default value to prefill into the form for a single parameter.
@@ -201,7 +202,7 @@ export function buildParameterForm(
 
   const submit = document.createElement("button");
   submit.type = "submit";
-  submit.textContent = "Generate Report";
+  submit.textContent = t("ui.button.generate");
   form.appendChild(submit);
 
   container.appendChild(form);

@@ -4,6 +4,7 @@
  * Usable independently in other projects.
  */
 import * as XLSX from "xlsx";
+import { t } from "../i18n";
 import type { DataSourceDef, DataStore, SheetDef } from "../types";
 
 export interface ValidationError {
@@ -38,7 +39,7 @@ export function loadDataSources(
   for (const [name, def] of Object.entries(definitions)) {
     const buffer = files.get(name);
     if (!buffer) {
-      warnings.push({ source: name, message: `No file provided for "${name}".` });
+      warnings.push({ source: name, message: t("data.noFile", { name }) });
       continue;
     }
 
@@ -74,7 +75,10 @@ function validateSheet(
   if (!workbook.SheetNames.includes(sheetDef.sheet)) {
     errors.push({
       source: sourceName,
-      message: `Missing sheet "${sheetDef.sheet}". Found: ${workbook.SheetNames.join(", ")}.`,
+      message: t("data.missingSheet", {
+        sheet: sheetDef.sheet,
+        found: workbook.SheetNames.join(", "),
+      }),
     });
     return errors;
   }
@@ -85,7 +89,7 @@ function validateSheet(
   if (aoa.length === 0) {
     errors.push({
       source: sourceName,
-      message: `Sheet "${sheetDef.sheet}" is empty.`,
+      message: t("data.emptySheet", { sheet: sheetDef.sheet }),
     });
     return errors;
   }
@@ -99,7 +103,11 @@ function validateSheet(
   if (missing.length > 0) {
     errors.push({
       source: sourceName,
-      message: `Sheet "${sheetDef.sheet}" is missing columns: ${missing.join(", ")}. Found: ${actualColumns.join(", ")}.`,
+      message: t("data.missingColumns", {
+        sheet: sheetDef.sheet,
+        missing: missing.join(", "),
+        found: actualColumns.join(", "),
+      }),
     });
   }
 
