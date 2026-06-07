@@ -33,6 +33,7 @@ Dieser Abschnitt ist die maßgebliche Referenz für jeden Schlüssel. Jeder Unte
   - [Parametertypen](#de-parameter-types)
   - [Besondere Parameterschlüssel (`palette`, `font`, `page_orientation`, `page_numbers`)](#de-special-keys)
 - [`data:`](#de-data)
+- [`preprocessing:`](#de-preprocessing)
 - [`template:`](#de-template)
 - [`data_protection:`](#de-data-protection)
 - [`export:`](#de-export)
@@ -49,6 +50,7 @@ Dieser Abschnitt ist die maßgebliche Referenz für jeden Schlüssel. Jeder Unte
 ```yaml
 parameters:        # Formularfelder vor der Berichtserstellung
 data:              # erwartete Tabellenblätter/Spalten in hochgeladenen .xlsx-Dateien
+preprocessing:     # abgeleitete Datensätze (Joins) vor dem Rendering
 template:          # gebündelte Markdown-Vorlagen zur Auswahl
 data_protection:   # Maskierungsschwelle für aggregierte Zählwerte
 export:            # DOCX-Gestaltung und Metadaten
@@ -198,6 +200,51 @@ data:
 **Prüfverhalten.** Abweichungen zwischen der hochgeladenen Datei und der deklarierten Form (fehlende Quelldatei, fehlendes Blatt, fehlende Spalten) erscheinen als **nicht-blockierende Warnungen** in einem gelben Banner — und diese Warnungen werden selbst in der gewählten Oberflächensprache angezeigt. Die Verarbeitung läuft weiter; jedes Diagramm oder jede Tabelle, die auf fehlende Daten verweist, wird in der Vorschau als roter „TBD"-Hinweis dargestellt, der Rest des Berichts bleibt intakt.
 
 **DataStore-Schlüssel.** Intern wird jedes geladene Blatt unter seinem Blattnamen abgelegt. Diagramm- und Tabellenblöcke verweisen über diesen Schlüssel auf Daten — z. B. sucht `data: Blatt 1` in einem Diagrammblock `DataStore["Blatt 1"]`.
+
+---
+
+<a id="de-preprocessing"></a>
+
+## `preprocessing:`
+
+Optionale, abgeleitete Datensätze, die **zwischen Datenladen und Rendering** aus den geladenen Blättern gebildet werden. Die Hauptoperation ist der **Join**: Zeilen aus einem Blatt mit Spalten anreichern, die über einen gemeinsamen Schlüssel in einem anderen Blatt nachgeschlagen werden. Das Ergebnis wird unter `name` im DataStore abgelegt und kann in Vorlagen wie ein normales Blatt referenziert werden (`data: <name>`).
+
+```yaml
+preprocessing:
+  joins:
+    - name: Zeitraum_Befoerderung   # Ausgabe-Datensatz (= left → reichert in place an)
+      left: Zeitraum_Befoerderung   # Basis; eine Ausgabezeile je left-Zeile (left join)
+      right: Stichtag               # nachgeschlagenes Blatt
+      on: PersNr                    # gemeinsamer Schlüssel (oder left_on / right_on)
+      type: left                    # left (unpassende behalten) | inner (verwerfen)
+      # select weglassen → alle right-Spalten übernehmen, die links fehlen
+      # select: [Beamte, {column: Org, as: Organisationseinheit}]   # explizit
+      # prefix: "ST_"               # Präfix für übernommene Spaltennamen
+      # indicator: "matched"        # bool-Spalte: hat die left-Zeile gematcht?
+```
+
+| Feld | Typ | Standard | Anmerkungen |
+|---|---|---|---|
+| `name` | String | — | Name des Ausgabe-Datensatzes (von `data:`-Blöcken referenziert). `name` = `left` reichert die Quelle direkt an. |
+| `left` | String | — | Basis-Datensatz; eine Ausgabezeile je left-Zeile (bei `left`). |
+| `right` | String | — | Datensatz, in dem nachgeschlagen wird. |
+| `on` | String | — | Schlüssel in beiden Blättern (Kurzform für gleiches `left_on`/`right_on`). |
+| `left_on` / `right_on` | String | — | Schlüssel mit unterschiedlichen Namen je Seite. |
+| `type` | Enum | `left` | `left` (unpassende left-Zeilen behalten) \| `inner` (verwerfen). |
+| `select` | Liste | alle | Zu übernehmende right-Spalten. Weglassen → alle, die nicht der Schlüssel und nicht bereits links vorhanden sind. Eintrag: Spaltenname oder `{ column, as }` (Umbenennung). |
+| `prefix` | String | `""` | Wird jedem übernommenen Spaltennamen vorangestellt (Kollisionsschutz). |
+| `indicator` | String | — | Optionale bool-Spalte: hat die left-Zeile eine right-Zeile getroffen? |
+
+**Semantik.**
+- **First-Match-Lookup**, kein SQL-Kreuzprodukt — eine left-Zeile erscheint höchstens einmal, auch wenn mehrere right-Zeilen denselben Schlüssel haben (Zählungen/Anteile bleiben stabil).
+- `type: left` behält unpassende left-Zeilen (übernommene Spalten leer, `indicator` false); `type: inner` verwirft sie.
+- `select` weggelassen → Anreicherung: alle right-Spalten außer dem Schlüssel und außer bereits links vorhandenen. Explizites `select` prüft jeden Namen gegen das right-Schema (fehlend → Warnung, übersprungen).
+- Joins laufen **in Reihenfolge**; ein späterer Join darf die Ausgabe eines früheren verwenden.
+- Schlüssel werden nach NFC- und Leerraum-Normalisierung verglichen.
+
+**Warum die StMAS-Vorlagen das brauchen.** Die `Zeitraum_*`-Ereignisblätter (z. B. `Zeitraum_Befoerderung`) enthalten nur Ereignisdaten, während Personenklassifikationen, die `filter:` der Diagramme nutzt — `Beamte`, `Tarifbeschäftigte` —, im `Stichtag`-Snapshot liegen. Der Join von `Stichtag` auf das Ereignisblatt über `PersNr` macht diese Spalten für die Ereignis-Diagramme verfügbar.
+
+Strukturelle Probleme (fehlendes Blatt, fehlender Schlüssel, fehlende Spalte, keine Treffer) erscheinen als **nicht-blockierende Warnungen** im selben gelben Banner wie die Datenprüfung — der Build bricht nie ab.
 
 ---
 
@@ -618,6 +665,7 @@ This section is the authoritative reference for every key. Each subsection opens
   - [Parameter types](#en-parameter-types)
   - [Special parameter keys (`palette`, `font`, `page_orientation`, `page_numbers`)](#en-special-keys)
 - [`data:`](#en-data)
+- [`preprocessing:`](#en-preprocessing)
 - [`template:`](#en-template)
 - [`data_protection:`](#en-data-protection)
 - [`export:`](#en-export)
@@ -634,6 +682,7 @@ This section is the authoritative reference for every key. Each subsection opens
 ```yaml
 parameters:        # form fields shown before report generation
 data:              # expected sheets/columns in uploaded .xlsx files
+preprocessing:     # derived datasets (joins) built before rendering
 template:          # bundled Markdown templates the user can pick from
 data_protection:   # masking threshold for aggregated counts
 export:            # DOCX styling and metadata
@@ -783,6 +832,51 @@ data:
 **Validation behavior.** Mismatches between the uploaded file and the declared shape (missing source file, missing sheet, missing columns) surface as **non-blocking warnings** in a yellow banner — and those warnings are themselves shown in the selected UI language. The pipeline continues; any chart or table that references missing data renders as a red "TBD" note in the preview, leaving the rest of the report intact.
 
 **DataStore keying.** Internally each loaded sheet is stored under its sheet name. Chart and table blocks reference data via this key — e.g. `data: Sheet 1` in a chart block looks up `DataStore["Sheet 1"]`.
+
+---
+
+<a id="en-preprocessing"></a>
+
+## `preprocessing:`
+
+Optional derived datasets built **between data load and rendering** from the loaded sheets. The main operation is a **join**: enrich rows in one sheet with columns looked up from another by a shared key. The result is stored under `name` in the DataStore and can be referenced in templates like a normal sheet (`data: <name>`).
+
+```yaml
+preprocessing:
+  joins:
+    - name: Zeitraum_Befoerderung   # output dataset (= left → enrich in place)
+      left: Zeitraum_Befoerderung   # base; one output row per left row (left join)
+      right: Stichtag               # looked-up sheet
+      on: PersNr                    # shared key (or left_on / right_on)
+      type: left                    # left (keep unmatched) | inner (drop)
+      # omit select → copy every right column not already on the left
+      # select: [Beamte, {column: Org, as: Organisationseinheit}]   # explicit
+      # prefix: "ST_"               # prepended to copied column names
+      # indicator: "matched"        # bool column: did the left row match?
+```
+
+| Field | Type | Default | Notes |
+|---|---|---|---|
+| `name` | string | — | Output dataset name (referenced by `data:` blocks). `name` = `left` enriches the source in place. |
+| `left` | string | — | Base dataset; one output row per left row (for `left`). |
+| `right` | string | — | Dataset to look values up in. |
+| `on` | string | — | Key present in both sheets (shorthand for equal `left_on`/`right_on`). |
+| `left_on` / `right_on` | string | — | Keys with different names on each side. |
+| `type` | enum | `left` | `left` (keep unmatched left rows) \| `inner` (drop them). |
+| `select` | list | all | Right columns to copy. Omit → every column that isn't the key and isn't already on the left. Entry: column name or `{ column, as }` (rename). |
+| `prefix` | string | `""` | Prepended to every copied column name (collision safety). |
+| `indicator` | string | — | Optional boolean column: did the left row match any right row? |
+
+**Semantics.**
+- **First-match lookup**, not a SQL cross-product — a left row appears at most once even if several right rows share its key (keeps counts/shares stable).
+- `type: left` keeps unmatched left rows (copied columns blank, `indicator` false); `type: inner` drops them.
+- `select` omitted → enrichment: every right column except the key and any already present on the left. Explicit `select` validates each name against the right schema (missing → warning, skipped).
+- Joins run **in order**; a later join may reference an earlier join's output.
+- Keys are matched after NFC + whitespace normalization.
+
+**Why the StMAS templates need it.** The `Zeitraum_*` event sheets (e.g. `Zeitraum_Befoerderung`) carry only event data, while person classifications used by chart `filter:`s — `Beamte`, `Tarifbeschäftigte` — live on the `Stichtag` snapshot. Joining `Stichtag` onto the event sheet by `PersNr` makes those columns available to the event charts.
+
+Structural problems (missing sheet, missing key, missing column, no matches) surface as **non-blocking warnings** in the same yellow banner as data validation — the build never aborts.
 
 ---
 

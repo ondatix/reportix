@@ -4,6 +4,7 @@
  */
 import { loadConfig } from "./modules/config";
 import { loadDataSources } from "./modules/data-loader";
+import { applyPreprocessing } from "./modules/preprocessing";
 import {
   buildParameterForm,
   collectParameterValues,
@@ -55,7 +56,7 @@ export function initApp(root: HTMLElement): void {
 
   root.innerHTML = `
     <img src="../img/ondatix_Logo_hell.png" alt="Reportix Logo" class="logo" height="80" align="right"/><br>
-    <h1>reportix</h1>
+    <h1>reportix - Gleichstellungskonzept</h1>
     <div id="language-bar" class="language-bar">
       <label for="language-select">${t("ui.language")}: </label>
       <select id="language-select"></select>
@@ -131,13 +132,17 @@ export function initApp(root: HTMLElement): void {
       if (f) files.set(fi.dataset.name!, await f.arrayBuffer());
     }
     const result = loadDataSources(files, config.data);
-    dataStore = result.store;
-    if (result.warnings.length > 0) {
+    // Build derived datasets (joins) before rendering; surface their warnings
+    // alongside the data-validation ones.
+    const pre = applyPreprocessing(result.store, config.preprocessing);
+    dataStore = pre.store;
+    const warnings = [...result.warnings, ...pre.warnings];
+    if (warnings.length > 0) {
       const heading = document.createElement("strong");
       heading.textContent = t("ui.data.warningsHeading");
       dataWarnings.appendChild(heading);
       const list = document.createElement("ul");
-      for (const w of result.warnings) {
+      for (const w of warnings) {
         const li = document.createElement("li");
         li.textContent = t("ui.data.warningLine", { source: w.source, message: w.message });
         list.appendChild(li);

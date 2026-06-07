@@ -75,6 +75,13 @@ const STRINGS: Record<Locale, Dict> = {
     "data.missingColumns":
       "Im Tabellenblatt „{sheet}“ fehlen Spalten: {missing}. Gefunden: {found}.",
 
+    // — Preprocessing (joins) —
+    "join.missingLeft": "Join: Linke Datenquelle „{sheet}“ nicht gefunden.",
+    "join.missingRight": "Join: Rechte Datenquelle „{sheet}“ nicht gefunden.",
+    "join.missingKey": "Join „{name}“: kein Schlüssel angegeben (`on` bzw. `left_on`/`right_on`).",
+    "join.missingColumn": "Join: Spalte „{column}“ in „{sheet}“ nicht gefunden — übersprungen.",
+    "join.noMatches": "Join: keine Übereinstimmung zwischen „{left}“ und „{right}“ (Schlüsselwerte passen nicht).",
+
     // — Renderer —
     "render.kind.chart": "Diagramm",
     "render.kind.table": "Tabelle",
@@ -149,6 +156,13 @@ const STRINGS: Record<Locale, Dict> = {
     "data.emptySheet": 'Sheet "{sheet}" is empty.',
     "data.missingColumns":
       'Sheet "{sheet}" is missing columns: {missing}. Found: {found}.',
+
+    // — Preprocessing (joins) —
+    "join.missingLeft": 'Join: left data source "{sheet}" not found.',
+    "join.missingRight": 'Join: right data source "{sheet}" not found.',
+    "join.missingKey": 'Join "{name}": no key specified (`on`, or `left_on`/`right_on`).',
+    "join.missingColumn": 'Join: column "{column}" not found in "{sheet}" — skipped.',
+    "join.noMatches": 'Join: no rows matched between "{left}" and "{right}" (key values do not line up).',
 
     // — Renderer —
     "render.kind.chart": "Chart",

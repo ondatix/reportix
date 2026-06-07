@@ -4,7 +4,7 @@
  */
 import { parse as parseYAML } from "yaml";
 import { getLocale, DEFAULT_LOCALE } from "../i18n";
-import type { AppConfig, ParameterDef, DataSourceDef, SheetDef, TemplateDef, TemplateOption, ExportConfig, ChartDefaults, DataProtectionConfig } from "../types";
+import type { AppConfig, ParameterDef, DataSourceDef, SheetDef, TemplateDef, TemplateOption, ExportConfig, ChartDefaults, DataProtectionConfig, PreprocessingConfig, JoinDef, JoinColumnSelect } from "../types";
 
 /**
  * Resolve a possibly-localized string for the active locale. A value may be:
@@ -21,6 +21,21 @@ function resolveLocalized(value: unknown, fallback: string): string {
     return String(picked ?? fallback);
   }
   return value === undefined || value === null ? fallback : String(value);
+}
+
+/** Parse a join `select:` list (each entry a plain string or `{ column, as }`). */
+function parseJoinSelect(value: unknown): (string | JoinColumnSelect)[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const out: (string | JoinColumnSelect)[] = [];
+  for (const entry of value) {
+    if (typeof entry === "string") {
+      out.push(entry);
+    } else if (entry && typeof entry === "object") {
+      const e = entry as Record<string, unknown>;
+      if (e.column != null) out.push({ column: String(e.column), as: e.as != null ? String(e.as) : undefined });
+    }
+  }
+  return out.length > 0 ? out : undefined;
 }
 
 export function parseConfig(yamlString: string): AppConfig {
@@ -279,7 +294,30 @@ export function parseConfig(yamlString: string): AppConfig {
     };
   }
 
-  return { parameters, data, template, export: exportConfig, charts, dataProtection };
+  let preprocessing: PreprocessingConfig | undefined;
+  if (raw.preprocessing && typeof raw.preprocessing === "object") {
+    const p = raw.preprocessing as Record<string, unknown>;
+    const joinsRaw = p.joins as Array<Record<string, unknown>> | undefined;
+    if (Array.isArray(joinsRaw)) {
+      const joins: JoinDef[] = joinsRaw
+        .map((j) => ({
+          name: String(j.name ?? ""),
+          left: String(j.left ?? ""),
+          right: String(j.right ?? ""),
+          on: j.on as string | undefined,
+          leftOn: (j.left_on ?? j.leftOn) as string | undefined,
+          rightOn: (j.right_on ?? j.rightOn) as string | undefined,
+          type: j.type === "inner" ? ("inner" as const) : ("left" as const),
+          select: parseJoinSelect(j.select),
+          prefix: j.prefix as string | undefined,
+          indicator: j.indicator as string | undefined,
+        }))
+        .filter((j) => j.name && j.left && j.right);
+      preprocessing = { joins };
+    }
+  }
+
+  return { parameters, data, template, preprocessing, export: exportConfig, charts, dataProtection };
 }
 
 /**

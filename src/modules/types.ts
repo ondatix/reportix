@@ -275,10 +275,60 @@ export interface DataProtectionConfig {
   smallestGroup?: number;
 }
 
+// ── Data preprocessing (joins) ──────────────────────────────────────
+
+/** A right-side column to copy onto the left rows, optionally renamed. */
+export interface JoinColumnSelect {
+  /** Column name in the `right` dataset. */
+  column: string;
+  /** Output column name (defaults to `column`). */
+  as?: string;
+}
+
+/**
+ * A single join: look up matching rows in `right` by key and copy its columns
+ * onto each `left` row. The result is stored under `name` (which may equal
+ * `left` to enrich it in place). First-match (lookup) semantics — a left row
+ * is never duplicated, even if several right rows share its key.
+ */
+export interface JoinDef {
+  /** Output dataset name (referenced by template `data:` blocks). */
+  name: string;
+  /** Base dataset — one output row per left row (left join) or per match (inner). */
+  left: string;
+  /** Dataset to look values up in. */
+  right: string;
+  /** Join key present in both datasets (shorthand for equal `leftOn`/`rightOn`). */
+  on?: string;
+  /** Join key in `left` (overrides `on`). */
+  leftOn?: string;
+  /** Join key in `right` (overrides `on`). */
+  rightOn?: string;
+  /** `left` (default — keep unmatched left rows) or `inner` (drop them). */
+  type?: "left" | "inner";
+  /**
+   * Right columns to copy. Omit to copy every right column that isn't the key
+   * and isn't already present on the left (enrichment). Each entry is a plain
+   * column name or `{ column, as }`.
+   */
+  select?: (string | JoinColumnSelect)[];
+  /** Prefix prepended to every copied column name (collision safety). */
+  prefix?: string;
+  /** Optional boolean column set to whether the left row matched any right row. */
+  indicator?: string;
+}
+
+export interface PreprocessingConfig {
+  /** Joins applied in order; a later join can reference an earlier one's output. */
+  joins?: JoinDef[];
+}
+
 export interface AppConfig {
   parameters: Record<string, ParameterDef>;
   data: Record<string, DataSourceDef>;
   template: TemplateDef;
+  /** Derived datasets (joins) built from the loaded sheets before rendering. */
+  preprocessing?: PreprocessingConfig;
   export?: ExportConfig;
   charts?: ChartDefaults;
   dataProtection?: DataProtectionConfig;

@@ -22,6 +22,7 @@ Each utility is a self-contained module usable independently in other projects.
 
 0. **Load config** — parse the YAML config file (see Config File); drives all subsequent steps
 1. **Load data** — import data files as specified in `[data]` (e.g. `.xlsx`)
+1.5. **Preprocess data** — build derived datasets from `[preprocessing]` (joins; see Data Preprocessing) before rendering
 2. **Query parameters** — render a form from the `[parameters]` section and collect user inputs
 3. **Load report template** — parse the Markdown template file specified in `[template]` (see Template Format)
 4. **Generate HTML preview** — render the report in-browser
@@ -402,6 +403,35 @@ data_protection:
 - **Tables:** affected cells render as `<5` instead of the formatted value.
 - **Charts:** affected bars/slices are clamped to the threshold so a small bar is still drawn, and the tooltip displays `<5` instead of the actual number.
 - **Applies to** count-like operations (`count`, `sum`, `share_total`, `share_group`). Means/medians/min/max are not masked because they don't reveal group sizes.
+
+## Data Preprocessing
+
+The `preprocessing` module (`src/modules/preprocessing/`) runs **between data load and rendering**, deriving additional datasets from the loaded sheets. It is config-driven, self-contained, and never throws — structural problems surface as non-blocking warnings shown alongside the data-validation ones.
+
+**Joins** are the main operation. Each join looks up matching rows in `right` by a shared key and copies its columns onto each `left` row, storing the result under `name`. The DataStore is keyed by dataset name, so template `data:` blocks reference a join output exactly like a sheet. Setting `name` equal to `left` **enriches the source in place** — existing `data: <left>` blocks then pick up the added columns with no template change.
+
+```yaml
+preprocessing:
+  joins:
+    - name: Zeitraum_Befoerderung   # output dataset (= left → enrich in place)
+      left: Zeitraum_Befoerderung   # base; one output row per left row (left join)
+      right: Stichtag               # looked-up sheet
+      on: PersNr                    # shared key (or left_on / right_on for different names)
+      type: left                    # left (keep unmatched) | inner (drop unmatched)
+      # select: omitted → copy every right column not already on the left
+      # select: [Beamte, {column: Org, as: Organisationseinheit}]   # explicit
+      # prefix: "ST_"               # prepended to copied column names
+      # indicator: "matched"        # bool column: did the left row match?
+```
+
+**Semantics:**
+- **First-match lookup**, not a SQL cross-product — a left row appears at most once even if several right rows share its key (keeps counts/shares stable).
+- `type: left` keeps unmatched left rows (copied columns blank, `indicator` false); `type: inner` drops them.
+- `select` omitted → enrichment: copy every right column except the key and any already present on the left. Explicit `select` validates each name against the right schema (missing → warning, skipped).
+- Joins run **in order**; a later join may reference an earlier join's output.
+- Keys are matched after NFC + whitespace normalization (so `PersNr` numbers/strings line up).
+
+**Why the StMAS templates need it:** the `Zeitraum_*` event sheets (e.g. `Zeitraum_Befoerderung`) carry only event data, while person classifications used by chart `filter:`s — `Beamte`, `Tarifbeschäftigte` — live on the `Stichtag` master snapshot. Joining `Stichtag` onto the event sheet by `PersNr` makes those columns available to the event charts.
 
 ## Architecture
 

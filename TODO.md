@@ -3,6 +3,7 @@
 1. Join data
   - configurable in config.yaml
   - extra section: data_preprocessing
+  - TODO: test
 2. table section
 
 ## Forks
@@ -50,7 +51,7 @@
 ## Templates
 - [ ] Create the StMAS Template
   - [ ] Table section at the end
-  - [ ] Data Preprocessing
+  - [x] Data Preprocessing
 - [x] Polish callouts
 
 ## License
