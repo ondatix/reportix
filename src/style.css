@@ -38,7 +38,31 @@ h1 {
 }
 
 .language-bar select {
-  padding: 0.2rem 0.4rem;
+  padding: 0.3rem 1.8rem 0.3rem 0.7rem;
+  border: 1px solid var(--purple-full);
+  border-radius: 4px;
+  background-color: var(--purple-light);
+  color: var(--deep-violet);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  /* Purple chevron so the native dropdown arrow matches the CI */
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%232D1B4E' stroke-width='1.6' d='M2.5 4.5 6 8l3.5-3.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.language-bar select:hover {
+  background-color: var(--purple-medium);
+  border-color: var(--purple-full);
+}
+
+.language-bar select:focus-visible {
+  outline: 2px solid var(--purple-full);
+  outline-offset: 1px;
 }
 
 .step {
@@ -62,6 +86,26 @@ label {
 
 input[type="file"] {
   margin-top: 0.25rem;
+  color: var(--black);
+}
+
+/* Native file-picker button — themed purple to fit the CI */
+input[type="file"]::file-selector-button {
+  margin-right: 0.75rem;
+  padding: 0.45rem 1rem;
+  background: var(--purple-full);
+  color: var(--deep-violet);
+  border: none;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+input[type="file"]::file-selector-button:hover {
+  background: var(--purple-medium);
 }
 
 /* Parameter form */
@@ -83,6 +127,27 @@ input[type="file"] {
   border: 1px solid var(--purple-medium);
   border-radius: 4px;
   font-size: 1rem;
+}
+
+/* Boolean parameter — small checkbox sitting inline, left of its title */
+/* .parameter-field:has(input[type="checkbox"]) {
+  /* display: flex; 
+  align-items: center;
+  gap: 0.5rem;
+} */
+
+/* .parameter-field:has(input[type="checkbox"]) label {
+  margin-bottom: -2;  /* visually center the label with the checkbox, which is slightly taller than the text 
+} */
+
+.parameter-field input[type="checkbox"] {
+  /* flex: 0 0 auto;     sits right of the title, vertically centered, inline */
+  width: 1.1rem;      /* override the full-width stretch from the rule above */
+  height: 1.1rem;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--purple-medium);
+  cursor: pointer;
 }
 
 /* Palette parameter — illustrated radio group */
@@ -313,3 +378,165 @@ button:hover {
 .data-warnings li {
   margin: 0.15rem 0;
 }
+
+/* ── Icon radio widgets (page orientation, page-number position) ───────── */
+.orientation-field,
+.page-numbers-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem;
+  border: 1px solid var(--purple-medium);
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem 0.75rem;
+  margin: 0;
+}
+
+.orientation-field legend,
+.page-numbers-field legend {
+  font-weight: 600;
+  padding: 0 0.25rem;
+  width: 100%;
+}
+
+.orientation-option,
+.page-number-option {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  min-width: 3.5rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 400;
+}
+
+.orientation-option:hover,
+.page-number-option:hover {
+  background: var(--purple-light);
+}
+
+.orientation-option:has(input:checked),
+.page-number-option:has(input:checked) {
+  border-color: var(--purple-full);
+  background: var(--purple-medium);
+}
+
+.orientation-option:has(input:focus-visible),
+.page-number-option:has(input:focus-visible) {
+  outline: 2px solid var(--purple-full);
+  outline-offset: 1px;
+}
+
+/* Visually hide the native radio; selection is shown via the wrapper. */
+.orientation-option input[type="radio"],
+.page-number-option input[type="radio"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.icon-option-caption {
+  font-size: 0.8rem;
+  color: var(--deep-violet);
+}
+
+/* Page-shape icons */
+.orientation-icon {
+  display: block;
+  border: 2px solid var(--deep-violet);
+  border-radius: 2px;
+  background: var(--white);
+}
+
+.orientation-portrait { width: 1.7rem; height: 2.3rem; }
+.orientation-landscape { width: 2.3rem; height: 1.7rem; }
+
+/* Page with a footer page-number mark positioned left/center/right */
+.page-number-icon {
+  position: relative;
+  display: block;
+  width: 1.8rem;
+  height: 2.3rem;
+  border: 2px solid var(--deep-violet);
+  border-radius: 2px;
+  background: var(--white);
+}
+
+.page-number-icon::after {
+  content: "";
+  position: absolute;
+  bottom: 3px;
+  width: 0.5rem;
+  height: 0.18rem;
+  background: var(--deep-violet);
+  border-radius: 1px;
+}
+
+.page-number-left::after { left: 3px; }
+.page-number-center::after { left: 50%; transform: translateX(-50%); }
+.page-number-right::after { right: 3px; }
+.page-number-none::after { display: none; }
+.page-number-none { opacity: 0.55; }
+
+/* ── Section numbering (preview) — CSS counters on h2–h4 ──────────────── */
+.report-preview.section-numbered { counter-reset: sec2; }
+.report-preview.section-numbered h2 { counter-reset: sec3; }
+.report-preview.section-numbered h3 { counter-reset: sec4; }
+
+.report-preview.section-numbered h2::before {
+  counter-increment: sec2;
+  content: counter(sec2) ". ";
+}
+.report-preview.section-numbered h3::before {
+  counter-increment: sec3;
+  content: counter(sec2) "." counter(sec3) ". ";
+}
+.report-preview.section-numbered h4::before {
+  counter-increment: sec4;
+  content: counter(sec2) "." counter(sec3) "." counter(sec4) ". ";
+}
+
+/* ── Table of contents (preview) ──────────────────────────────────────── */
+.report-toc {
+  margin: 1rem 0 1.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--purple-medium);
+  border-radius: 6px;
+  background: var(--purple-light);
+}
+
+.report-toc-title {
+  margin: 0 0 0.5rem;
+  font-weight: 700;
+  color: var(--deep-violet);
+}
+
+.report-toc ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.report-toc li {
+  margin: 0.15rem 0;
+}
+
+.report-toc a {
+  color: var(--deep-violet);
+  text-decoration: none;
+}
+
+.report-toc a:hover {
+  text-decoration: underline;
+}
+
+.report-toc-l1 { padding-left: 1.25rem; }
+.report-toc-l2 { padding-left: 2.5rem; }

@@ -134,7 +134,7 @@ export:
       footer: 709    # ~12 mm from bottom edge to footer
 
   page_numbers:
-    show: true
+    position: center # left | center | right | none (footer page-number placement)
     start: 1
     format: decimal  # decimal | upperRoman | lowerRoman | upperLetter | lowerLetter
 
@@ -197,6 +197,15 @@ charts:
 
 **Localized labels:** every `label` (parameter labels and `template.files` labels) accepts either a plain string or a per-locale map `{ de: "…", en: "…" }`. The active language (see Internationalization) selects the entry, falling back to the default locale and then to any provided entry.
 
+**Bind paths target the parsed `AppConfig` (camelCase), not the raw YAML keys.** Most leaves are spelled the same in both (`export.font.size`, `export.page.orientation`), but multi-word keys differ: bind to `export.pageNumbers.position`, `export.sectionNumbering`, `dataProtection.smallestGroup` — **not** the snake_case `export.page_numbers.show` etc. A bind to a non-existent path silently no-ops (the override never reaches the consumer). The parser maps snake_case YAML → camelCase in `src/modules/config/`.
+
+**Special parameter widgets** (special-cased by key in `src/modules/parameters/`): `palette` and `font` render as illustrated radios; `page_orientation` and `page_numbers` render as CSS-drawn **icon radios** (page shapes / footer-number positions) so the choices need no translated option text — captions come from the i18n module.
+
+**Structure features (preview + DOCX):**
+- The first `# {{title}}` (an `<h1>`) is treated as the **document title** — rendered as a centred title, excluded from the TOC and from section numbering, and placed before the TOC.
+- `section_numbering: true` numbers section headings starting at `<h2>` (`1.`, `1.1.`, `1.1.1.`) — in the preview via CSS counters and in the DOCX via per-heading multilevel numbering.
+- `toc: true` inserts a table of contents **just before the first `<h2>`** — a Word TOC field in the DOCX and a `<nav class="report-toc">` in the preview (skipped by the exporter so it isn't duplicated).
+
 **Export settings:**
 - `filename` — output file name (default: `report.docx`)
 - `locale` — locale for number/currency formatting
@@ -213,7 +222,7 @@ charts:
 - `page.orientation` — `portrait` or `landscape`; auto-swaps A4 dimensions
 - `page.width` / `page.height` — page dimensions in twips (default: A4)
 - `page.margin.*` — top/right/bottom/left margins plus `header`/`footer` offset from page edge
-- `page_numbers.show` — insert page numbers in the footer (default: `true`)
+- `page_numbers.position` — footer page-number placement: `left`, `center`, `right`, or `none` (hides it). Default: `center`. The number is rendered plain (e.g. `1`), without a total. (Legacy `page_numbers.show: false` is still honoured as `position: none`.)
 - `page_numbers.start` — starting page number
 - `page_numbers.format` — number style: `decimal`, `upperRoman`, `lowerRoman`, `upperLetter`, `lowerLetter`
 - `header.text` — static text rendered in the page header

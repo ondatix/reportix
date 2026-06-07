@@ -74,6 +74,7 @@ interface ResolvedSettings {
   marginFooter: number;
   // page numbers
   showPageNumbers: boolean;
+  pageNumberAlignment: (typeof AlignmentType)[keyof typeof AlignmentType];
   pageNumberStart: number;
   pageNumberFormat: (typeof NumberFormat)[keyof typeof NumberFormat];
   // header / footer text
@@ -90,6 +91,13 @@ interface ResolvedSettings {
   // Callout box overrides (per-class).
   definitionBox?: CalloutBoxConfig;
   summaryBox?: CalloutBoxConfig;
+  // Transient conversion state (set per export, not from config):
+  /** The element rendered as the document title (first <h1>) — excluded from headings. */
+  titleEl?: HTMLElement | null;
+  /** The first section heading (<h2>); the TOC is inserted just before it. */
+  firstH2El?: HTMLElement | null;
+  /** Mutable latch so the TOC is emitted exactly once. */
+  tocInserted?: boolean;
 }
 
 /** Reference id used to bind the multilevel numbering scheme to heading styles. */
@@ -141,6 +149,12 @@ function resolveSettings(c?: ExportConfig): ResolvedSettings {
     ? convertMillimetersToTwip(210)
     : convertMillimetersToTwip(297);
 
+  // Page-number placement: prefer the new `position` field; fall back to the
+  // legacy `show` boolean (false ≡ none). Default: centered.
+  const pnPosition =
+    c?.pageNumbers?.position ?? (c?.pageNumbers?.show === false ? "none" : "center");
+  const showPageNumbers = pnPosition !== "none";
+
   return {
     filename: c?.filename ?? "report.docx",
     locale: c?.locale ?? "en-US",
@@ -171,7 +185,8 @@ function resolveSettings(c?: ExportConfig): ResolvedSettings {
     marginLeft: c?.page?.margin?.left ?? MM25,
     marginHeader: c?.page?.margin?.header ?? convertMillimetersToTwip(12),
     marginFooter: c?.page?.margin?.footer ?? convertMillimetersToTwip(12),
-    showPageNumbers: c?.pageNumbers?.show ?? true,
+    showPageNumbers,
+    pageNumberAlignment: resolveAlignment(showPageNumbers ? pnPosition : "center"),
     pageNumberStart: c?.pageNumbers?.start ?? 1,
     pageNumberFormat: resolvePageNumberFormat(c?.pageNumbers?.format),
     headerText: c?.header?.text ?? "",
@@ -207,10 +222,56 @@ function buildHeadingNumbering(): INumberingOptions {
   };
 }
 
-function headingNumberingProp(level: number): {
-  numbering: { reference: string; level: number };
-} {
-  return { numbering: { reference: HEADING_NUMBERING_REF, level } };
+/**
+ * Map an HTML heading level to a numbering level. Sections start at <h2>
+ * (the document's <h1> is the title), so h2→0 ("1."), h3→1 ("1.1."), h4→2.
+ * Returns null for levels that aren't numbered.
+ */
+function numberingLevelFor(
+  level: (typeof HeadingLevel)[keyof typeof HeadingLevel]
+): number | null {
+  switch (level) {
+    case HeadingLevel.HEADING_1:
+    case HeadingLevel.HEADING_2: return 0;
+    case HeadingLevel.HEADING_3: return 1;
+    case HeadingLevel.HEADING_4: return 2;
+    case HeadingLevel.HEADING_5:
+    case HeadingLevel.HEADING_6: return 3;
+    default: return null;
+  }
+}
+
+/**
+ * The TOC block: a styled (non-heading, so self-excluded) title paragraph,
+ * the Word TOC field over heading levels 1–4, and a trailing break. Latches
+ * `s.tocInserted` so it's emitted exactly once.
+ */
+function tocBlock(s: ResolvedSettings): (Paragraph | TableOfContents)[] {
+  s.tocInserted = true;
+  return [
+    new Paragraph({
+      spacing: { before: 120, after: 120 },
+      children: [
+        new TextRun({ text: t("export.toc"), bold: true, font: s.headingFamily, size: s.h2Size, color: s.headingColor }),
+      ],
+    }),
+    new TableOfContents(t("export.toc"), {
+      hyperlink: true,
+      headingStyleRange: "1-4",
+    }),
+    new Paragraph({ children: [new TextRun({ text: "", break: 1 })] }),
+  ];
+}
+
+/** Render the document title (first <h1>) as a centred, non-heading title. */
+function titleParagraph(el: HTMLElement, s: ResolvedSettings): Paragraph {
+  return new Paragraph({
+    alignment: AlignmentType.CENTER,
+    spacing: { before: 0, after: 240 },
+    children: [
+      new TextRun({ text: el.textContent ?? "", bold: true, font: s.headingFamily, size: s.h1Size, color: s.headingColor }),
+    ],
+  });
 }
 
 // ── Public API ───────────────────────────────────────────────────────
@@ -220,32 +281,22 @@ export async function exportToDocx(
   config?: ExportConfig
 ): Promise<void> {
   const s = resolveSettings(config);
-  const bodyChildren = convertChildren(container, s);
-  const sectionChildren: (Paragraph | Table | TableOfContents)[] = [];
 
-  if (s.toc) {
-    sectionChildren.push(
-      new Paragraph({
-        heading: HeadingLevel.HEADING_1,
-        children: [new TextRun({ text: t("export.toc"), font: s.headingFamily })],
-      }),
-      new TableOfContents(t("export.toc"), {
-        hyperlink: true,
-        headingStyleRange: "1-4",
-      }),
-      new Paragraph({ children: [new TextRun({ text: "", break: 1 })] })
-    );
+  // Front matter: the first <h1> is the document title — rendered as a centred
+  // title (not a heading style, so it's excluded from the TOC and numbering).
+  // The TOC is injected right before the first section heading (<h2>), so the
+  // title (and any subtitle above the first section) precede it.
+  s.titleEl = container.querySelector("h1");
+  s.firstH2El = s.toc ? container.querySelector("h2") : null;
+  s.tocInserted = false;
+
+  const sectionChildren: DocxChild[] = convertChildren(container, s);
+
+  // Fallback: TOC requested but there is no <h2> to anchor it to — place it
+  // right after the title (or at the very top when there is no title).
+  if (s.toc && !s.tocInserted) {
+    sectionChildren.splice(s.titleEl ? 1 : 0, 0, ...tocBlock(s));
   }
-  sectionChildren.push(...bodyChildren);
-
-  // When section numbering is on, bind heading styles to a multilevel
-  // numbering ref so Word renders "1.", "1.1.", etc. automatically.
-  const numberingClause = s.sectionNumbering
-    ? { paragraph: { ...headingNumberingProp(0) } }
-    : {};
-  const heading2Numbering = s.sectionNumbering ? headingNumberingProp(1) : {};
-  const heading3Numbering = s.sectionNumbering ? headingNumberingProp(2) : {};
-  const heading4Numbering = s.sectionNumbering ? headingNumberingProp(3) : {};
 
   const doc = new Document({
     title: s.title,
@@ -276,19 +327,19 @@ export async function exportToDocx(
         },
         heading1: {
           run: { font: s.headingFamily, size: s.h1Size, color: s.headingColor, bold: true },
-          paragraph: { spacing: { before: 240, after: 120 }, ...numberingClause.paragraph },
+          paragraph: { spacing: { before: 240, after: 120 } },
         },
         heading2: {
           run: { font: s.headingFamily, size: s.h2Size, color: s.headingColor, bold: true },
-          paragraph: { spacing: { before: 200, after: 80 }, ...heading2Numbering },
+          paragraph: { spacing: { before: 200, after: 80 } },
         },
         heading3: {
           run: { font: s.headingFamily, size: s.h3Size, color: s.headingColor, bold: true },
-          paragraph: { spacing: { before: 160, after: 60 }, ...heading3Numbering },
+          paragraph: { spacing: { before: 160, after: 60 } },
         },
         heading4: {
           run: { font: s.headingFamily, size: s.h4Size, color: s.headingColor, bold: true },
-          paragraph: { spacing: { before: 120, after: 40 }, ...heading4Numbering },
+          paragraph: { spacing: { before: 120, after: 40 } },
         },
       },
     },
@@ -350,23 +401,23 @@ function buildFooter(s: ResolvedSettings): Paragraph {
     runs.push(new TextRun({ text: s.footerText + "    ", font: s.fontFamily, size: s.fontSize }));
   }
 
+  // Plain current page number ("1"), no total. Alignment follows the chosen
+  // position (left/center/right); "none" already cleared showPageNumbers.
   if (s.showPageNumbers) {
     runs.push(
-      new TextRun({ children: [PageNumber.CURRENT], font: s.fontFamily, size: s.fontSize }),
-      new TextRun({ text: " / ", font: s.fontFamily, size: s.fontSize }),
-      new TextRun({ children: [PageNumber.TOTAL_PAGES], font: s.fontFamily, size: s.fontSize })
+      new TextRun({ children: [PageNumber.CURRENT], font: s.fontFamily, size: s.fontSize })
     );
   }
 
   return new Paragraph({
     children: runs,
-    alignment: (!s.footerText && s.showPageNumbers) ? AlignmentType.CENTER : AlignmentType.LEFT,
+    alignment: s.footerText ? AlignmentType.LEFT : s.pageNumberAlignment,
   });
 }
 
 // ── DOM → docx conversion ─────────────────────────────────────────────
 
-type DocxChild = Paragraph | Table;
+type DocxChild = Paragraph | Table | TableOfContents;
 
 function convertChildren(el: HTMLElement, s: ResolvedSettings): DocxChild[] {
   const result: DocxChild[] = [];
@@ -395,10 +446,22 @@ function convertChildren(el: HTMLElement, s: ResolvedSettings): DocxChild[] {
  * block elements aren't accidentally treated as containers of paragraphs.
  */
 function convertElement(child: HTMLElement, s: ResolvedSettings): DocxChild[] {
+  // The preview's own TOC is rebuilt natively in the .docx — skip it here.
+  if (child.classList.contains("report-toc")) return [];
+
   const tag = child.tagName.toLowerCase();
   switch (tag) {
-    case "h1": return [heading(child, HeadingLevel.HEADING_1, s)];
-    case "h2": return [heading(child, HeadingLevel.HEADING_2, s)];
+    case "h1":
+      // The first <h1> is the document title — render it specially, not as a heading.
+      if (child === s.titleEl) return [titleParagraph(child, s)];
+      return [heading(child, HeadingLevel.HEADING_1, s)];
+    case "h2": {
+      // Inject the TOC right before the first section heading.
+      const out: DocxChild[] = [];
+      if (s.toc && !s.tocInserted && child === s.firstH2El) out.push(...tocBlock(s));
+      out.push(heading(child, HeadingLevel.HEADING_2, s));
+      return out;
+    }
     case "h3": return [heading(child, HeadingLevel.HEADING_3, s)];
     case "h4": return [heading(child, HeadingLevel.HEADING_4, s)];
     case "h5": return [heading(child, HeadingLevel.HEADING_5, s)];
@@ -421,8 +484,12 @@ function heading(
   level: (typeof HeadingLevel)[keyof typeof HeadingLevel],
   s: ResolvedSettings
 ): Paragraph {
+  // Apply multilevel numbering per-heading (more reliable than style-bound
+  // numbering) so Word renders "1.", "1.1.", … when section numbering is on.
+  const nl = s.sectionNumbering ? numberingLevelFor(level) : null;
   return new Paragraph({
     heading: level,
+    numbering: nl !== null ? { reference: HEADING_NUMBERING_REF, level: nl } : undefined,
     children: [new TextRun({ text: el.textContent ?? "", font: s.headingFamily })],
   });
 }

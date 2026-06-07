@@ -88,11 +88,18 @@ parameters:
     type: text
     bind: export.footer.text
   page_numbers:
+    # Rendered as page-icon radios (left | center | right | none); "none" hides
+    # the footer page number. Values are translation-free; captions localized.
     label:
-      de: "Seitenzahlen anzeigen"
-      en: "Show page numbers"
-    type: boolean
-    bind: export.page_numbers.show
+      de: "Seitenzahlen"
+      en: "Page numbers"
+    type: select
+    bind: export.pageNumbers.position
+    options:
+      - left
+      - center
+      - right
+      - none
   filename:
     label:
       de: "Dateiname der Ausgabe"
@@ -120,13 +127,13 @@ parameters:
       de: "Schwellenwert kleinste Gruppe"
       en: "Smallest group threshold"
     type: number
-    bind: data_protection.smallest_group
+    bind: dataProtection.smallestGroup
   section_numbering:
     label:
       de: "Überschriften nummerieren (1., 1.1., …)"
       en: "Number headings (1., 1.1., …)"
     type: boolean
-    bind: export.section_numbering
+    bind: export.sectionNumbering
   toc:
     label:
       de: "Inhaltsverzeichnis einfügen"
@@ -275,7 +282,7 @@ export:
       footer: 709              # ~12 mm from bottom edge to footer
 
   page_numbers:
-    show: true                 # bound by parameters.page_numbers
+    position: center           # left | center | right | none — bound by parameters.page_numbers
     start: 1
     format: decimal            # decimal | upperRoman | lowerRoman | upperLetter | lowerLetter
 

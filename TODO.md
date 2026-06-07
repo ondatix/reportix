@@ -1,6 +1,9 @@
 # TODO
 
-- Warnings bei fehlenden Daten, aber trotzdem lauffähig
+1. Join data
+  - configurable in config.yaml
+  - extra section: data_preprocessing
+2. table section
 
 ## Forks
 - Main Fork
@@ -11,7 +14,6 @@
   - Data preprocessing
   - Config
   - Template
-  - German / Locale control
 
 
 ## README
@@ -19,15 +21,15 @@
 - [x] Quick Start: mention to run app in root
 
 ## Parameters
-- Data validation only throws warning
+- [x] Data validation only throws warning
 
 ## Design
 - [x] Prepare generic CSS
 - [x] Apply ondatix theme
 
 ## Config
-- [ ] Create generic config
-- [ ] Create StMAS config
+- [x] Create generic config
+- [x] Create StMAS config
 - [x] Create config specification
 - [x] Add section numbering option and toc option
 - [x] Add parameter logic (parameters are set in config, but can be overwritten by users)
@@ -35,7 +37,7 @@
 ## Charts and Tables
 - [ ] Accessible charts
   - [ ] Actual numbers in the charts?
-  - [ ] Titles?
+  - [x] Titles?
 - [ ] Well-formed tables
   - [ ] Format (centered or block)
   - [ ] Config options

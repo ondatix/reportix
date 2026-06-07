@@ -144,6 +144,7 @@ export function parseConfig(yamlString: string): AppConfig {
 
       pageNumbers: pageNumRaw
         ? {
+            position: pageNumRaw.position as string | undefined,
             show: pageNumRaw.show as boolean | undefined,
             start: pageNumRaw.start as number | undefined,
             format: pageNumRaw.format as string | undefined,

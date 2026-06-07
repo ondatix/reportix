@@ -50,9 +50,17 @@ const STRINGS: Record<Locale, Dict> = {
     "ui.button.export": "Als .docx exportieren",
     "ui.button.loadValidate": "Daten laden und prüfen",
     "ui.button.generate": "Bericht erstellen",
-    "ui.data.expectedSheets": "{name} (erwartete Tabellenblätter: {sheets}): ",
+    "ui.data.expectedSheets": "{name}\n\t(erwartete Tabellenblätter: {sheets}): ",
     "ui.data.warningsHeading": "Warnungen bei der Datenprüfung:",
     "ui.data.warningLine": "[{source}] {message}",
+
+    // — Parameter widgets (icon radios) —
+    "param.orientation.portrait": "Hochformat",
+    "param.orientation.landscape": "Querformat",
+    "param.pageNumbers.left": "Links",
+    "param.pageNumbers.center": "Zentriert",
+    "param.pageNumbers.right": "Rechts",
+    "param.pageNumbers.none": "Keine",
 
     // — Startup / config errors —
     "error.noTemplates":
@@ -117,9 +125,17 @@ const STRINGS: Record<Locale, Dict> = {
     "ui.button.export": "Export as .docx",
     "ui.button.loadValidate": "Load & Validate Data",
     "ui.button.generate": "Generate Report",
-    "ui.data.expectedSheets": "{name} (expected sheets: {sheets}): ",
+    "ui.data.expectedSheets": "{name}\n\t(expected sheets: {sheets}): ",
     "ui.data.warningsHeading": "Data validation warnings:",
     "ui.data.warningLine": "[{source}] {message}",
+
+    // — Parameter widgets (icon radios) —
+    "param.orientation.portrait": "Portrait",
+    "param.orientation.landscape": "Landscape",
+    "param.pageNumbers.left": "Left",
+    "param.pageNumbers.center": "Center",
+    "param.pageNumbers.right": "Right",
+    "param.pageNumbers.none": "None",
 
     // — Startup / config errors —
     "error.noTemplates":

@@ -52,6 +52,74 @@ export function renderBlocks(
 }
 
 /**
+ * Apply document-level structure to an already-rendered preview:
+ *   • section numbering — toggles a CSS-counter class so headings render
+ *     "1.", "1.1.", … (sections start at <h2>; the <h1> title is excluded).
+ *   • table of contents — builds a `<nav class="report-toc">` listing the
+ *     section headings and inserts it just before the first <h2> (so it sits
+ *     after the title/subtitle front matter, matching the .docx layout).
+ *
+ * Section numbers are computed in JS for the TOC entries so they match the
+ * CSS-counter numbers shown on the headings. Idempotent per render — the app
+ * rebuilds the preview from scratch each time.
+ */
+export function applyDocumentStructure(
+  container: HTMLElement,
+  opts: { sectionNumbering?: boolean; toc?: boolean }
+): void {
+  container.classList.toggle("section-numbered", Boolean(opts.sectionNumbering));
+  if (opts.toc) buildTableOfContents(container, Boolean(opts.sectionNumbering));
+}
+
+function buildTableOfContents(container: HTMLElement, numbered: boolean): void {
+  const headings = Array.from(
+    container.querySelectorAll<HTMLElement>("h2, h3, h4")
+  );
+  if (headings.length === 0) return;
+
+  const nav = document.createElement("nav");
+  nav.className = "report-toc";
+  nav.setAttribute("aria-label", t("export.toc"));
+
+  const title = document.createElement("p");
+  title.className = "report-toc-title";
+  title.textContent = t("export.toc");
+  nav.appendChild(title);
+
+  const list = document.createElement("ul");
+  const counters = [0, 0, 0]; // h2, h3, h4
+
+  headings.forEach((h, i) => {
+    const level = Number(h.tagName[1]) - 2; // h2 → 0, h3 → 1, h4 → 2
+    if (!h.id) h.id = `sec-${i}`;
+
+    let prefix = "";
+    if (numbered) {
+      counters[level]++;
+      for (let k = level + 1; k < counters.length; k++) counters[k] = 0;
+      prefix = counters.slice(0, level + 1).join(".") + ". ";
+    }
+
+    const li = document.createElement("li");
+    li.className = `report-toc-l${level}`;
+    const a = document.createElement("a");
+    a.href = `#${h.id}`;
+    a.textContent = prefix + (h.textContent ?? "");
+    li.appendChild(a);
+    list.appendChild(li);
+  });
+
+  nav.appendChild(list);
+
+  const firstH2 = container.querySelector("h2");
+  if (firstH2?.parentElement) {
+    firstH2.parentElement.insertBefore(nav, firstH2);
+  } else {
+    container.insertBefore(nav, container.firstChild);
+  }
+}
+
+/**
  * Run a render function that may append DOM children to `container`. If it
  * throws, remove any children added during the failed attempt and replace
  * them with a red TBD note carrying the error message so the rest of the

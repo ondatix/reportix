@@ -10,7 +10,7 @@ import {
   applyParameterOverrides,
 } from "./modules/parameters";
 import { parseTemplate } from "./modules/template";
-import { renderBlocks } from "./modules/renderer";
+import { renderBlocks, applyDocumentStructure } from "./modules/renderer";
 import { exportToDocx } from "./modules/exporter";
 import { getPalette } from "./modules/palettes";
 import { getFont } from "./modules/fonts";
@@ -243,6 +243,12 @@ export function initApp(root: HTMLElement): void {
     };
 
     renderBlocks(blocks, dataStore, paramValues, previewContainer, chartDefaults, palette, resolved.dataProtection);
+
+    // Section numbering + table of contents (preview), mirroring the .docx.
+    applyDocumentStructure(previewContainer, {
+      sectionNumbering: resolved.export?.sectionNumbering,
+      toc: resolved.export?.toc,
+    });
 
     // Export button
     const exportBtn = root.querySelector<HTMLButtonElement>("#export-btn")!;

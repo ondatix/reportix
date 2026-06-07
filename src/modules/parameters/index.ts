@@ -109,6 +109,18 @@ export function buildParameterForm(
       continue;
     }
 
+    // Convention: "page_orientation" renders as page-shape icons (translation-free).
+    if (key === "page_orientation" && def.type === "select") {
+      form.appendChild(buildOrientationField(key, def, initial));
+      continue;
+    }
+
+    // Convention: "page_numbers" renders as footer page-number position icons.
+    if (key === "page_numbers" && def.type === "select") {
+      form.appendChild(buildPageNumberField(key, def, initial));
+      continue;
+    }
+
     const fieldset = document.createElement("div");
     fieldset.className = "parameter-field";
 
@@ -308,6 +320,83 @@ function buildFontField(
   }
 
   return fieldset;
+}
+
+/**
+ * Generic illustrated radio group: each option is a CSS-drawn icon plus a
+ * localized caption. Used for translation-free choices like page orientation
+ * and page-number position. The selected value is the option string.
+ */
+function buildIconRadioField(
+  key: string,
+  def: ParameterDef,
+  initial: unknown,
+  fieldClass: string,
+  optionClass: string,
+  iconClassFor: (opt: string) => string,
+  labelFor: (opt: string) => string,
+  fallbackOptions: string[]
+): HTMLElement {
+  const fieldset = document.createElement("fieldset");
+  fieldset.className = `parameter-field ${fieldClass}`;
+
+  const legend = document.createElement("legend");
+  legend.textContent = def.label;
+  fieldset.appendChild(legend);
+
+  const defaultId = typeof initial === "string" ? initial : undefined;
+  const options = def.options && def.options.length > 0 ? def.options : fallbackOptions;
+
+  for (const opt of options) {
+    const optionId = `param-${key}-${opt}`;
+    const wrapper = document.createElement("label");
+    wrapper.className = optionClass;
+    wrapper.htmlFor = optionId;
+
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.id = optionId;
+    radio.name = key;
+    radio.value = opt;
+    if (defaultId === opt) radio.checked = true;
+    wrapper.appendChild(radio);
+
+    const icon = document.createElement("span");
+    icon.className = iconClassFor(opt);
+    icon.setAttribute("aria-hidden", "true");
+    wrapper.appendChild(icon);
+
+    const caption = document.createElement("span");
+    caption.className = "icon-option-caption";
+    caption.textContent = labelFor(opt);
+    wrapper.appendChild(caption);
+
+    fieldset.appendChild(wrapper);
+  }
+
+  return fieldset;
+}
+
+/** Page orientation as portrait/landscape page-shape icons. */
+function buildOrientationField(key: string, def: ParameterDef, initial: unknown): HTMLElement {
+  return buildIconRadioField(
+    key, def, initial,
+    "orientation-field", "orientation-option",
+    (opt) => `orientation-icon orientation-${opt}`,
+    (opt) => t(`param.orientation.${opt}`),
+    ["portrait", "landscape"]
+  );
+}
+
+/** Page-number footer position as left/center/right/none page icons. */
+function buildPageNumberField(key: string, def: ParameterDef, initial: unknown): HTMLElement {
+  return buildIconRadioField(
+    key, def, initial,
+    "page-numbers-field", "page-number-option",
+    (opt) => `page-number-icon page-number-${opt}`,
+    (opt) => t(`param.pageNumbers.${opt}`),
+    ["left", "center", "right", "none"]
+  );
 }
 
 export function collectParameterValues(

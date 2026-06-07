@@ -120,6 +120,13 @@ export interface ExportConfig {
 
   /** Page numbers inserted into the footer. */
   pageNumbers?: {
+    /**
+     * Footer page-number placement: "left" | "center" | "right" align the
+     * number in the footer; "none" hides it. Supersedes the legacy `show`
+     * boolean (kept for back-compat: `show: false` ≡ `position: none`).
+     */
+    position?: string;
+    /** @deprecated Use `position`. `false` ≡ `position: none`. */
     show?: boolean;
     /** Starting page number. */
     start?: number;
