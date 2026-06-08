@@ -220,18 +220,56 @@ data:
           - Maßnahmenart
 
 preprocessing:
-  # Derived datasets built from the loaded sheets before rendering. Each join
-  # looks up matching rows in `right` by key (first match wins — left rows are
-  # never duplicated) and copies its columns onto `left`. The result is stored
-  # under `name`; setting `name` = `left` enriches the source in place, so the
-  # template's existing `data:` blocks pick up the added columns automatically.
+  # Derived datasets built from the loaded sheets before rendering.
+  # Order: `mutations` run first (derive columns on raw sheets), then `joins`
+  # (which can propagate the derived columns to other datasets).
+
+  # ── Mutations: derive a new column with a simple if-else rule. Where `when`
+  #    holds for the `from` value, the new `column` gets `then`, else `else`. ──
+  mutations:
+    # Beamte/Tarifbeschäftigte aus der Entgelt-/Besoldungsgruppe ableiten:
+    # Besoldungsgruppen (A…, B…, R…, W…) ⇒ Beamte; Entgeltgruppen (E…) ⇒ Tarif.
+    # Auf Stichtag abgeleitet — der Join unten trägt sie nach Zeitraum_Befoerderung.
+    - dataset: Stichtag
+      column: Beamte
+      from: "Entgeltgruppe / Besoldungsgruppe"
+      when:
+        starts_with: [A, B, R, W]
+      then: "Ja"
+      else: "Nein"
+    - dataset: Stichtag
+      column: Tarifbeschäftigte
+      from: "Entgeltgruppe / Besoldungsgruppe"
+      when:
+        starts_with: [E]
+      then: "Ja"
+      else: "Nein"
+    # Beförderungsereignisse klassifizieren (eigene Spalten von Zeitraum_Befoerderung):
+    - dataset: Zeitraum_Befoerderung
+      column: "Beförderung (ja/nein)"
+      from: Maßnahmenart
+      when:
+        equals: "Beförderung"
+      then: "Ja"
+      else: "Nein"
+    - dataset: Zeitraum_Befoerderung
+      column: "Höhergruppierung genehmigt"
+      from: Maßnahmenart
+      when:
+        equals: "Höhergruppierung"
+      then: "Ja"
+      else: "Nein"
+
+  # ── Joins: look up matching rows in `right` by key (first match wins — left
+  #    rows are never duplicated) and copy its columns onto `left`. Setting
+  #    `name` = `left` enriches the source in place, so the template's existing
+  #    `data:` blocks pick up the added columns automatically. ──
   joins:
     # Beförderungsereignisse mit den Stammdaten der Person aus `Stichtag`
-    # anreichern (Schlüssel: PersNr). So stehen den Beförderungs-Diagrammen die
-    # Personenmerkmale aus dem Stichtags-Snapshot zur Verfügung — u. a. die
-    # Beamte/Tarifbeschäftigte-Klassifikation, die deren `filter:` nutzt.
-    # `select` weggelassen → es werden alle Stichtag-Spalten übernommen, die in
-    # Zeitraum_Befoerderung noch nicht vorhanden sind.
+    # anreichern (Schlüssel: PersNr). Trägt u. a. die oben abgeleitete
+    # Beamte/Tarifbeschäftigte-Klassifikation in Zeitraum_Befoerderung, die die
+    # Beförderungs-Diagramme als `filter:` nutzen. `select` weggelassen → alle
+    # Stichtag-Spalten, die in Zeitraum_Befoerderung noch nicht vorhanden sind.
     - name: Zeitraum_Befoerderung   # in-place enrichment of the source sheet
       left: Zeitraum_Befoerderung
       right: Stichtag

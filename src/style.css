@@ -25,6 +25,8 @@
 
 h1 {
   border-bottom: 2px solid var(--deep-violet);
+  font-weight: 600;
+  font-size: 2.4rem;
   padding-bottom: 0.5rem;
 }
 
@@ -262,7 +264,7 @@ input[type="file"]::file-selector-button:hover {
 }
 
 .callout-title {
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: 0.25rem;
 }
 
@@ -515,7 +517,7 @@ button:hover {
 
 .report-toc-title {
   margin: 0 0 0.5rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--deep-violet);
 }
 

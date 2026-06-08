@@ -81,6 +81,8 @@ const STRINGS: Record<Locale, Dict> = {
     "join.missingKey": "Join „{name}“: kein Schlüssel angegeben (`on` bzw. `left_on`/`right_on`).",
     "join.missingColumn": "Join: Spalte „{column}“ in „{sheet}“ nicht gefunden — übersprungen.",
     "join.noMatches": "Join: keine Übereinstimmung zwischen „{left}“ und „{right}“ (Schlüsselwerte passen nicht).",
+    "mutation.missingDataset": "Mutation: Datensatz „{dataset}“ nicht gefunden.",
+    "mutation.missingColumn": "Mutation: Quellspalte „{column}“ in „{dataset}“ nicht gefunden — alle Zeilen erhalten den else-Wert.",
 
     // — Renderer —
     "render.kind.chart": "Diagramm",
@@ -163,6 +165,8 @@ const STRINGS: Record<Locale, Dict> = {
     "join.missingKey": 'Join "{name}": no key specified (`on`, or `left_on`/`right_on`).',
     "join.missingColumn": 'Join: column "{column}" not found in "{sheet}" — skipped.',
     "join.noMatches": 'Join: no rows matched between "{left}" and "{right}" (key values do not line up).',
+    "mutation.missingDataset": 'Mutation: dataset "{dataset}" not found.',
+    "mutation.missingColumn": 'Mutation: source column "{column}" not found in "{dataset}" — every row gets the else value.',
 
     // — Renderer —
     "render.kind.chart": "Chart",

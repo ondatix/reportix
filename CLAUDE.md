@@ -406,9 +406,28 @@ data_protection:
 
 ## Data Preprocessing
 
-The `preprocessing` module (`src/modules/preprocessing/`) runs **between data load and rendering**, deriving additional datasets from the loaded sheets. It is config-driven, self-contained, and never throws — structural problems surface as non-blocking warnings shown alongside the data-validation ones.
+The `preprocessing` module (`src/modules/preprocessing/`) runs **between data load and rendering**, deriving additional columns and datasets from the loaded sheets. It is config-driven, self-contained, and never throws — structural problems surface as non-blocking warnings shown alongside the data-validation ones. Two operations: **mutations** (derived columns) run first, then **joins**.
 
-**Joins** are the main operation. Each join looks up matching rows in `right` by a shared key and copies its columns onto each `left` row, storing the result under `name`. The DataStore is keyed by dataset name, so template `data:` blocks reference a join output exactly like a sheet. Setting `name` equal to `left` **enriches the source in place** — existing `data: <left>` blocks then pick up the added columns with no template change.
+### Mutations (derived columns)
+
+A mutation adds a column to a dataset using a **simple if-else rule**: where the condition holds for the `from` value, the new `column` gets `then`, otherwise `else` (default `""`). This is how the StMAS reports derive the `Beamte`/`Tarifbeschäftigte` classification from `Entgeltgruppe / Besoldungsgruppe`, and event flags like `Beförderung (ja/nein)` from `Maßnahmenart`.
+
+```yaml
+preprocessing:
+  mutations:
+    - dataset: Stichtag                          # dataset to add the column to
+      column: Beamte                             # new (or overwritten) column
+      from: "Entgeltgruppe / Besoldungsgruppe"   # source column the condition tests
+      when: { starts_with: [A, B, R, W] }        # condition (omit → "value is truthy")
+      then: "Ja"
+      else: "Nein"                               # optional (default "")
+```
+
+**Condition operators** (inside `when`, combined with AND; scalar ops also accept a list = "any of"): `equals`, `not_equals`, `in`, `contains`, `starts_with`, `ends_with`, `matches` (regex), `gt`/`gte`/`lt`/`lte` (numeric), `empty` (bool), `truthy` (bool — `true`/`Ja`/`Yes`/`1`). String comparisons are NFC + trimmed. Omitting `when` means "the `from` value is truthy".
+
+### Joins
+
+Each join looks up matching rows in `right` by a shared key and copies its columns onto each `left` row, storing the result under `name`. The DataStore is keyed by dataset name, so template `data:` blocks reference a join output exactly like a sheet. Setting `name` equal to `left` **enriches the source in place** — existing `data: <left>` blocks then pick up the added columns with no template change.
 
 ```yaml
 preprocessing:
@@ -428,10 +447,10 @@ preprocessing:
 - **First-match lookup**, not a SQL cross-product — a left row appears at most once even if several right rows share its key (keeps counts/shares stable).
 - `type: left` keeps unmatched left rows (copied columns blank, `indicator` false); `type: inner` drops them.
 - `select` omitted → enrichment: copy every right column except the key and any already present on the left. Explicit `select` validates each name against the right schema (missing → warning, skipped).
-- Joins run **in order**; a later join may reference an earlier join's output.
+- Joins run **in order, after all mutations**; a later join may reference an earlier join's output, and joins propagate mutation-derived columns.
 - Keys are matched after NFC + whitespace normalization (so `PersNr` numbers/strings line up).
 
-**Why the StMAS templates need it:** the `Zeitraum_*` event sheets (e.g. `Zeitraum_Befoerderung`) carry only event data, while person classifications used by chart `filter:`s — `Beamte`, `Tarifbeschäftigte` — live on the `Stichtag` master snapshot. Joining `Stichtag` onto the event sheet by `PersNr` makes those columns available to the event charts.
+**Why the StMAS templates need both:** the `Zeitraum_*` event sheets (e.g. `Zeitraum_Befoerderung`) carry only event data. Mutations derive the `Beamte`/`Tarifbeschäftigte` classification (from `Entgeltgruppe / Besoldungsgruppe`) on `Stichtag` and the `Beförderung (ja/nein)` / `Höhergruppierung genehmigt` flags (from `Maßnahmenart`) on the event sheet; the `Stichtag → Zeitraum_Befoerderung` join then carries the classification onto each event by `PersNr`. Together they supply every column the Beförderung charts reference in their `filter:` and `y:`.
 
 ## Architecture
 

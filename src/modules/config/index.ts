@@ -4,7 +4,7 @@
  */
 import { parse as parseYAML } from "yaml";
 import { getLocale, DEFAULT_LOCALE } from "../i18n";
-import type { AppConfig, ParameterDef, DataSourceDef, SheetDef, TemplateDef, TemplateOption, ExportConfig, ChartDefaults, DataProtectionConfig, PreprocessingConfig, JoinDef, JoinColumnSelect } from "../types";
+import type { AppConfig, ParameterDef, DataSourceDef, SheetDef, TemplateDef, TemplateOption, ExportConfig, ChartDefaults, DataProtectionConfig, PreprocessingConfig, JoinDef, JoinColumnSelect, MutationDef, MutationCondition } from "../types";
 
 /**
  * Resolve a possibly-localized string for the active locale. A value may be:
@@ -36,6 +36,30 @@ function parseJoinSelect(value: unknown): (string | JoinColumnSelect)[] | undefi
     }
   }
   return out.length > 0 ? out : undefined;
+}
+
+/** Parse a mutation `when:` condition (snake_case keys → camelCase predicate). */
+function parseMutationCondition(value: unknown): MutationCondition | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const w = value as Record<string, unknown>;
+  const c: MutationCondition = {};
+  if (w.equals !== undefined) c.equals = w.equals as MutationCondition["equals"];
+  if (w.not_equals !== undefined || w.notEquals !== undefined)
+    c.notEquals = (w.not_equals ?? w.notEquals) as MutationCondition["notEquals"];
+  if (w.in !== undefined) c.in = w.in as MutationCondition["in"];
+  if (w.contains !== undefined) c.contains = w.contains as MutationCondition["contains"];
+  if (w.starts_with !== undefined || w.startsWith !== undefined)
+    c.startsWith = (w.starts_with ?? w.startsWith) as MutationCondition["startsWith"];
+  if (w.ends_with !== undefined || w.endsWith !== undefined)
+    c.endsWith = (w.ends_with ?? w.endsWith) as MutationCondition["endsWith"];
+  if (w.matches !== undefined) c.matches = String(w.matches);
+  if (w.gt !== undefined) c.gt = Number(w.gt);
+  if (w.gte !== undefined) c.gte = Number(w.gte);
+  if (w.lt !== undefined) c.lt = Number(w.lt);
+  if (w.lte !== undefined) c.lte = Number(w.lte);
+  if (w.empty !== undefined) c.empty = Boolean(w.empty);
+  if (w.truthy !== undefined) c.truthy = Boolean(w.truthy);
+  return Object.keys(c).length > 0 ? c : undefined;
 }
 
 export function parseConfig(yamlString: string): AppConfig {
@@ -297,6 +321,23 @@ export function parseConfig(yamlString: string): AppConfig {
   let preprocessing: PreprocessingConfig | undefined;
   if (raw.preprocessing && typeof raw.preprocessing === "object") {
     const p = raw.preprocessing as Record<string, unknown>;
+
+    const mutationsRaw = p.mutations as Array<Record<string, unknown>> | undefined;
+    let mutations: MutationDef[] | undefined;
+    if (Array.isArray(mutationsRaw)) {
+      mutations = mutationsRaw
+        .map((m) => ({
+          dataset: String(m.dataset ?? ""),
+          column: String(m.column ?? ""),
+          from: String(m.from ?? ""),
+          when: parseMutationCondition(m.when),
+          then: m.then as string | number | boolean,
+          else: m.else as string | number | boolean | undefined,
+        }))
+        .filter((m) => m.dataset && m.column && m.from);
+      if (mutations.length > 0) preprocessing = { ...(preprocessing ?? {}), mutations };
+    }
+
     const joinsRaw = p.joins as Array<Record<string, unknown>> | undefined;
     if (Array.isArray(joinsRaw)) {
       const joins: JoinDef[] = joinsRaw
@@ -313,7 +354,7 @@ export function parseConfig(yamlString: string): AppConfig {
           indicator: j.indicator as string | undefined,
         }))
         .filter((j) => j.name && j.left && j.right);
-      preprocessing = { joins };
+      if (joins.length > 0) preprocessing = { ...(preprocessing ?? {}), joins };
     }
   }
 

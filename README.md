@@ -14,7 +14,7 @@ Many reporting workflows (HR equality reports, internal KPIs, compliance summari
 - **Markdown templates** with embedded chart / table YAML blocks and Pandoc-style callouts.
 - **Six chart types**: `bar`, `line`, `pie`, `doughnut`, `scatter`, `pyramid`, `distance` (dumbbell plot).
 - **Long-form data support**: `color: <column>` pivots a single dataset into one series per distinct value.
-- **Data preprocessing (joins)**: `config.yaml` can define joins that enrich one sheet with columns looked up from another by a shared key (e.g. attach `Stichtag` master-data onto each `Zeitraum_*` event by `PersNr`) before rendering.
+- **Data preprocessing**: `config.yaml` can define **mutations** (derive a new column with a simple if-else rule, e.g. classify `Beamte`/`Tarifbeschäftigte` from the pay grade) and **joins** (enrich one sheet with columns looked up from another by a shared key, e.g. attach `Stichtag` master-data onto each `Zeitraum_*` event by `PersNr`) — applied before rendering.
 - **Aggregation**: `count`, `sum`, `mean`, `min`, `max`, `median`, `share_total`, `share_group`, `identity` — for both charts and tables.
 - **Row filtering**: `filter: <bool-column>` keeps only matching rows before aggregation.
 - **Data protection**: aggregated values below a configurable threshold are masked (`<5` in tables, clamped + masked tooltip in charts) for count-like operations.
@@ -55,7 +55,7 @@ The app runs a strict pipeline:
 
 1. **Load config** — `/config.yaml` is bundled at build time and parsed on startup.
 2. **Upload data** — user picks one `.xlsx` per data source declared in the config. Each source is validated against its expected sheet names and column lists; mismatches surface as non-blocking warnings and the pipeline proceeds with whatever sheets did load (blocks referencing missing data render as red "TBD" notes).
-2b. **Preprocess** — any `preprocessing.joins` defined in the config build derived datasets (enriching one sheet with another's columns by a shared key) before rendering.
+2b. **Preprocess** — any `preprocessing` defined in the config runs before rendering: `mutations` derive new columns (if-else rules), then `joins` enrich one sheet with another's columns by a shared key.
 3. **Choose template** — user picks one of the bundled Markdown templates listed under `template.files` in the config (radio chooser with human-readable labels). Templates live in `templates/` and are bundled at build time.
 4. **Fill parameters** — a form is generated from the config's `parameters` section.
 5. **Render preview** — Markdown becomes semantic HTML; chart / table YAML blocks become Chart.js canvases and accessible `<table>`s with auto-generated alt text.
@@ -69,7 +69,7 @@ The config is the entry point — a developer edits it, the end user never touch
 
 - **`parameters`** — form fields shown before report generation (`text`, `number`, `date`, `select`, `multiselect`, `boolean`). Each entry is either **standalone** (template variable, prefilled from `default:`) or **bound** to a config leaf via `bind: <dotted.path>` — bound entries prefill from the path's preset and write the user's value back to that path at runtime, letting most styling and metadata keys be overridden per report. The names `palette`, `font`, `page_orientation`, and `page_numbers` get special UI widgets (illustrated / icon radios — translation-free choices). Each `label` may be a plain string or a per-locale map `{ de: "…", en: "…" }` resolved to the [selected language](#features). **Bind paths target the parsed config (camelCase)** — e.g. `export.pageNumbers.position`, `export.sectionNumbering`, `dataProtection.smallestGroup` — not the snake_case YAML keys.
 - **`data`** — expected data sources, each with sheet names and required columns. Used to validate the uploaded workbook.
-- **`preprocessing.joins`** — optional derived datasets built before rendering. Each join enriches a `left` sheet with columns from a `right` sheet matched on a key (`on`, or `left_on`/`right_on`); `type` is `left` or `inner`; omit `select` to copy all non-overlapping right columns, or list specific ones (`{column, as}` to rename); `indicator` adds a boolean "matched?" column. Setting `name` = `left` enriches the sheet in place. First-match lookup (left rows are never duplicated).
+- **`preprocessing`** — optional derived columns and datasets built before rendering. **`mutations`** (run first) add a column via a simple if-else rule: where `when` holds for the `from` value the new `column` gets `then`, else `else` (operators: `equals`, `in`, `contains`, `starts_with`, `ends_with`, `matches`, `gt`/`lt`/`gte`/`lte`, `empty`, `truthy`). **`joins`** then enrich a `left` sheet with columns from a `right` sheet matched on a key (`on`, or `left_on`/`right_on`); `type` is `left` or `inner`; omit `select` to copy all non-overlapping right columns, or list specific ones (`{column, as}` to rename); `indicator` adds a boolean "matched?" column. Setting `name` = `left` enriches the sheet in place. First-match lookup (left rows are never duplicated).
 - **`template.files`** — list of bundled Markdown templates shown as a radio chooser in Step 2. Each entry has a `label` (shown to the user) and a `file` (filename within `templates/`). The app hard-fails at startup if any referenced file isn't bundled.
 - **`export`** — DOCX styling: filename, locale, document metadata, fonts, heading sizes/colours, paragraph spacing, page size & margins, **page numbers** (`page_numbers.position`: `left`/`center`/`right`/`none`), header/footer text, table borders, **section numbering** (`section_numbering: true` numbers section headings `1.`, `1.1.`, … in both preview and DOCX), **table of contents** (`toc: true` builds one in the preview and as a Word TOC field), **callout box colours and backgrounds** (`definition_box`, `summary_box`). The first `# {{title}}` is treated as the document title (placed before the TOC, not numbered).
 - **`charts`** — Chart.js defaults: animation, aspect ratio, fonts, title/legend/tooltip placement, axis grid colours, line/bar element styling.
@@ -118,7 +118,7 @@ Each utility is a self-contained module under `src/modules/` with a clean public
 | `i18n/` | Central translation layer (German / English) with `t(key, params)` lookup; drives all UI text, error messages, and chart alt text. |
 | `config/` | Parse `/config.yaml` (bundled via `?raw` import) into a typed `AppConfig`. |
 | `data-loader/` | Read `.xlsx` files via SheetJS, validate sheets and columns. |
-| `preprocessing/` | Derive datasets from the loaded sheets before rendering — joins (lookup/enrichment) defined in `config.yaml`. |
+| `preprocessing/` | Derive columns and datasets from the loaded sheets before rendering — mutations (if-else derived columns) and joins (lookup/enrichment), defined in `config.yaml`. |
 | `parameters/` | Render the form from `AppConfig.parameters`, collect typed values. |
 | `template/` | Parse Markdown into typed blocks (`text` / `chart` / `table`). |
 | `aggregation/` | Aggregation ops, row filtering, data-protection helpers. |

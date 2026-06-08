@@ -207,7 +207,37 @@ data:
 
 ## `preprocessing:`
 
-Optionale, abgeleitete Datensätze, die **zwischen Datenladen und Rendering** aus den geladenen Blättern gebildet werden. Die Hauptoperation ist der **Join**: Zeilen aus einem Blatt mit Spalten anreichern, die über einen gemeinsamen Schlüssel in einem anderen Blatt nachgeschlagen werden. Das Ergebnis wird unter `name` im DataStore abgelegt und kann in Vorlagen wie ein normales Blatt referenziert werden (`data: <name>`).
+Optionale, abgeleitete Spalten und Datensätze, die **zwischen Datenladen und Rendering** aus den geladenen Blättern gebildet werden. Zwei Operationen: **`mutations`** (abgeleitete Spalten) laufen zuerst, danach **`joins`**. Ergebnisse werden im DataStore abgelegt und können in Vorlagen wie normale Blätter referenziert werden (`data: <name>`).
+
+### `mutations` — abgeleitete Spalten (Wenn-Dann-Sonst)
+
+Eine Mutation fügt einem Datensatz eine Spalte mit einer **einfachen Wenn-Dann-Sonst-Regel** hinzu: Wo die Bedingung für den `from`-Wert zutrifft, erhält die neue `column` den `then`-Wert, sonst `else` (Standard `""`). So leiten die StMAS-Berichte die Klassifikation `Beamte`/`Tarifbeschäftigte` aus `Entgeltgruppe / Besoldungsgruppe` ab und Ereignis-Flags wie `Beförderung (ja/nein)` aus `Maßnahmenart`.
+
+```yaml
+preprocessing:
+  mutations:
+    - dataset: Stichtag                          # Datensatz, der die Spalte erhält
+      column: Beamte                             # neue (oder überschriebene) Spalte
+      from: "Entgeltgruppe / Besoldungsgruppe"   # Quellspalte, die die Bedingung testet
+      when: { starts_with: [A, B, R, W] }        # Bedingung (weglassen → „Wert ist truthy")
+      then: "Ja"
+      else: "Nein"                               # optional (Standard "")
+```
+
+| Feld | Typ | Standard | Anmerkungen |
+|---|---|---|---|
+| `dataset` | String | — | Datensatz, dem die Spalte hinzugefügt wird (in eine abgeleitete Kopie). |
+| `column` | String | — | Name der neuen (oder überschriebenen) Spalte. |
+| `from` | String | — | Quellspalte, deren Wert die Bedingung testet. |
+| `when` | Objekt | truthy | Bedingung auf `from` (siehe Operatoren). Weglassen → „Wert ist truthy". |
+| `then` | beliebig | — | Wert, wenn die Bedingung zutrifft. |
+| `else` | beliebig | `""` | Wert sonst. |
+
+**Bedingungsoperatoren** (innerhalb `when`, per UND verknüpft; skalare Operatoren akzeptieren auch eine Liste = „eines davon"): `equals`, `not_equals`, `in`, `contains`, `starts_with`, `ends_with`, `matches` (Regex), `gt`/`gte`/`lt`/`lte` (numerisch), `empty` (bool), `truthy` (bool — `true`/`Ja`/`Yes`/`1`). String-Vergleiche sind NFC-normalisiert und getrimmt.
+
+### `joins`
+
+Zeilen aus einem Blatt mit Spalten anreichern, die über einen gemeinsamen Schlüssel in einem anderen Blatt nachgeschlagen werden. Das Ergebnis wird unter `name` abgelegt; `name` = `left` reichert die Quelle direkt an.
 
 ```yaml
 preprocessing:
@@ -239,10 +269,10 @@ preprocessing:
 - **First-Match-Lookup**, kein SQL-Kreuzprodukt — eine left-Zeile erscheint höchstens einmal, auch wenn mehrere right-Zeilen denselben Schlüssel haben (Zählungen/Anteile bleiben stabil).
 - `type: left` behält unpassende left-Zeilen (übernommene Spalten leer, `indicator` false); `type: inner` verwirft sie.
 - `select` weggelassen → Anreicherung: alle right-Spalten außer dem Schlüssel und außer bereits links vorhandenen. Explizites `select` prüft jeden Namen gegen das right-Schema (fehlend → Warnung, übersprungen).
-- Joins laufen **in Reihenfolge**; ein späterer Join darf die Ausgabe eines früheren verwenden.
+- Joins laufen **in Reihenfolge, nach allen Mutationen**; ein späterer Join darf die Ausgabe eines früheren verwenden, und Joins tragen per Mutation abgeleitete Spalten weiter.
 - Schlüssel werden nach NFC- und Leerraum-Normalisierung verglichen.
 
-**Warum die StMAS-Vorlagen das brauchen.** Die `Zeitraum_*`-Ereignisblätter (z. B. `Zeitraum_Befoerderung`) enthalten nur Ereignisdaten, während Personenklassifikationen, die `filter:` der Diagramme nutzt — `Beamte`, `Tarifbeschäftigte` —, im `Stichtag`-Snapshot liegen. Der Join von `Stichtag` auf das Ereignisblatt über `PersNr` macht diese Spalten für die Ereignis-Diagramme verfügbar.
+**Warum die StMAS-Vorlagen beides brauchen.** Die `Zeitraum_*`-Ereignisblätter (z. B. `Zeitraum_Befoerderung`) enthalten nur Ereignisdaten. Mutationen leiten die Klassifikation `Beamte`/`Tarifbeschäftigte` (aus `Entgeltgruppe / Besoldungsgruppe`) auf `Stichtag` ab sowie die Flags `Beförderung (ja/nein)` / `Höhergruppierung genehmigt` (aus `Maßnahmenart`) auf dem Ereignisblatt; der Join `Stichtag → Zeitraum_Befoerderung` trägt die Klassifikation dann über `PersNr` an jedes Ereignis. Zusammen liefern sie jede Spalte, die die Beförderungs-Diagramme in `filter:` und `y:` referenzieren.
 
 Strukturelle Probleme (fehlendes Blatt, fehlender Schlüssel, fehlende Spalte, keine Treffer) erscheinen als **nicht-blockierende Warnungen** im selben gelben Banner wie die Datenprüfung — der Build bricht nie ab.
 
@@ -839,7 +869,37 @@ data:
 
 ## `preprocessing:`
 
-Optional derived datasets built **between data load and rendering** from the loaded sheets. The main operation is a **join**: enrich rows in one sheet with columns looked up from another by a shared key. The result is stored under `name` in the DataStore and can be referenced in templates like a normal sheet (`data: <name>`).
+Optional derived columns and datasets built **between data load and rendering** from the loaded sheets. Two operations: **`mutations`** (derived columns) run first, then **`joins`**. Results are stored in the DataStore and can be referenced in templates like normal sheets (`data: <name>`).
+
+### `mutations` — derived columns (if-else)
+
+A mutation adds a column to a dataset with a **simple if-else rule**: where the condition holds for the `from` value, the new `column` gets `then`, otherwise `else` (default `""`). This is how the StMAS reports derive the `Beamte`/`Tarifbeschäftigte` classification from `Entgeltgruppe / Besoldungsgruppe`, and event flags such as `Beförderung (ja/nein)` from `Maßnahmenart`.
+
+```yaml
+preprocessing:
+  mutations:
+    - dataset: Stichtag                          # dataset that receives the column
+      column: Beamte                             # new (or overwritten) column
+      from: "Entgeltgruppe / Besoldungsgruppe"   # source column the condition tests
+      when: { starts_with: [A, B, R, W] }        # condition (omit → "value is truthy")
+      then: "Ja"
+      else: "Nein"                               # optional (default "")
+```
+
+| Field | Type | Default | Notes |
+|---|---|---|---|
+| `dataset` | string | — | Dataset the column is added to (as a derived copy). |
+| `column` | string | — | Name of the new (or overwritten) column. |
+| `from` | string | — | Source column whose value the condition tests. |
+| `when` | object | truthy | Condition on `from` (see operators). Omit → "value is truthy". |
+| `then` | any | — | Value written when the condition holds. |
+| `else` | any | `""` | Value written otherwise. |
+
+**Condition operators** (inside `when`, combined with AND; scalar operators also accept a list = "any of"): `equals`, `not_equals`, `in`, `contains`, `starts_with`, `ends_with`, `matches` (regex), `gt`/`gte`/`lt`/`lte` (numeric), `empty` (bool), `truthy` (bool — `true`/`Ja`/`Yes`/`1`). String comparisons are NFC-normalized and trimmed.
+
+### `joins`
+
+Enrich rows in one sheet with columns looked up from another by a shared key. The result is stored under `name`; `name` = `left` enriches the source in place.
 
 ```yaml
 preprocessing:
@@ -871,10 +931,10 @@ preprocessing:
 - **First-match lookup**, not a SQL cross-product — a left row appears at most once even if several right rows share its key (keeps counts/shares stable).
 - `type: left` keeps unmatched left rows (copied columns blank, `indicator` false); `type: inner` drops them.
 - `select` omitted → enrichment: every right column except the key and any already present on the left. Explicit `select` validates each name against the right schema (missing → warning, skipped).
-- Joins run **in order**; a later join may reference an earlier join's output.
+- Joins run **in order, after all mutations**; a later join may reference an earlier join's output, and joins carry mutation-derived columns along.
 - Keys are matched after NFC + whitespace normalization.
 
-**Why the StMAS templates need it.** The `Zeitraum_*` event sheets (e.g. `Zeitraum_Befoerderung`) carry only event data, while person classifications used by chart `filter:`s — `Beamte`, `Tarifbeschäftigte` — live on the `Stichtag` snapshot. Joining `Stichtag` onto the event sheet by `PersNr` makes those columns available to the event charts.
+**Why the StMAS templates need both.** The `Zeitraum_*` event sheets (e.g. `Zeitraum_Befoerderung`) carry only event data. Mutations derive the `Beamte`/`Tarifbeschäftigte` classification (from `Entgeltgruppe / Besoldungsgruppe`) on `Stichtag` and the `Beförderung (ja/nein)` / `Höhergruppierung genehmigt` flags (from `Maßnahmenart`) on the event sheet; the `Stichtag → Zeitraum_Befoerderung` join then carries the classification onto each event by `PersNr`. Together they supply every column the Beförderung charts reference in their `filter:` and `y:`.
 
 Structural problems (missing sheet, missing key, missing column, no matches) surface as **non-blocking warnings** in the same yellow banner as data validation — the build never aborts.
 

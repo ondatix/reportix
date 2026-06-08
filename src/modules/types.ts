@@ -318,8 +318,56 @@ export interface JoinDef {
   indicator?: string;
 }
 
+/**
+ * A predicate tested against a single source-column value. All provided keys
+ * are combined with AND. String comparisons are NFC + trimmed; numeric ones
+ * (`gt`/`lt`/…) parse the value as a number. Scalar keys also accept a list,
+ * which matches if any entry matches.
+ */
+export interface MutationCondition {
+  equals?: string | number | (string | number)[];
+  notEquals?: string | number | (string | number)[];
+  /** Alias of `equals` with a list. */
+  in?: (string | number)[];
+  contains?: string | string[];
+  startsWith?: string | string[];
+  endsWith?: string | string[];
+  /** JavaScript regular-expression source tested against the value. */
+  matches?: string;
+  gt?: number;
+  gte?: number;
+  lt?: number;
+  lte?: number;
+  /** `true` matches empty/blank values; `false` matches non-empty. */
+  empty?: boolean;
+  /** `true` matches truthy values (`true`/`Ja`/`Yes`/`1`); `false` the inverse. */
+  truthy?: boolean;
+}
+
+/**
+ * Derive a new column on a dataset with a simple if-else rule: where `when`
+ * holds for the `from` value, the new `column` gets `then`, otherwise `else`.
+ * Omitting `when` means the condition is "value is truthy".
+ */
+export interface MutationDef {
+  /** Dataset to add the column to (modified into a derived copy). */
+  dataset: string;
+  /** New (or overwritten) column name. */
+  column: string;
+  /** Source column whose value the condition tests. */
+  from: string;
+  /** Condition on the `from` value (default: truthy). */
+  when?: MutationCondition;
+  /** Value written when the condition holds. */
+  then: string | number | boolean;
+  /** Value written otherwise (default: empty string). */
+  else?: string | number | boolean;
+}
+
 export interface PreprocessingConfig {
-  /** Joins applied in order; a later join can reference an earlier one's output. */
+  /** Column derivations (if-else). Applied first, in order, before joins. */
+  mutations?: MutationDef[];
+  /** Joins applied after mutations, in order; a later join can use an earlier output. */
   joins?: JoinDef[];
 }
 

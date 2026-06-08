@@ -13,7 +13,7 @@
  * layer (for localized warnings). Never throws — structural problems (missing
  * sheet, missing key, missing column) surface as non-blocking warnings.
  */
-import type { DataSet, DataStore, JoinDef, PreprocessingConfig } from "../types";
+import type { DataSet, DataStore, JoinDef, MutationDef, MutationCondition, PreprocessingConfig } from "../types";
 import { t } from "../i18n";
 
 export interface PreprocessingWarning {
@@ -39,6 +39,14 @@ export function applyPreprocessing(
   const out: DataStore = { ...store };
   const warnings: PreprocessingWarning[] = [];
 
+  // Mutations first (derive columns on raw sheets), then joins (which can
+  // propagate the derived columns to other datasets).
+  for (const mutation of config?.mutations ?? []) {
+    const { dataset, warnings: w } = runMutation(out, mutation);
+    warnings.push(...w);
+    if (dataset) out[mutation.dataset] = dataset;
+  }
+
   for (const join of config?.joins ?? []) {
     const { dataset, warnings: w } = runJoin(out, join);
     warnings.push(...w);
@@ -46,6 +54,84 @@ export function applyPreprocessing(
   }
 
   return { store: out, warnings };
+}
+
+// ── Mutations (derived columns) ──────────────────────────────────────
+
+function runMutation(
+  store: DataStore,
+  m: MutationDef
+): { dataset?: DataSet; warnings: PreprocessingWarning[] } {
+  const warnings: PreprocessingWarning[] = [];
+  const src = `${m.dataset}.${m.column}`;
+  const rows = store[m.dataset];
+
+  if (!rows) {
+    warnings.push({ source: src, message: t("mutation.missingDataset", { dataset: m.dataset }) });
+    return { warnings };
+  }
+  if (rows.length > 0 && !columnUnion(rows).has(m.from)) {
+    warnings.push({ source: src, message: t("mutation.missingColumn", { column: m.from, dataset: m.dataset }) });
+    // Proceed: every row fails the condition and receives the `else` value.
+  }
+
+  const elseValue = m.else ?? "";
+  const result: DataSet = rows.map((row) => ({
+    ...row,
+    [m.column]: matchesCondition(row[m.from], m.when) ? m.then : elseValue,
+  }));
+
+  return { dataset: result, warnings };
+}
+
+/** Evaluate the if-else condition against a source value (AND of all predicates). */
+function matchesCondition(value: unknown, when?: MutationCondition): boolean {
+  // No condition → "is truthy".
+  if (!when || Object.keys(when).length === 0) return isTruthy(value);
+
+  const s = asStr(value);
+  const num = Number(s);
+  const checks: boolean[] = [];
+
+  if (when.equals !== undefined) checks.push(toList(when.equals).some((v) => asStr(v) === s));
+  if (when.in !== undefined) checks.push(toList(when.in).some((v) => asStr(v) === s));
+  if (when.notEquals !== undefined) checks.push(!toList(when.notEquals).some((v) => asStr(v) === s));
+  if (when.contains !== undefined) checks.push(toList(when.contains).some((v) => s.includes(asStr(v))));
+  if (when.startsWith !== undefined) checks.push(toList(when.startsWith).some((v) => s.startsWith(asStr(v))));
+  if (when.endsWith !== undefined) checks.push(toList(when.endsWith).some((v) => s.endsWith(asStr(v))));
+  if (when.matches !== undefined) checks.push(safeRegex(when.matches).test(s));
+  if (when.gt !== undefined) checks.push(!Number.isNaN(num) && num > when.gt);
+  if (when.gte !== undefined) checks.push(!Number.isNaN(num) && num >= when.gte);
+  if (when.lt !== undefined) checks.push(!Number.isNaN(num) && num < when.lt);
+  if (when.lte !== undefined) checks.push(!Number.isNaN(num) && num <= when.lte);
+  if (when.empty !== undefined) checks.push(when.empty ? s === "" : s !== "");
+  if (when.truthy !== undefined) checks.push(when.truthy ? isTruthy(value) : !isTruthy(value));
+
+  // An otherwise-empty `when` object falls back to truthy (defensive).
+  return checks.length > 0 ? checks.every(Boolean) : isTruthy(value);
+}
+
+function toList<T>(v: T | T[]): T[] {
+  return Array.isArray(v) ? v : [v];
+}
+
+function safeRegex(source: string): RegExp {
+  try {
+    return new RegExp(source);
+  } catch {
+    return /$.^/; // never matches
+  }
+}
+
+const TRUTHY = new Set(["true", "ja", "yes", "1"]);
+function isTruthy(value: unknown): boolean {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value !== 0;
+  return TRUTHY.has(asStr(value).toLowerCase());
+}
+
+function asStr(value: unknown): string {
+  return String(value ?? "").normalize("NFC").trim();
 }
 
 interface ResolvedSelect {
