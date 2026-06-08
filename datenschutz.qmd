@@ -1,0 +1,6 @@
+# Datenschutz
+
+TODO:
+
+- Hier Datenschutz erläutern. 
+- Entscheidungsgrundlage für Datenschützer (welche Fragen stellen sich die Datenschützer bei der Entscheidung, ob das Tool ok ist?).
