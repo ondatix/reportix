@@ -17,5 +17,6 @@ Reportix ist ein Tool zur teil-automatisierten Erstellung von Gleichstellungskko
 
 Ein paar klicks und Sie erhalten ein vorformuliertes, datenschutzkonformes und barrierefreies Gleichstellungskonzept mit Grafiken und Tabellen als Word- oder odt-Dokument.
 
-> TODO: Bild oder Gif einfügen
+
+![Screenshot von Reportix: 1. Vorlage wählen (Auswahlmöglichkeiten: Gleichstellungskonzept (vollständig); Gleichstellungskonzept (verpflichtend))](images/Screenshot-vorlage-waehlen.png)
 

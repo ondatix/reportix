@@ -29,7 +29,7 @@ Unabhängig von der Datenquelle sollte der Export oder die Erhebung als `csv`- o
 
 
 
-### Untersuchungskörper: Wer muss berücksichtigt werden? 
+### Untersuchungskörper: Wer muss berücksichtigt werden? {#sec-untersuchungskoerper}
 
 Der sogenannte **Untersuchungskörper**
 beschreibt den gesamten Personenkreis, über
@@ -194,7 +194,7 @@ z.B. Einstellungen werden für den gesamten Berichtszeitraum (letzter Stichtag (
 
 Es werden folgende Datensätze benötigt (optionale Inhalte sind als solches gekennzeichnet):
 
-#### Stichtagsdaten
+#### Stichtagsdaten {#sec-stichtagsdaten}
 
 Der Stichtagsdatensatz enthält die Spalten:
 
@@ -205,7 +205,7 @@ Der Stichtagsdatensatz enthält die Spalten:
 Hier Definitionen-yml einbinden
 
 
-#### Zeitraumsdaten
+#### Zeitraumsdaten {#sec-zeitraumsdaten}
 
 Bei Zeitraumsdaten wird pro Ereignistyp eine Tabelle benötigt:
 

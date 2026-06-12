@@ -8,7 +8,13 @@ Einfach auf
 
 gehen und **reportix** ausprobieren.
 
+
 > TODO: richtiger link
+
+---
+
+![Screenshot von Reportix: 1. Vorlage wählen (Auswahlmöglichkeiten: Gleichstellungskonzept (vollständig); Gleichstellungskonzept (verpflichtend))](images/Screenshot-vorlage-waehlen.png)
+
 
 > TODO: Gif oder Video einfügen
 
