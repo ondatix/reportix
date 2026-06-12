@@ -11,7 +11,9 @@ book:
       chapters: 
         - musterkonzept.qmd
         - datenvorbereitung.qmd
-        - datenschutz.qmd
+        - webapp.qmd
+        - nachbereitung.qmd
+    - datenschutz.qmd
     - noch-fragen.qmd
     - ueber-reportix.qmd
   page-footer:

@@ -4,3 +4,15 @@ TODO:
 
 - Hier Datenschutz erläutern. 
 - Entscheidungsgrundlage für Datenschützer (welche Fragen stellen sich die Datenschützer bei der Entscheidung, ob das Tool ok ist?).
+
+Grundlage: 
+
+## Überblick
+- Client-side only
+- Keine Datenspeicherung
+- Keine gespeicherten Sessions
+- Möglichkeit des Ausschlusses von niedrigen Fallzahlen (kann selbst bestimmt werden)
+
+## Details
+- https://nc-274963602466558160.nextcloud-ionos.com/index.php/f/3927
+- https://nc-274963602466558160.nextcloud-ionos.com/index.php/f/3928

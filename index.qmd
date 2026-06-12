@@ -4,10 +4,10 @@ Dies ist das Nutzer:innenhandbuch für die Erstellung von Gleichstellungskonzept
 
 ::: {.grid .gap-3 .pb-3 .pt-4}
 ::: {.g-col-12 .g-col-sm-4}
-[Quick Start](quick-start.qmd){.btn .btn-primary .w-100 .btn-lg}
+[Quick Start](quick-start.qmd){.btn .btn-primary .w-100 .btn-lg .rounded-pill}
 :::
 ::: {.g-col-12 .g-col-sm-4 .mb-2}
-[Handbuch](datenvorbereitung.qmd){.btn .btn-secondary .w-100 .btn-lg}
+[Handbuch](datenvorbereitung.qmd){.btn .btn-secondary .w-100 .btn-lg .rounded-pill}
 ::: 
 ::: 
 
@@ -15,13 +15,7 @@ Dies ist das Nutzer:innenhandbuch für die Erstellung von Gleichstellungskonzept
 
 Reportix ist ein Tool zur teil-automatisierten Erstellung von Gleichstellungskkonzepten in bayrischen Behörden.
 
-Vorgehen:
+Ein paar klicks und Sie erhalten ein vorformuliertes, datenschutzkonformes und barrierefreies Gleichstellungskonzept mit Grafiken und Tabellen als Word- oder odt-Dokument.
 
-1. Daten aus dem Personalverwaltungssystem exportieren
-2. Ggf. Daten formatierien
-3. Reportix öffnen und Daten reinladen
-
-Und schon erhalten Sie ein vorformuliertes, datenschutzkonformes und barrierefreies Gleichstellungskonzept mit Grafiken und Tabellen und können dies im Word-Format herunterladen.
-
-
+> TODO: Bild oder Gif einfügen
 

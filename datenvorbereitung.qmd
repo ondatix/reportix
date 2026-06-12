@@ -1,57 +1,152 @@
 # Datenvorbereitung
 
-Für die Datenvorbereitung ist die klare Definition der einzelnen Merkmale der wichtigste Faktor. Diese Definitionen finden Sie im **Musterkonzept**. 
+## Standard
+Die Daten für die Nutzung von **reportix** müssen klaren Standards entsprechen. 
 
-Zusätzlich finden Sie die relevanten Merkmale und deren Zuordnung in ausgewählten Personalverwaltungssystemen in der **Merkmalstabelle**.  
-Bei **Zeitraumdaten** ist das stichtagsbezogene Vorjahr verlangt (soweit nicht anderweitig ausgewiesen). Ist z.B. der Stichtag der 30.06.2026, so wird bei Zeitraumdaten der 01.01.2025-31.12.2025 betrachtet. Ausnahmen sind in der Merkmalstabelle markiert: z.B.: Einstellungen werden für den gesamten Berichtszeitraum (letzter Stichtag (ausgeschlossen) bis aktueller Stichtag (eingeschlossen), i.d.R. 5 Jahre) ausgewiesen. 
+### Dateiformate: csv und xlsx
+**reportix** kann mit Tabellen im Format `csv` oder `xlsx` (Excel) arbeiten.
 
-## Standards
-Die Daten für die Nutzung des Analysetools müssen klaren Standards entsprechen. Hier gibt es zwei Varianten. Variante 1 ist dabei bevorzugt.
+::: {.grid}
 
-**Variante 1 \- eine Zeile pro Person / Ereignis**:  
-Bei Daten aus dem Personalverwaltungssystem (VIVA, PWS, etc.) können Datensätze exportiert werden, in der jede Zeile eine Person (Stichtagsdaten) oder Ereignis (Zeitraumdaten) repräsentiert und jede Spalte ein Merkmal (z.B. Geschlecht, Arbeitszeitanteil) darstellt. Jeder Datensatz sollte die Personalnummer als eine weitere Spalte enthalten, damit ggf. Datensätze zusammengefügt werden können. Die Personalnummer selbst wird nie in Grafiken oder Tabellen auftauchen.
+::: {.g-col-6}
+::: {.callout-note icon=false}
+## csv
 
-![][image3]  
+Bei `csv`-Dateien muss jede Tabelle eine einzelne Datei sein (z.B. `Stichtagsdaten.csv`, `Beurlaubung.csv`, ...).
+:::
+:::
+
+::: {.g-col-6}
+::: {.callout-note icon=false}
+## xlsx
+
+Bei `xlsx`-Dateien gibt es zwei Möglichkeiten:
+
+- Eine Datei mit Sheets/Arbeitsblättern (z.B. `Alle-Daten.xlsx`)  
+- Einzelne Dateien für die verschiedenen Tabellen (z. B. `Stichtagsdaten.xlsx`, `Beurlaubung.xlsx`, ...).  
+:::
+:::
+
+:::
+
+
+### Tabellenform: Eine Zeile pro Person / Ereignis  
+Personalverwaltungssysteme (VIVA, PWS, etc.) können Datensätze exportieren, in der jede Zeile eine Person (Stichtagsdaten) oder Ereignis (Zeitraumdaten) repräsentiert und jede Spalte ein Merkmal (z.B. Geschlecht, Arbeitszeitanteil) darstellt. 
+Jeder Datensatz sollte die Personalnummer als eine weitere Spalte enthalten, damit ggf. Datensätze zusammengefügt werden können. 
+Die Personalnummer selbst wird nie in Grafiken oder Tabellen auftauchen.
+
 Beispiel Stichtagsdaten:
 
-| Personalnummer | Geschlecht | Arbeitszeitanteil | … |
+| PersNr | Geschlecht | QE | … |
 | :---- | :---- | :---- | :---- |
-| 1001 | Frau | 1,00 | … |
-| 1011 | Mann | 0,80 | … |
-| 1012 | Frau | 0,75 | … |
+| 1001 | weiblich | 1 | … |
+| 1011 | männlich | 2 | … |
+| 1012 | weiblich | 2 | … |
 | … | … | … | … |
 
-Beispiel Zeitraumsdaten:
+Beispiel Zeitraumsdaten (z.B. Beförderungen in 2025):
 
-| Personalnummer | Geschlecht | Datum der Beförderung | … |
-| :---- | :---- | :---- | :---- |
-| 1001 | Frau | 01.01.2025 | … |
-| 1001 | Frau | 01.11.2025 | … |
-| 1011 | Mann | 01.04.2025 | … |
-| 1012 | Frau | 01.10.2025 | … |
-| … | … | … | … |
+| PersNr | Datum | … |
+| :----  | :---- | :---- |
+| 1001   | 01.01.2025 | … |
+| 1001   | 01.11.2025 | … |
+| 1011   | 01.04.2025 | … |
+| 1012   | 01.10.2025 | … |
+| … | … | … | 
 
-**Variante 2 \- Kreuztabellen**:  
-Kreuztabellen, die nach Geschlecht und einem weiteren Merkmal aufschlüsseln. Zeigen das Geschlecht in den Spalten und das Merkmal in den Zeilen.
+Bei **Zeitraumdaten** ist das stichtagsbezogene Vorjahr verlangt (soweit nicht anderweitig ausgewiesen). 
+Ist z.B. der Stichtag der 30.06.2026, so wird bei Zeitraumdaten der 01.01.2025-31.12.2025 betrachtet. 
+Ausnahmen sind in den Definitionen beschrieben: 
+z.B. Einstellungen werden für den gesamten Berichtszeitraum (letzter Stichtag (ausgeschlossen) bis aktueller Stichtag (eingeschlossen), i.d.R. 5 Jahre) ausgewiesen.
 
-Beispiel:
+Es werden folgende Datensätze benötigt:
 
-| Arbeitszeitmodell | Frauen | Männer |
-| :---- | :---- | :---- |
-| Vollzeit | 1000 | 1200 |
-| Teilzeit | 980 | 510 |
+#### Stichtagsdaten
 
-Weitere Aufgliederung nach mehr als zwei Merkmalen ist ebenso möglich.
+Der Stichtagsdatensatz enthält die Spalten:
 
-Beispiel:
+- PersNr: Personalnummer
+- Geschlecht: ...
+... 
 
-| QE | Arbeitszeitmodell | Frauen | Männer |
-| :---- | :---- | :---- | :---- |
-| 1\. QE | Vollzeit | 100 | 120 |
-| 1\. QE | Teilzeit | 12 | 5 |
-| 2\. QE | Vollzeit | 200 | 290 |
-| 2\. QE | Teilzeit | 90 | 70 |
-| **…** | **…** | … | … |
+Hier Definitionen-yml einbinden
+
+
+#### Zeitraumsdaten
+
+Bei Zeitraumsdaten wird pro Ereignistyp eine Tabelle benötigt:
+
+##### Beurlaubung
+
+##### Bewerbung
+
+##### Einstellung
+
+##### Fortbildung
+
+##### Qualifikation
+
+##### Leistungskomponente
+
+##### Beförderung
+
+
+## Anpassungen
+
+Es gibt verschiedene Szenarien, in denen Anpassungen nötig sind.
+
+### Daten liegen nicht vor
+Sollten Informationen, die für das Gleichstellungskonzept benötigt werden nicht vorliegen, können diese nacherhoben werden und eine Tabelle im vorgegeben Format auch händisch erstellt werden. 
+
+Beispiel: Bewerbungen
+
+... TODO ...
+
+### Daten liegen nur als Kreuztabelle vor
+
+In manchen Fällen liegen die Daten nur als Kreuztabelle vor, z.B. wenn Strichlisten mit Bewerbungen geführt werden.
+
+Beispiel Bewerbungen mit QE bzw. QE-äquivalenten:
+
+| Beschäftigungsart    | QE     | Bewerbungen weiblich | Bewerbungen männlich |
+|----------------------|--------|--------------------|--------------------|
+| Beamte/Beamtinnen    | 1      | 78                 | 64                 |
+| Beamte/Beamtinnen    | 2      | 91                 | 55                 |
+| Beamte/Beamtinnen    | 3      | 67                 | 88                 |
+| Beamte/Beamtinnen    | 4      | 54                 | 73                 |
+| Tarifbeschäftigte    | 1      | 82                 | 96                 |
+| Tarifbeschäftigte    | 2      | 59                 | 61                 |
+| Tarifbeschäftigte    | 3      | 100                | 77                 |
+| Tarifbeschäftigte    | 4      | 69                 | 84                 |
+
+
+Sollten die Daten nur als bereits fertige Kreuztabelle vorliegen, gibt es zwei Möglichkeiten:
+
+**Möglichkeit 1: Tabelle umwandeln**
+
+In Excel können mit M-Code Daten umgewandelt werden.
+In LibreOffice und Excel können alternativ eine Mischung aus händischer Bearbeitung und Formeln gearbeitet werden:
+Erst "Frauen/Männer" trennen, dann per Hilfsspalte + `ZÄHLENWENN` + `VERGLEICH` zu einer Zeile pro Person *aufblasen*.
+
+Das Ergebnis sollte dann so aussehen:
+
+| Beschäftigungsart    | QE                     | Geschlecht |
+|----------------------|------------------------|------------|
+| Beamte/Beamtinnen    | 4                      | weiblich   | 
+| Tarifbeschäftigte    | 3                      | männlich   | 
+| Tarifbeschäftigte    | 1                      | männlich   | 
+| ...                  | ...                    | ...        | 
+
+
+**Möglichkeit 2: Grafiken selbst erstellen**
+
+Grafiken können auch selbst erstellt werden und händisch in die von reportix erstellte docx- bzw odt-Datei eingefügt werden. 
+Zur Erstellung von passenden Grafiken verweisen wir auf den Leitfaden (TODO: Link einfügen).
+
+
+
+
+
 
 
 
