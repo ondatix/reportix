@@ -397,18 +397,18 @@ function buildTitlePlugin(
   d?: ChartDefaults
 ): NonNullable<NonNullable<ChartOptions["plugins"]>["title"]> {
   // Comment this out to get chart titles.
-  return { display: false };
-  // if (!spec.title) return { display: false };
-  // const fontColor = d?.font?.color ? `#${d.font.color}` : undefined;
-  // const fontSpec = d?.font ? { family: d.font.family, size: d.font.size } : undefined;
-  // return {
-  //   display: true,
-  //   text: spec.title,
-  //   position: (d?.title?.position ?? "top") as "top" | "bottom" | "left" | "right",
-  //   align: (d?.title?.align ?? "center") as "start" | "center" | "end",
-  //   color: d?.title?.color ? `#${d.title.color}` : fontColor,
-  //   font: fontSpec,
-  // };
+  if (!spec.title) return { display: false };
+  const fontColor = d?.font?.color ? `#${d.font.color}` : undefined;
+  const fontSpec = d?.font ? { family: d.font.family, size: d.font.size } : undefined;
+  // return { display: false };
+  return {
+    display: true,
+    text: spec.title,
+    position: (d?.title?.position ?? "top") as "top" | "bottom" | "left" | "right",
+    align: (d?.title?.align ?? "center") as "start" | "center" | "end",
+    color: d?.title?.color ? `#${d.title.color}` : fontColor,
+    font: fontSpec,
+  };
 }
 
 /** Build a tooltip label callback that masks privacy-suppressed values as `<{threshold}`. */
