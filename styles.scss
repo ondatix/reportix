@@ -5,3 +5,18 @@ body {
 }
 
 
+/* Chapter number in headings */
+.chapter-number,
+.header-section-number {
+  color: #2D1B4E !important;
+}
+
+/* Section header text (all levels) */
+h1, h2, h3, h4, h5, h6 {
+  color: #2D1B4E;
+}
+
+/* Summary text color */
+details > summary {
+  color: #5BC4A0;
+}
