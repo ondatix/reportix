@@ -16,9 +16,10 @@
    5. QE
 6. Unified Color coding
 7. Tooltips auf Basis des Handbuchs
-8. Parameter: Was für eine Art von Behörde?
-9. CSV Support
-10. ODT Export
+8. Add definitions to data columns and store in extra yaml
+9. Parameter: Was für eine Art von Behörde?
+10. CSV Support
+11. ODT Export
 
 ## Forks
 - Main Fork

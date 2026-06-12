@@ -16,6 +16,11 @@
 /build
 /dist
 
+# docker
+Dockerfile
+.dockerignore
+nginx.conf
+
 # misc
 .DS_Store
 *.pem
@@ -45,4 +50,4 @@ next-env.d.ts
 # CLAUDE.md
 
 # example data
-# /example
+/example
