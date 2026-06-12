@@ -13,7 +13,7 @@ book:
         - datenvorbereitung.qmd
         - webapp.qmd
         - nachbereitung.qmd
-    - datenschutz.qmd
+        - datenschutz.qmd
     - noch-fragen.qmd
     - ueber-reportix.qmd
   page-footer:

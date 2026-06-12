@@ -1,18 +1,230 @@
 # Datenschutz
 
-TODO:
+> TODO:
+>
+> - Hier Datenschutz erläutern. 
+> - Entscheidungsgrundlage für Datenschützer (welche Fragen stellen sich die Datenschützer bei der Entscheidung, ob das Tool ok ist?).
 
-- Hier Datenschutz erläutern. 
-- Entscheidungsgrundlage für Datenschützer (welche Fragen stellen sich die Datenschützer bei der Entscheidung, ob das Tool ok ist?).
 
-Grundlage: 
+## Das wichtigste im Überblick
+**reportix** in der Anwendung für Gleichstellungskonzepte in Bayern verarbeitet Daten ausschließlich dort, wo sie tatsächlich benötigt werden – direkt auf dem Endgerät der Nutzer:innen:
 
-## Überblick
-- Client-side only
-- Keine Datenspeicherung
-- Keine gespeicherten Sessions
-- Möglichkeit des Ausschlusses von niedrigen Fallzahlen (kann selbst bestimmt werden)
+::: {.grid}
+
+::: {.g-col-6}
+::: {.callout-tip}
+### Client-side Only
+Die gesamte Verarbeitung findet ausschließlich im Browser bzw. direkt auf dem Endgerät der Nutzer:innen statt. Es erfolgt keine Übertragung von Daten an externe Server.
+:::
+
+::: {.callout-tip}
+### Keine Datenspeicherung
+Die App speichert keinerlei personenbezogene oder nutzungsbezogene Daten dauerhaft. Nach der Nutzung bleiben keine Daten zurück.
+:::
+:::
+
+::: {.g-col-6}
+::: {.callout-tip}
+### Datenschutzkonforme Ausweisung geringer Fallzahlen
+Geringe Fallzahlen werden nicht direkt sondern z.B. als "<5" dargestellt. Die Nutzer:innen können die Schwelle (z.B. 5) selbst festlegen.
+:::
+
+::: {.callout-tip}
+### Keine gespeicherten Sessions
+Es werden keine Sessions gespeichert. Jeder Nutzungsvorgang ist vollständig unabhängig und kann nicht später wiederhergestellt oder weiterverwendet werden.
+:::
+:::
+
+:::
 
 ## Details
-- https://nc-274963602466558160.nextcloud-ionos.com/index.php/f/3927
-- https://nc-274963602466558160.nextcloud-ionos.com/index.php/f/3928
+
+### Beschreibung der Datenverarbeitung
+
+|                                                   |                                                                        |
+|---------------------------------------------------|------------------------------------------------------------------------|
+| Zweck                                             | Automatische Erstellung eines Gleichstellungskonzepts nach Art. 4 BayGlG |
+| Rechtsgrundlagen/Befugnis                         | Art. 6 Abs. 1 S. 1 lit. c), e) DSGVO i. V. m. Art. 4 Abs. 1 BayDSG i. V. m. Art. 4, 5 BayGlG |
+| Kategorien personenbezogener Daten                | Siehe @sec-stichtagsdaten und @sec-zeitraumsdaten                     |
+| Betroffene Personen                               | Siehe @sec-untersuchungskoerper                                      |
+
+
+### Technische und organisatorische Maßnahmen (TOM)
+
+#### Vertraulichkeit (Art. 32 Abs. 1 lit. b DSGVO)
+
++----------------------+-----------------------------------------------+
+| **Maßnahme**         | **Beschreibung**                              |
++======================+===============================================+
+| Zutrittskontrolle    | Keine physische Zutrittskontrolle             |
+|                      | erforderlich, da keine Server-Infrastruktur   |
+|                      | betrieben wird                                |
++----------------------+-----------------------------------------------+
+| Zugangskontrolle     | - Browser-basierte Sandbox-Umgebung           |
+|                      |                                               |
+|                      | - Same-Origin-Policy verhindert unbefugten    |
+|                      | Zugriff                                       |
+|                      |                                               |
+|                      | - Kein Backend-System, daher keine            |
+|                      | Zugriffsberechtigungen erforderlich           |
++----------------------+-----------------------------------------------+
+| Zugriffskontrolle    | - Client-Side-Only-Verarbeitung: Daten        |
+|                      | verlassen niemals das Endgerät                |
+|                      |                                               |
+|                      | - Keine persistente Speicherung               |
+|                      |                                               |
+|                      | - Keine Zugriffsmöglichkeit durch Dritte      |
++----------------------+-----------------------------------------------+
+| Trennungskontrolle   | - Automatische Isolation durch                |
+|                      | Browser-Architektur                           |
+|                      |                                               |
+|                      | - Keine Vermischung mit anderen               |
+|                      | Datenbeständen möglich                        |
+|                      |                                               |
+|                      | - Jede Session ist vollständig getrennt       |
++----------------------+-----------------------------------------------+
+| Pseudonymisierung    | Nicht erforderlich, da keine dauerhafte       |
+|                      | Speicherung oder Übermittlung erfolgt         |
++----------------------+-----------------------------------------------+
+
+#### Integrität (Art. 32 Abs. 1 lit. b DSGVO)
+
++----------------------+-----------------------------------------------+
+| **Maßnahme**         | **Beschreibung**                              |
++======================+===============================================+
+| Weitergabekontrolle  | - Keine Datenübertragung an Server oder       |
+|                      | Dritte                                        |
+|                      |                                               |
+|                      | - Kein E-Mail-Versand oder Export-Funktionen  |
+|                      |                                               |
+|                      | - Content Security Policy (CSP) verhindert    |
+|                      | unautorisierten Datenabfluss                  |
++----------------------+-----------------------------------------------+
+| Eingabekontrolle     | - Browser-Console-Logs dokumentieren          |
+|                      | Verarbeitungsschritte (optional)              |
+|                      |                                               |
+|                      | - Transparente Verarbeitung für den Nutzer    |
+|                      | sichtbar                                      |
++----------------------+-----------------------------------------------+
+
+#### Verfügbarkeit und Belastbarkeit (Art. 32 Abs. 1 lit. b DSGVO)
+
++-------------------------+-----------------------------------------------+
+| **Maßnahme**            | **Beschreibung**                              |
++=========================+===============================================+
+| Verfügbarkeitskontrolle | - HTTPS-only Deployment zur sicheren          |
+|                         | Übertragung der Webapp                        |
+|                         |                                               |
+|                         | - Hosting auf zuverlässiger Infrastruktur     |
+|                         |                                               |
+|                         | - Regelmäßige Verfügbarkeitsprüfung           |
++-------------------------+-----------------------------------------------+
+| Rasche                  | - Statische Webapp kann schnell neu deployed  |
+| Wiederherstellbarkeit   | werden                                        |
+|                         |                                               |
+|                         | - Versionskontrolle (Git) für schnelle        |
+|                         | Rollbacks                                     |
+|                         |                                               |
+|                         | - Keine Datenbanken oder persistente Systeme, |
+|                         | die wiederhergestellt werden müssen           |
++-------------------------+-----------------------------------------------+
+
+#### Verfahren zur Überprüfung, Bewertung und Evaluierung (Art. 32 Abs.1 lit. d DSGVO)
+
++------------------------+-----------------------------------------------+
+| **Maßnahme**           | **Beschreibung**                              |
++========================+===============================================+
+| Datenschutz-Management | - Regelmäßige Überprüfung der                 |
+|                        | Client-Side-Verarbeitung                      |
+|                        |                                               |
+|                        | - Code-Reviews vor Updates                    |
+|                        |                                               |
+|                        | - Dokumentation aller Änderungen              |
++------------------------+-----------------------------------------------+
+| Incident-Response      | - Prozess zur Meldung von                     |
+|                        | Sicherheitsvorfällen etabliert                |
+|                        |                                               |
+|                        | - Bei Verdacht auf Datenleck: Sofortige       |
+|                        | Abschaltung möglich                           |
+|                        |                                               |
+|                        | - Kontaktperson für Sicherheitsfragen benannt |
++------------------------+-----------------------------------------------+
+| Datenschutzfreundliche | - Privacy by Design: Keine Datensammlung      |
+| Voreinstellungen       | vorgesehen                                    |
+|                        |                                               |
+|                        | - Privacy by Default: Minimale                |
+|                        | Datenverarbeitung                             |
+|                        |                                               |
+|                        | - Transparente Informationen für Nutzer       |
++------------------------+-----------------------------------------------+
+
+#### Technische Sicherheitsmaßnahmen
+
++--------------------------+-----------------------------------------------+
+| **Maßnahme**             | **Beschreibung**                              |
++==========================+===============================================+
+| Transportverschlüsselung | - HTTPS-Verschlüsselung (TLS 1.2 oder höher)  |
+|                          | für die Webapp                                |
+|                          |                                               |
+|                          | - HSTS (HTTP Strict Transport Security)       |
+|                          | aktiviert                                     |
+|                          |                                               |
+|                          | - Sichere Cipher Suites konfiguriert          |
++--------------------------+-----------------------------------------------+
+| Content Security Policy  | - CSP-Header konfiguriert                     |
+|                          |                                               |
+|                          | - Blockierung externer Scripts und Ressourcen |
+|                          |                                               |
+|                          | - Verhinderung von Cross-Site-Scripting (XSS) |
++--------------------------+-----------------------------------------------+
+| Subresource Integrity    | - SRI-Hashes für alle eingebundenen           |
+|                          | Bibliotheken                                  |
+|                          |                                               |
+|                          | - Schutz vor kompromittierten CDN-Ressourcen  |
+|                          |                                               |
+|                          | - Sicherstellung der Code-Integrität          |
++--------------------------+-----------------------------------------------+
+| Keine externen           | - Keine Einbindung externer APIs              |
+| Abhängigkeiten           |                                               |
+|                          | - Keine Third-Party-Services                  |
+|                          |                                               |
+|                          | - Vollständige Kontrolle über Code-Basis      |
+|                          |                                               |
+|                          | - Alle Bibliotheken gebundelt und geprüft     |
++--------------------------+-----------------------------------------------+
+
+#### Besondere Risiken und Gegenmaßnahmen
+
++---------------------------------+---------------------------------+------------------------+
+| **Risiko**                      | **Eintrittswahrscheinlichkeit** | **Gegenmaßnahme**      |
++=================================+=================================+========================+
+| Browser-Schwachstellen könnten  | Gering (Browser-Sicherheit wird | - Hinweis an Nutzer,   |
+| zu Datenabfluss führen          | von Herstellern kontinuierlich  | aktuelle               |
+|                                 | verbessert)                     | Browser-Versionen zu   |
+|                                 |                                 | verwenden              |
+|                                 |                                 |                        |
+|                                 |                                 | - CSP und SRI als      |
+|                                 |                                 | zusätzliche            |
+|                                 |                                 | Schutzebenen           |
++---------------------------------+---------------------------------+------------------------+
+| Versehentliches Teilen von      | Mittel (liegt im                | - Deutlicher Hinweis   |
+| Screenshots/Bildschirmaufnahmen | Verantwortungsbereich der       | in der Webapp          |
+|                                 | Nutzer)                         |                        |
+|                                 |                                 | - Schulung der Nutzer  |
+|                                 |                                 |                        |
+|                                 |                                 | - Dokumentation der    |
+|                                 |                                 | Verantwortlichkeiten   |
++---------------------------------+---------------------------------+------------------------+
+| Kompromittierung des            | Gering bei Einsatz sicherer     | - Deployment auf       |
+| Hosting-Servers                 | Hosting-Infrastruktur           | vertrauenswürdiger     |
+| (Code-Manipulation)             |                                 | Infrastruktur          |
+|                                 |                                 | (deutscher/bayerischer |
+|                                 |                                 | Server)                |
+|                                 |                                 |                        |
+|                                 |                                 | - Regelmäßige          |
+|                                 |                                 | Integritätsprüfungen   |
+|                                 |                                 |                        |
+|                                 |                                 | - Versionskontrolle    |
+|                                 |                                 | und Change-Management  |
++---------------------------------+---------------------------------+------------------------+
+
