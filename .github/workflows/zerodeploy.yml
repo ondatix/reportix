@@ -22,4 +22,4 @@ jobs:
         uses: mittwald/zerodeploy-action@v1
         with:
           mittwald-api-token: ${{ secrets.MITTWALD_API_TOKEN }}
-          mittwald-project-id: "p-m73e7w"
+          mittwald-project-id: "p-ui7enf"
