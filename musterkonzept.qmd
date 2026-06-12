@@ -1,26 +1,21 @@
 # Musterkonzept
 
-Das Musterkonzept ist die gemeinsame Grundlage für alle Gleichstellungskonzepte in Bayern.
+Das Musterkonzept ist die gemeinsame Grundlage für alle Gleichstellungskonzepte in Bayern und damit auch die Grundlage für **reportix**-Outputs.
 
-Das Musterkonzept legt eine einheitliche Struktur fest, die im Rahmen von Stakeholder-Workshops mit den relevanten Akteurinnen und Akteuren erarbeitet wurde. Es enthält Textbausteine, die als Formulierungshilfe dienen und bei der Erstellung der Gleichstellungskonzepte bei Bedarf angepasst werden können.   
-Es kann auch unabhängig von Reportix genutzt werden.
+Das Musterkonzept legt eine einheitliche Struktur fest und enthält Textbausteine, die als Formulierungshilfe dienen und bei der Erstellung der Gleichstellungskonzepte bei Bedarf angepasst werden können.
+*Es kann auch unabhängig von **reportix** genutzt werden. Für diesen Fall können sie es [hier](TODO: Link einfügen) herunterladen.*
 
-## Das Musterkonzept als Baukasten
 
+**Das Musterkonzept als Baukasten:**
 Das Musterkonzept ist nicht als einengendes Korsett gedacht, sondern soll die Erstellung vereinfachen und den wichtigen Raum schaffen, weitere Inhalte hinzuzufügen.
 
 
-::: {.grid}
-
-::: {.g-col-4}
 ::: {.callout-note icon=false}
 ## Pflichtinhalte
 
 Für alle verpflichtende Inhalte.
 :::
-:::
 
-::: {.g-col-4}
 ::: {.callout-tip icon=false}
 ## Optionale Inhalte
 
@@ -29,120 +24,17 @@ Sie konnen ganz oder auch teilweise genutzt werden.
 Sie dürfen dabei knappgehalten oder ausführlich ausgearbeitet werden, je nachdem, was für die jeweilige Dienststelle als passend und notwendig angesehen wird. 
 Der Detailgrad wird daher durch die Dienststelle bestimmt.
 :::
-:::
 
-::: {.g-col-4}
 ::: {.callout-important icon=false}
 ## Zusätzliche Inhalte
 
 Weitere - möglicherweise dienststellenspezifische - Inhalte sind erwünscht.
 :::
-:::
 
-:::
 
 
 Welche konkreten Inhalte in das jeweilige Gleichstellungskonzept aufgenommen werden, wird von der Dienststellenleitung bestimmt.
 Die Gleichstellungsbeauftragten können dabei unterstützend tätig werden.
 
-
-
-
-## Untersuchungskörper: Wer muss berücksichtigt werden? 
-
-Der sogenannte **Untersuchungskörper**
-beschreibt den gesamten Personenkreis, über
-den im Gleichstellungskonzept berichtet wird. Er
-umfasst also alle Personen, die im Konzept
-berücksichtigt werden müssen.
-
-Bei der Erstellung eines Gleichstellungskonzepts
-stellen sich dazu zwei grundlegende Fragen:
-
-### (1) Welche Personen gehören zum Untersuchungskörper? {.unnumbered}
-
-Das Gesetz legt den Rahmen fest, welche Personen das Konzept mindestens berücksichtigen muss. 
-Wenn darüber hinaus Unklarheiten bestehen (z. B. bei besonderen Beschäftigtengruppen), entscheidet die jeweilige Dienststelle, ob diese Personen in den Untersuchungskörper einbezogen werden.
-
-### (2) Wie wird der Untersuchungskörper im Konzept dargestellt und gegliedert? {.unnumbered}
-
-Der gesamte Untersuchungskörper kann als Einheit betrachtet und im Konzept gemeinsam ausgewertet werden. 
-Oder Sie entscheiden sich dafür, einzelne Bereiche getrennt zu betrachten, zum Beispiel **nachgeordnete Behörden**. 
-In diesem Fall können diese in Unterkonzepten beschrieben werden, beispielsweise im optionalen Kapitel *Situationsbeschreibung nachgelagerter Behörden*.
-
-Diese Strukturierung ist eine individuelle
-Entscheidung der Dienststelle und sollte sich
-daran orientieren, was für eine **sinnvolle und
-aussagekräftige Analyse** der Situation vor Ort
-hilfreich ist.
-
-Sie können wie folgt vorgehen, um zu klären,
-über welche Personen in Ihrem Gleichstellungs-
-konzept berichtet werden soll:
-
-::: {.grid}
-
-::: {.g-col-6}
-**(a) Gesetzlichen Rahmen prüfen**
-
-Prüfen Sie zunächst anhand von Art. 4 Abs.
-2, Art. 5 BayGlG i.V.m. Art. 3 Abs. 2 BayGlG
-sowie Art. 6 Bayerisches Personalvertretungsgesetz (PVG), welche Organisationseinheit als
-Dienststelle gilt und für welche Beschäftigten-
-gruppen daher ein Gleichstellungskonzept zu erstellen ist.
-
-Überlegen Sie, ob nachgeordnete Behörden,
-die zum betrachteten Personenkreis gehören,
-im Gleichstellungskonzept gesondert dargestellt
-werden sollen – zum Beispiel in Form
-eines Unterkonzepts im optionalen Kapitel
-*Situationsbeschreibung nachgelagerter
-Behörden*.
-
-Eine getrennte Darstellung ist vor allem
-dann sinnvoll, wenn sich die nachgeordneten
-Behörden deutlich voneinander oder von
-der übergeordneten Behörde unterscheiden
-(z. B. in Aufgabenprofil, Struktur oder
-Beschäftigtenzusammensetzung).
-
-::: {.callout-note appearance="minimal"}
-## Beispiel:  
-Im Gleichstellungskonzept des StMFH wird
-zum einen über das Ministerium selbst be-
-richtet. Zusätzlich werden eigene Situations-
-beschreibungen u. a. für die nachgelagerten
-Bereiche Steuern, Vermessung und
-Schlösserverwaltung erstellt, da sich diese
-Bereiche sowohl voneinander als auch vom
-Ministerium deutlich unterscheiden.
-:::
-:::
-
-::: {.g-col-6}
-**(b) Zusätzliche Bereiche bewusst einbeziehen (optional)**
-
-Überlegen Sie anschließend, ob es sinnvoll ist,
-weitere Bereiche oder Personengruppen zusätzlich
-in das Konzept aufzunehmen. Gründe
-hierfür können zum Beispiel sein:
-
-- Personengruppen, die sonst in keinem anderen Gleichstellungskonzept erfasst werden,
-- der Wunsch nach vollständigeren Daten sowie
-- eine höhere Aussagekraft der Auswertungen.
-
-::: {.callout-note appearance="minimal"}
-## Beispiel:
-Außertariflich Beschäftigte sind per Defini-
-tion weder Beamtinnen und Beamte noch
-Tarifbeschäftigte. Wenn sie im Konzept zum
-Beispiel den Tarifbeschäftigten zugerechnet
-und die gesamte Gruppe als „Arbeitnehmer“
-bezeichnet wird, sollte dies in der Definition
-des betrachteten Personenkreises eindeutig
-und ausdrücklich erläutert werden.
-:::
-:::
-:::
 
 
