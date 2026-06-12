@@ -61,14 +61,14 @@ export function initApp(root: HTMLElement): void {
       <label for="language-select">${t("ui.language")}: </label>
       <select id="language-select"></select>
     </div>
-    <div id="step-data" class="step">
-      <h2>${t("ui.step.data")}</h2>
-      <div id="data-inputs"></div>
-    </div>
-    <div id="step-template" class="step" hidden>
+    <div id="step-template" class="step">
       <h2>${t("ui.step.template")}</h2>
       <div id="template-choices"></div>
       <button id="template-continue" type="button">${t("ui.button.continue")}</button>
+    </div>
+    <div id="step-data" class="step" hidden>
+      <h2>${t("ui.step.data")}</h2>
+      <div id="data-inputs"></div>
     </div>
     <div id="step-params" class="step" hidden>
       <h2>${t("ui.step.params")}</h2>
@@ -99,62 +99,9 @@ export function initApp(root: HTMLElement): void {
   let dataStore: DataStore;
   let templateText: string;
 
-  // Step 1: Data files
-  const dataInputs = root.querySelector<HTMLElement>("#data-inputs")!;
-  const dataWarnings = document.createElement("div");
-  dataWarnings.className = "data-warnings";
-  dataWarnings.hidden = true;
+  showTemplateStep();
 
-  for (const [name, def] of Object.entries(config.data)) {
-    const expectedSheets = def.sheets.map((s) => s.sheet).join(", ");
-    const label = document.createElement("label");
-    label.textContent = t("ui.data.expectedSheets", { name, sheets: expectedSheets });
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".xlsx,.xls";
-    input.dataset.name = name;
-    label.appendChild(input);
-    dataInputs.appendChild(label);
-  }
-
-  dataInputs.appendChild(dataWarnings);
-
-  const loadBtn = document.createElement("button");
-  loadBtn.textContent = t("ui.button.loadValidate");
-  loadBtn.addEventListener("click", async () => {
-    dataWarnings.hidden = true;
-    dataWarnings.innerHTML = "";
-    const fileInputs =
-      dataInputs.querySelectorAll<HTMLInputElement>("input[type=file]");
-    const files = new Map<string, ArrayBuffer>();
-    for (const fi of fileInputs) {
-      const f = fi.files?.[0];
-      if (f) files.set(fi.dataset.name!, await f.arrayBuffer());
-    }
-    const result = loadDataSources(files, config.data);
-    // Build derived datasets (joins) before rendering; surface their warnings
-    // alongside the data-validation ones.
-    const pre = applyPreprocessing(result.store, config.preprocessing);
-    dataStore = pre.store;
-    const warnings = [...result.warnings, ...pre.warnings];
-    if (warnings.length > 0) {
-      const heading = document.createElement("strong");
-      heading.textContent = t("ui.data.warningsHeading");
-      dataWarnings.appendChild(heading);
-      const list = document.createElement("ul");
-      for (const w of warnings) {
-        const li = document.createElement("li");
-        li.textContent = t("ui.data.warningLine", { source: w.source, message: w.message });
-        list.appendChild(li);
-      }
-      dataWarnings.appendChild(list);
-      dataWarnings.hidden = false;
-    }
-    showTemplateStep();
-  });
-  dataInputs.appendChild(loadBtn);
-
-  // Step 2: Template choice — radio group over the bundled templates
+  // Step 1: Template choice — radio group over the bundled templates
   function showTemplateStep() {
     const stepTpl = root.querySelector<HTMLElement>("#step-template")!;
     const choices = root.querySelector<HTMLElement>("#template-choices")!;
@@ -189,8 +136,67 @@ export function initApp(root: HTMLElement): void {
       const bundled = getBundledTemplate(selected.value);
       if (bundled === undefined) return; // startup guard already ruled this out
       templateText = bundled;
-      showParamsStep();
+      showDataLoadingStep();
     };
+  }
+
+  // Step 2: Data files
+  function showDataLoadingStep() {
+    const stepData = root.querySelector<HTMLElement>("#step-data")!;
+    const dataInputs = root.querySelector<HTMLElement>("#data-inputs")!;
+    const dataWarnings = document.createElement("div");
+    dataWarnings.className = "data-warnings";
+    stepData.hidden = false;
+    dataWarnings.hidden = true;
+
+    for (const [name, def] of Object.entries(config.data)) {
+      const expectedSheets = def.sheets.map((s) => s.sheet).join(", ");
+      const label = document.createElement("label");
+      label.textContent = t("ui.data.expectedSheets", { name, sheets: expectedSheets });
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".xlsx,.xls";
+      input.dataset.name = name;
+      label.appendChild(input);
+      dataInputs.appendChild(label);
+    }
+
+    dataInputs.appendChild(dataWarnings);
+
+    const loadBtn = document.createElement("button");
+    loadBtn.textContent = t("ui.button.loadValidate");
+    loadBtn.addEventListener("click", async () => {
+      dataWarnings.hidden = true;
+      dataWarnings.innerHTML = "";
+      const fileInputs =
+        dataInputs.querySelectorAll<HTMLInputElement>("input[type=file]");
+      const files = new Map<string, ArrayBuffer>();
+      for (const fi of fileInputs) {
+        const f = fi.files?.[0];
+        if (f) files.set(fi.dataset.name!, await f.arrayBuffer());
+      }
+      const result = loadDataSources(files, config.data);
+      // Build derived datasets (joins) before rendering; surface their warnings
+      // alongside the data-validation ones.
+      const pre = applyPreprocessing(result.store, config.preprocessing);
+      dataStore = pre.store;
+      const warnings = [...result.warnings, ...pre.warnings];
+      if (warnings.length > 0) {
+        const heading = document.createElement("strong");
+        heading.textContent = t("ui.data.warningsHeading");
+        dataWarnings.appendChild(heading);
+        const list = document.createElement("ul");
+        for (const w of warnings) {
+          const li = document.createElement("li");
+          li.textContent = t("ui.data.warningLine", { source: w.source, message: w.message });
+          list.appendChild(li);
+        }
+        dataWarnings.appendChild(list);
+        dataWarnings.hidden = false;
+      }
+      showParamsStep();
+    });
+    dataInputs.appendChild(loadBtn);
   }
 
   // Step 3: Parameters

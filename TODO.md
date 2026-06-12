@@ -5,6 +5,17 @@
   - extra section: data_preprocessing
   - TODO: test
 2. table section
+3. More sophisticated data loading
+  - manual mapping of columns
+4. Datenformate vereinheitlichen
+   1. Datum
+   2. weiblich - männlich
+   3. Arbeitszeitanteil berechnen
+   4. Elternzeitberechnung
+5. Unified Color coding
+6. Tooltips auf Basis des Handbuchs
+7. CSV Support
+8. ODT Export
 
 ## Forks
 - Main Fork
@@ -17,28 +28,10 @@
   - Template
 
 
-## README
-- [x] Fill the README
-- [x] Quick Start: mention to run app in root
-
-## Parameters
-- [x] Data validation only throws warning
-
-## Design
-- [x] Prepare generic CSS
-- [x] Apply ondatix theme
-
-## Config
-- [x] Create generic config
-- [x] Create StMAS config
-- [x] Create config specification
-- [x] Add section numbering option and toc option
-- [x] Add parameter logic (parameters are set in config, but can be overwritten by users)
-
 ## Charts and Tables
 - [ ] Accessible charts
   - [ ] Actual numbers in the charts?
-  - [x] Titles?
+  - [ ] White space between elements
 - [ ] Well-formed tables
   - [ ] Format (centered or block)
   - [ ] Config options
@@ -52,10 +45,7 @@
 - [ ] Create the StMAS Template
   - [ ] Table section at the end
   - [x] Data Preprocessing
-- [x] Polish callouts
 
-## License
-- [x] Validate License with Team
 
 ## Security
 - [x] Subresource Integrity (SRI)

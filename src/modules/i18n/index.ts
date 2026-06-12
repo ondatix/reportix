@@ -42,8 +42,8 @@ const STRINGS: Record<Locale, Dict> = {
   de: {
     // — App shell / steps —
     "ui.language": "Sprache",
-    "ui.step.data": "1. Daten laden",
-    "ui.step.template": "2. Vorlage wählen",
+    "ui.step.template": "1. Vorlage wählen",
+    "ui.step.data": "2. Daten laden",
     "ui.step.params": "3. Berichtsparameter",
     "ui.step.preview": "Berichtsvorschau",
     "ui.button.continue": "Weiter",
@@ -126,8 +126,8 @@ const STRINGS: Record<Locale, Dict> = {
   en: {
     // — App shell / steps —
     "ui.language": "Language",
-    "ui.step.data": "1. Load Data Files",
-    "ui.step.template": "2. Choose Template",
+    "ui.step.template": "1. Choose Template",
+    "ui.step.data": "2. Load Data Files",
     "ui.step.params": "3. Report Parameters",
     "ui.step.preview": "Report Preview",
     "ui.button.continue": "Continue",
