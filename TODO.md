@@ -5,17 +5,20 @@
   - extra section: data_preprocessing
   - TODO: test
 2. table section
-3. More sophisticated data loading
+3. Condition config.data on template
+4. More sophisticated data loading
   - manual mapping of columns
-4. Datenformate vereinheitlichen
+5. Datenformate vereinheitlichen
    1. Datum
    2. weiblich - männlich
    3. Arbeitszeitanteil berechnen
    4. Elternzeitberechnung
-5. Unified Color coding
-6. Tooltips auf Basis des Handbuchs
-7. CSV Support
-8. ODT Export
+   5. QE
+6. Unified Color coding
+7. Tooltips auf Basis des Handbuchs
+8. Parameter: Was für eine Art von Behörde?
+9. CSV Support
+10. ODT Export
 
 ## Forks
 - Main Fork

@@ -179,7 +179,7 @@ Alle Schlüssel folgen weiterhin dem Standardschema (einschließlich lokalisiert
 
 ## `data:`
 
-Deklariert die Datenquellen, deren Upload die App erwartet, jeweils mit einem oder mehreren `.xlsx`-Tabellenblättern und ihren Pflichtspalten.
+Deklariert die Datenquellen, deren Upload die App erwartet, jeweils mit einem oder mehreren Tabellenblättern und ihren Spalten. Diese Namen sind **Zuordnungsziele**: Der Nutzer wählt zuerst ein Format (XLSX oder CSV) und ordnet dann die tatsächlichen Blätter/Spalten seiner Datei diesen Namen zu (per Namensgleichheit vorausgewählt). Es ist also **keine starre Validierung** mehr — die deklarierten Namen müssen in der Datei nicht exakt vorkommen.
 
 ```yaml
 data:
@@ -197,7 +197,7 @@ data:
 | `.sheets[].sheet` | String | Name des Excel-Tabellenblatts, wie er in der Arbeitsmappe erscheint. |
 | `.sheets[].columns` | `string[]` | Pflicht-Spaltenüberschriften (verglichen nach Unicode-NFC- und Leerraum-Normalisierung). |
 
-**Prüfverhalten.** Abweichungen zwischen der hochgeladenen Datei und der deklarierten Form (fehlende Quelldatei, fehlendes Blatt, fehlende Spalten) erscheinen als **nicht-blockierende Warnungen** in einem gelben Banner — und diese Warnungen werden selbst in der gewählten Oberflächensprache angezeigt. Die Verarbeitung läuft weiter; jedes Diagramm oder jede Tabelle, die auf fehlende Daten verweist, wird in der Vorschau als roter „TBD"-Hinweis dargestellt, der Rest des Berichts bleibt intakt.
+**Zuordnung statt Validierung.** Im Datenschritt wählt der Nutzer **XLSX** (eine Arbeitsmappe je Quelle; jedes Konfig-Blatt → ein Blatt der Mappe) oder **CSV** (eine Einzeltabellen-Datei je Blatt; akzeptiert auch eine einblättrige `.xlsx`) und ordnet je Blatt/Spalte über ein Auswahlfeld zu. Die nach Name passende Option ist vorausgewählt. Nicht zugeordnete Blätter/Spalten erzeugen beim „Weiter" **nicht-blockierende Warnungen** (in der gewählten Sprache); die Verarbeitung läuft weiter, und Blöcke, die auf fehlende Daten verweisen, werden als roter „TBD"-Hinweis dargestellt. Zugeordnete Spalten werden auf die Konfig-Spaltennamen **umbenannt**.
 
 **DataStore-Schlüssel.** Intern wird jedes geladene Blatt unter seinem Blattnamen abgelegt. Diagramm- und Tabellenblöcke verweisen über diesen Schlüssel auf Daten — z. B. sucht `data: Blatt 1` in einem Diagrammblock `DataStore["Blatt 1"]`.
 
@@ -841,7 +841,7 @@ All keys still follow the standard schema (including localized `label:`); only t
 
 ## `data:`
 
-Declares the data sources the app expects the user to upload, each with one or more `.xlsx` sheets and their required columns.
+Declares the data sources the app expects the user to upload, each with one or more sheets and their columns. These names are **mapping targets**: the user first picks a format (XLSX or CSV) and then maps their file's actual sheets/columns onto these names (pre-selected by matching name). It is **no longer a rigid validation** — the declared names need not appear verbatim in the file.
 
 ```yaml
 data:
@@ -859,7 +859,7 @@ data:
 | `.sheets[].sheet` | string | Excel sheet name as it appears in the workbook. |
 | `.sheets[].columns` | `string[]` | Required column headers (compared after Unicode NFC + whitespace normalisation). |
 
-**Validation behavior.** Mismatches between the uploaded file and the declared shape (missing source file, missing sheet, missing columns) surface as **non-blocking warnings** in a yellow banner — and those warnings are themselves shown in the selected UI language. The pipeline continues; any chart or table that references missing data renders as a red "TBD" note in the preview, leaving the rest of the report intact.
+**Mapping, not validation.** In the data step the user picks **XLSX** (one workbook per source; each config sheet → a workbook sheet) or **CSV** (one single-table file per sheet; also accepts a single-sheet `.xlsx`) and maps each sheet/column via a dropdown. The option whose name matches is pre-selected. Unmapped sheets/columns produce **non-blocking warnings** on Continue (shown in the selected UI language); the pipeline proceeds and blocks referencing missing data render as a red "TBD" note. Mapped columns are **renamed** to the config column names.
 
 **DataStore keying.** Internally each loaded sheet is stored under its sheet name. Chart and table blocks reference data via this key — e.g. `data: Sheet 1` in a chart block looks up `DataStore["Sheet 1"]`.
 

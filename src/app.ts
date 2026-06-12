@@ -3,7 +3,14 @@
  *   config (bundled) → data upload → template choice → parameters → render → export
  */
 import { loadConfig } from "./modules/config";
-import { loadDataSources } from "./modules/data-loader";
+import {
+  parseWorkbook,
+  parseTable,
+  assembleStore,
+  matchName,
+  type SourceTable,
+  type DataMapping,
+} from "./modules/data-loader";
 import { applyPreprocessing } from "./modules/preprocessing";
 import {
   buildParameterForm,
@@ -140,47 +147,273 @@ export function initApp(root: HTMLElement): void {
     };
   }
 
-  // Step 2: Data files
+  // Step 2: Data — pick a format, then map the user's sheets/columns onto the
+  // config-defined sheets and columns. No rigid validation; unmapped names
+  // surface as warnings on Continue.
   function showDataLoadingStep() {
     const stepData = root.querySelector<HTMLElement>("#step-data")!;
-    const dataInputs = root.querySelector<HTMLElement>("#data-inputs")!;
+    const container = root.querySelector<HTMLElement>("#data-inputs")!;
+    stepData.hidden = false;
+    container.innerHTML = "";
+
+    let dataFormat: "xlsx" | "csv" = "xlsx";
+
+    // Parsed source tables.
+    const workbooks = new Map<string, Record<string, SourceTable>>(); // xlsx: source → its sheets
+    const sheetFiles = new Map<string, SourceTable>();                // csv: config sheet → its file
+
+    // Live <select> references, keyed by config sheet name.
+    const sheetSelects = new Map<string, HTMLSelectElement>();
+    const columnSelects = new Map<string, Map<string, HTMLSelectElement>>();
+
+    // The mapping UI lives in a collapsible panel; after Continue it folds away
+    // (warnings stay visible) and an "edit" button re-opens it for changes.
+    const panel = document.createElement("div");
+    panel.className = "data-mapping-panel";
+    container.appendChild(panel);
+
+    // ── Format toggle ──
+    const toggle = document.createElement("div");
+    toggle.className = "data-format-toggle";
+    const formatLabel = document.createElement("span");
+    formatLabel.className = "data-format-label";
+    formatLabel.textContent = `${t("ui.data.format")}:`;
+    toggle.appendChild(formatLabel);
+    const formatButtons = new Map<"xlsx" | "csv", HTMLButtonElement>();
+    for (const fmt of ["xlsx", "csv"] as const) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = t(`ui.data.format.${fmt}`);
+      b.addEventListener("click", () => {
+        if (dataFormat === fmt) return;
+        dataFormat = fmt;
+        renderBody();
+      });
+      formatButtons.set(fmt, b);
+      toggle.appendChild(b);
+    }
+    panel.appendChild(toggle);
+
+    const body = document.createElement("div");
+    body.className = "data-mapping";
+    panel.appendChild(body);
+
+    const continueBtn = document.createElement("button");
+    continueBtn.type = "button";
+    continueBtn.textContent = t("ui.button.continue");
+    continueBtn.addEventListener("click", onContinue);
+    panel.appendChild(continueBtn);
+
+    // Re-open the collapsed panel to make changes.
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.className = "data-edit-btn";
+    editBtn.textContent = t("ui.data.edit");
+    editBtn.hidden = true;
+    editBtn.addEventListener("click", () => {
+      panel.hidden = false;
+      editBtn.hidden = true;
+    });
+    container.appendChild(editBtn);
+
     const dataWarnings = document.createElement("div");
     dataWarnings.className = "data-warnings";
-    stepData.hidden = false;
     dataWarnings.hidden = true;
+    container.appendChild(dataWarnings);
 
-    for (const [name, def] of Object.entries(config.data)) {
-      const expectedSheets = def.sheets.map((s) => s.sheet).join(", ");
-      const label = document.createElement("label");
-      label.textContent = t("ui.data.expectedSheets", { name, sheets: expectedSheets });
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = ".xlsx,.xls";
-      input.dataset.name = name;
-      label.appendChild(input);
-      dataInputs.appendChild(label);
+    renderBody();
+
+    // ── Rendering ──
+    function renderBody() {
+      for (const [fmt, b] of formatButtons) b.classList.toggle("active", fmt === dataFormat);
+      body.innerHTML = "";
+      sheetSelects.clear();
+      columnSelects.clear();
+      workbooks.clear();
+      sheetFiles.clear();
+
+      for (const [source, def] of Object.entries(config.data)) {
+        const group = document.createElement("div");
+        group.className = "source-group";
+        const h = document.createElement("h3");
+        h.textContent = source;
+        group.appendChild(h);
+        if (dataFormat === "xlsx") renderXlsxSource(source, def, group);
+        else renderCsvSource(def, group);
+        body.appendChild(group);
+      }
     }
 
-    dataInputs.appendChild(dataWarnings);
+    // XLSX: one workbook per source; map each config sheet → a workbook sheet,
+    // each config column → a column of the chosen sheet.
+    function renderXlsxSource(
+      source: string,
+      def: (typeof config.data)[string],
+      group: HTMLElement
+    ) {
+      const fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.accept = ".xlsx,.xls";
+      const fileLabel = document.createElement("label");
+      fileLabel.textContent = t("ui.data.uploadWorkbook");
+      fileLabel.appendChild(fileInput);
+      group.appendChild(fileLabel);
 
-    const loadBtn = document.createElement("button");
-    loadBtn.textContent = t("ui.button.loadValidate");
-    loadBtn.addEventListener("click", async () => {
-      dataWarnings.hidden = true;
-      dataWarnings.innerHTML = "";
-      const fileInputs =
-        dataInputs.querySelectorAll<HTMLInputElement>("input[type=file]");
-      const files = new Map<string, ArrayBuffer>();
-      for (const fi of fileInputs) {
-        const f = fi.files?.[0];
-        if (f) files.set(fi.dataset.name!, await f.arrayBuffer());
+      for (const sheetDef of def.sheets) {
+        const sheetRow = document.createElement("div");
+        sheetRow.className = "sheet-map";
+
+        const lbl = document.createElement("label");
+        lbl.className = "sheet-map-head";
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "sheet-map-name";
+        nameSpan.textContent = `${sheetDef.sheet} — ${t("ui.data.mapSheet")}`;
+        const sheetSel = makeSelect();
+        lbl.append(nameSpan, sheetSel);
+        sheetRow.appendChild(lbl);
+        sheetSelects.set(sheetDef.sheet, sheetSel);
+
+        const colSelMap = new Map<string, HTMLSelectElement>();
+        columnSelects.set(sheetDef.sheet, colSelMap);
+        const colsWrap = document.createElement("div");
+        colsWrap.className = "column-maps";
+        for (const col of sheetDef.columns) {
+          const { row, select } = buildColumnRow(col);
+          colSelMap.set(col, select);
+          colsWrap.appendChild(row);
+        }
+        sheetRow.appendChild(colsWrap);
+        group.appendChild(sheetRow);
+
+        // Re-fill the column options when the chosen sheet changes.
+        sheetSel.addEventListener("change", () => {
+          const table = workbooks.get(source)?.[sheetSel.value];
+          for (const col of sheetDef.columns) {
+            fillSelect(colSelMap.get(col)!, table?.columns ?? [], col);
+          }
+        });
       }
-      const result = loadDataSources(files, config.data);
-      // Build derived datasets (joins) before rendering; surface their warnings
-      // alongside the data-validation ones.
+
+      fileInput.addEventListener("change", async () => {
+        const f = fileInput.files?.[0];
+        if (!f) return;
+        const tables = parseWorkbook(await f.arrayBuffer());
+        workbooks.set(source, tables);
+        const sheetNames = Object.keys(tables);
+        for (const sheetDef of def.sheets) {
+          const sheetSel = sheetSelects.get(sheetDef.sheet)!;
+          fillSelect(sheetSel, sheetNames, sheetDef.sheet);
+          const table = tables[sheetSel.value];
+          const colSelMap = columnSelects.get(sheetDef.sheet)!;
+          for (const col of sheetDef.columns) {
+            fillSelect(colSelMap.get(col)!, table?.columns ?? [], col);
+          }
+        }
+      });
+    }
+
+    // CSV: one single-table file (CSV or XLSX) per config sheet; map columns only.
+    function renderCsvSource(def: (typeof config.data)[string], group: HTMLElement) {
+      for (const sheetDef of def.sheets) {
+        const sheetRow = document.createElement("div");
+        sheetRow.className = "sheet-map";
+
+        const head = document.createElement("h4");
+        head.textContent = sheetDef.sheet;
+        sheetRow.appendChild(head);
+
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.accept = ".csv,.xlsx,.xls";
+        const fileLabel = document.createElement("label");
+        fileLabel.textContent = t("ui.data.uploadFile");
+        fileLabel.appendChild(fileInput);
+        sheetRow.appendChild(fileLabel);
+
+        const colSelMap = new Map<string, HTMLSelectElement>();
+        columnSelects.set(sheetDef.sheet, colSelMap);
+        const colsWrap = document.createElement("div");
+        colsWrap.className = "column-maps";
+        for (const col of sheetDef.columns) {
+          const { row, select } = buildColumnRow(col);
+          colSelMap.set(col, select);
+          colsWrap.appendChild(row);
+        }
+        sheetRow.appendChild(colsWrap);
+        group.appendChild(sheetRow);
+
+        fileInput.addEventListener("change", async () => {
+          const f = fileInput.files?.[0];
+          if (!f) return;
+          const table = parseTable(await f.arrayBuffer(), f.name, sheetDef.sheet);
+          sheetFiles.set(sheetDef.sheet, table);
+          for (const col of sheetDef.columns) {
+            fillSelect(colSelMap.get(col)!, table.columns, col);
+          }
+        });
+      }
+    }
+
+    // ── Select helpers ──
+    function makeSelect(): HTMLSelectElement {
+      const sel = document.createElement("select");
+      const none = document.createElement("option");
+      none.value = "";
+      none.textContent = t("ui.data.none");
+      sel.appendChild(none);
+      return sel;
+    }
+
+    function buildColumnRow(col: string): { row: HTMLElement; select: HTMLSelectElement } {
+      const row = document.createElement("label");
+      row.className = "column-map";
+      const name = document.createElement("span");
+      name.className = "column-map-name";
+      name.textContent = col;
+      const select = makeSelect();
+      row.append(name, select);
+      return { row, select };
+    }
+
+    /** Replace a select's options with `(none)` + `options`, pre-selecting the name matching `configName`. */
+    function fillSelect(sel: HTMLSelectElement, options: string[], configName: string) {
+      while (sel.options.length > 1) sel.remove(1);
+      for (const o of options) {
+        const opt = document.createElement("option");
+        opt.value = o;
+        opt.textContent = o;
+        sel.appendChild(opt);
+      }
+      sel.value = matchName(configName, options) ?? "";
+    }
+
+    // ── Continue: assemble the store and proceed ──
+    function onContinue() {
+      const mapping: DataMapping = {};
+      for (const [source, def] of Object.entries(config.data)) {
+        for (const sheetDef of def.sheets) {
+          let table: SourceTable | undefined;
+          if (dataFormat === "xlsx") {
+            const sel = sheetSelects.get(sheetDef.sheet);
+            if (sel?.value) table = workbooks.get(source)?.[sel.value];
+          } else {
+            table = sheetFiles.get(sheetDef.sheet);
+          }
+          const columns: Record<string, string> = {};
+          const colSelMap = columnSelects.get(sheetDef.sheet);
+          for (const col of sheetDef.columns) columns[col] = colSelMap?.get(col)?.value ?? "";
+          mapping[sheetDef.sheet] = { table, columns };
+        }
+      }
+
+      const result = assembleStore(config.data, mapping);
+      // Build derived datasets (mutations + joins) before rendering; surface
+      // their warnings alongside the mapping ones.
       const pre = applyPreprocessing(result.store, config.preprocessing);
       dataStore = pre.store;
+
       const warnings = [...result.warnings, ...pre.warnings];
+      dataWarnings.innerHTML = "";
       if (warnings.length > 0) {
         const heading = document.createElement("strong");
         heading.textContent = t("ui.data.warningsHeading");
@@ -193,10 +426,17 @@ export function initApp(root: HTMLElement): void {
         }
         dataWarnings.appendChild(list);
         dataWarnings.hidden = false;
+      } else {
+        dataWarnings.hidden = true;
       }
+
+      // Collapse the mapping panel to keep the page tractable; warnings stay
+      // visible and the "edit" button re-opens it.
+      panel.hidden = true;
+      editBtn.hidden = false;
+
       showParamsStep();
-    });
-    dataInputs.appendChild(loadBtn);
+    }
   }
 
   // Step 3: Parameters
@@ -205,6 +445,7 @@ export function initApp(root: HTMLElement): void {
     const paramsContainer =
       root.querySelector<HTMLElement>("#params-container")!;
     stepParams.hidden = false;
+    paramsContainer.innerHTML = ""; // Continue may be pressed again after re-mapping
 
     const form = buildParameterForm(config.parameters, paramsContainer, config);
     form.addEventListener("submit", (e) => {

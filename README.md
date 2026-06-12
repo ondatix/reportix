@@ -2,7 +2,7 @@
 
 # reportix
 
-Fully client-side web app for automated report generation. Upload an Excel workbook and a Markdown template, fill in a parameter form, and export a styled `.docx` — all in the browser, no server, no network at runtime.
+Fully client-side web app for automated report generation. Upload an Excel workbook or CSV files, map their sheets/columns to the report's data, fill in a parameter form, and export a styled `.docx` — all in the browser, no server, no network at runtime.
 
 ## Why
 
@@ -31,7 +31,7 @@ Many reporting workflows (HR equality reports, internal KPIs, compliance summari
 
 **To use the built app:**
 - A modern evergreen browser (Chrome, Firefox, Safari, Edge — anything supporting ES2022 and the Canvas 2D API)
-- An `.xlsx` workbook matching the sheets and columns declared in `config.yaml`
+- An `.xlsx` workbook or CSV files with the data — sheet/column names need **not** match `config.yaml`; you map them in the UI
 - A Markdown template (see [Template Format](#template-format))
 
 **To deploy:**
@@ -54,21 +54,21 @@ The dev server reloads on save. The production build under `dist/` is a fully st
 The app runs a strict pipeline:
 
 1. **Load config** — `/config.yaml` is bundled at build time and parsed on startup.
-2. **Upload data** — user picks one `.xlsx` per data source declared in the config. Each source is validated against its expected sheet names and column lists; mismatches surface as non-blocking warnings and the pipeline proceeds with whatever sheets did load (blocks referencing missing data render as red "TBD" notes).
-2b. **Preprocess** — any `preprocessing` defined in the config runs before rendering: `mutations` derive new columns (if-else rules), then `joins` enrich one sheet with another's columns by a shared key.
-3. **Choose template** — user picks one of the bundled Markdown templates listed under `template.files` in the config (radio chooser with human-readable labels). Templates live in `templates/` and are bundled at build time.
+2. **Choose template** — user picks one of the bundled Markdown templates listed under `template.files` in the config (radio chooser with human-readable labels). Templates live in `templates/` and are bundled at build time.
+3. **Load data** — user picks a format (**XLSX** workbook per source, or **CSV** — one single-table file per sheet, also accepting a single-sheet `.xlsx`) and **maps** their actual sheets/columns onto the config's sheets/columns. Options pre-select by matching name, so a file that already uses the config names needs no manual mapping. Unmapped names surface as non-blocking warnings on Continue (blocks referencing missing data render as red "TBD" notes).
+3b. **Preprocess** — any `preprocessing` defined in the config runs before rendering: `mutations` derive new columns (if-else rules), then `joins` enrich one sheet with another's columns by a shared key.
 4. **Fill parameters** — a form is generated from the config's `parameters` section.
 5. **Render preview** — Markdown becomes semantic HTML; chart / table YAML blocks become Chart.js canvases and accessible `<table>`s with auto-generated alt text.
 6. **Export DOCX** — the rendered DOM is walked and serialised to a `.docx` file with the configured page layout, fonts, callouts, and chart images.
 
-No step talks to a server. The XLSX is read in-browser via SheetJS; the DOCX is built in-browser via [docx](https://www.npmjs.com/package/docx) and saved via [FileSaver](https://www.npmjs.com/package/file-saver).
+No step talks to a server. The XLSX/CSV is read in-browser via SheetJS; the DOCX is built in-browser via [docx](https://www.npmjs.com/package/docx) and saved via [FileSaver](https://www.npmjs.com/package/file-saver).
 
 ## Configuration (`config.yaml`)
 
 The config is the entry point — a developer edits it, the end user never touches it. It declares:
 
 - **`parameters`** — form fields shown before report generation (`text`, `number`, `date`, `select`, `multiselect`, `boolean`). Each entry is either **standalone** (template variable, prefilled from `default:`) or **bound** to a config leaf via `bind: <dotted.path>` — bound entries prefill from the path's preset and write the user's value back to that path at runtime, letting most styling and metadata keys be overridden per report. The names `palette`, `font`, `page_orientation`, and `page_numbers` get special UI widgets (illustrated / icon radios — translation-free choices). Each `label` may be a plain string or a per-locale map `{ de: "…", en: "…" }` resolved to the [selected language](#features). **Bind paths target the parsed config (camelCase)** — e.g. `export.pageNumbers.position`, `export.sectionNumbering`, `dataProtection.smallestGroup` — not the snake_case YAML keys.
-- **`data`** — expected data sources, each with sheet names and required columns. Used to validate the uploaded workbook.
+- **`data`** — expected data sources, each with sheet names and required columns. These are the **mapping targets**: the user maps their uploaded file's actual sheets/columns onto these names (pre-selected when names match), rather than the upload being hard-validated.
 - **`preprocessing`** — optional derived columns and datasets built before rendering. **`mutations`** (run first) add a column via a simple if-else rule: where `when` holds for the `from` value the new `column` gets `then`, else `else` (operators: `equals`, `in`, `contains`, `starts_with`, `ends_with`, `matches`, `gt`/`lt`/`gte`/`lte`, `empty`, `truthy`). **`joins`** then enrich a `left` sheet with columns from a `right` sheet matched on a key (`on`, or `left_on`/`right_on`); `type` is `left` or `inner`; omit `select` to copy all non-overlapping right columns, or list specific ones (`{column, as}` to rename); `indicator` adds a boolean "matched?" column. Setting `name` = `left` enriches the sheet in place. First-match lookup (left rows are never duplicated).
 - **`template.files`** — list of bundled Markdown templates shown as a radio chooser in Step 2. Each entry has a `label` (shown to the user) and a `file` (filename within `templates/`). The app hard-fails at startup if any referenced file isn't bundled.
 - **`export`** — DOCX styling: filename, locale, document metadata, fonts, heading sizes/colours, paragraph spacing, page size & margins, **page numbers** (`page_numbers.position`: `left`/`center`/`right`/`none`), header/footer text, table borders, **section numbering** (`section_numbering: true` numbers section headings `1.`, `1.1.`, … in both preview and DOCX), **table of contents** (`toc: true` builds one in the preview and as a Word TOC field), **callout box colours and backgrounds** (`definition_box`, `summary_box`). The first `# {{title}}` is treated as the document title (placed before the TOC, not numbered).
@@ -117,7 +117,7 @@ Each utility is a self-contained module under `src/modules/` with a clean public
 |---|---|
 | `i18n/` | Central translation layer (German / English) with `t(key, params)` lookup; drives all UI text, error messages, and chart alt text. |
 | `config/` | Parse `/config.yaml` (bundled via `?raw` import) into a typed `AppConfig`. |
-| `data-loader/` | Read `.xlsx` files via SheetJS, validate sheets and columns. |
+| `data-loader/` | Parse `.xlsx` workbooks / CSV files via SheetJS; assemble a DataStore from the user's sheet/column mapping (renames to config names). |
 | `preprocessing/` | Derive columns and datasets from the loaded sheets before rendering — mutations (if-else derived columns) and joins (lookup/enrichment), defined in `config.yaml`. |
 | `parameters/` | Render the form from `AppConfig.parameters`, collect typed values. |
 | `template/` | Parse Markdown into typed blocks (`text` / `chart` / `table`). |

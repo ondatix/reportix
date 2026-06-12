@@ -21,10 +21,10 @@ npm run preview    # preview production build locally
 Each utility is a self-contained module usable independently in other projects.
 
 0. **Load config** — parse the YAML config file (see Config File); drives all subsequent steps
-1. **Load data** — import data files as specified in `[data]` (e.g. `.xlsx`)
-1.5. **Preprocess data** — build derived datasets from `[preprocessing]` (joins; see Data Preprocessing) before rendering
-2. **Query parameters** — render a form from the `[parameters]` section and collect user inputs
-3. **Load report template** — parse the Markdown template file specified in `[template]` (see Template Format)
+1. **Load report template** — parse the Markdown template file specified in `[template]` (see Template Format)
+2. **Load data** — the user picks a format (**XLSX** or **CSV**) and maps their actual sheets/columns onto the `[data]`-defined sheets and columns (see Data Loading)
+2.5. **Preprocess data** — build derived datasets from `[preprocessing]` (joins; see Data Preprocessing) before rendering
+3. **Query parameters** — render a form from the `[parameters]` section and collect user inputs
 4. **Generate HTML preview** — render the report in-browser
    - 4.1 Render text (Markdown → HTML)
    - 4.2 Render graphics (YAML chart spec → chart)
@@ -57,7 +57,8 @@ parameters:
 
 data:
   # Defines expected data sources. Each source declares the sheet names
-  # and required columns. Used to validate the uploaded .xlsx file.
+  # and required columns — these are the **mapping targets** the user maps
+  # their uploaded file's actual sheets/columns onto (see Data Loading).
 
 template:
   # Points to the Markdown template file and sets rendering options.
@@ -403,6 +404,15 @@ data_protection:
 - **Tables:** affected cells render as `<5` instead of the formatted value.
 - **Charts:** affected bars/slices are clamped to the threshold so a small bar is still drawn, and the tooltip displays `<5` instead of the actual number.
 - **Applies to** count-like operations (`count`, `sum`, `share_total`, `share_group`). Means/medians/min/max are not masked because they don't reveal group sizes.
+
+## Data Loading
+
+The data step (`src/modules/data-loader/`, driven by `src/app.ts`) does **not** validate the upload against fixed names — instead the user maps their actual data onto the `config.data` sheets/columns. There is no hard schema check; mismatches are resolved by the user, not rejected.
+
+- **Format choice** — two buttons: **XLSX** (one workbook per data source; map each config sheet → a workbook sheet) or **CSV** (one single-table file per config sheet — the per-sheet input also accepts a single-sheet `.xlsx`).
+- **Mapping UI** — the config's source→sheets→columns hierarchy is rendered with a `<select>` per sheet (XLSX only) and per column. Options come from the parsed file; the option whose **normalized name** (NFC, trimmed, lower-cased) matches the config name is **pre-selected** (`matchName`). Any choice may be left "(none)".
+- **Module API** — `parseWorkbook(buffer)` → `Record<sheet, SourceTable>`; `parseTable(buffer, filename, preferSheet?)` → one `SourceTable` (CSV decoded as text, XLSX prefers the named sheet then the first); `assembleStore(definitions, mapping)` builds the `DataStore` **keyed by config sheet name**, copying each row with the chosen source columns **renamed to the config column names** (only mapped columns are kept). `SourceTable = { columns, rows }`, `DataMapping = Record<configSheet, { table?, columns: Record<configCol, sourceCol> }>`.
+- **Warnings, not errors** — on Continue, unmapped sheets/columns produce non-blocking warnings (`data.unmappedSheet` / `data.unmappedColumn`) shown alongside preprocessing warnings; the pipeline proceeds and blocks referencing missing data render as "TBD" notes.
 
 ## Data Preprocessing
 

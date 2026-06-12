@@ -542,3 +542,125 @@ button:hover {
 
 .report-toc-l1 { padding-left: 1.25rem; }
 .report-toc-l2 { padding-left: 2.5rem; }
+
+/* ── Data step: format toggle + sheet/column mapping ──────────────────── */
+.data-format-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.data-format-label {
+  font-weight: 600;
+  color: var(--deep-violet);
+}
+
+.data-format-toggle button {
+  margin-top: 0;
+  padding: 0.4rem 1rem;
+  background: var(--purple-light);
+  color: var(--deep-violet);
+  border: 1px solid var(--purple-full);
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.data-format-toggle button:hover {
+  background: var(--purple-medium);
+}
+
+.data-format-toggle button.active {
+  background: var(--purple-full);
+  color: var(--black);
+}
+
+/* "Edit mapping" button shown when the panel is collapsed */
+.data-edit-btn {
+  background: var(--purple-light);
+  color: var(--deep-violet);
+  border: 1px solid var(--purple-full);
+}
+
+.data-edit-btn:hover {
+  background: var(--purple-medium);
+}
+
+/* File pickers sit on their own line, below their label text */
+.data-mapping input[type="file"] {
+  display: block;
+  margin-top: 0.3rem;
+}
+
+.source-group {
+  margin-bottom: 1.5rem;
+}
+
+.source-group > h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  color: var(--deep-violet);
+}
+
+.source-group input[type="file"] {
+  margin-bottom: 0.75rem;
+}
+
+/* One mapped sheet: its sheet selector (xlsx) plus its column selectors */
+.sheet-map {
+  margin: 0.5rem 0 1rem;
+  padding: 0.75rem;
+  border: 1px solid var(--purple-medium);
+  border-radius: 6px;
+  background: var(--white);
+}
+
+.sheet-map > h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+  color: var(--deep-violet);
+}
+
+.sheet-map-head {
+  display: grid;
+  grid-template-columns: 1fr 14rem;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
+
+.sheet-map-name {
+  color: var(--deep-violet);
+}
+
+.column-maps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--purple-light);
+}
+
+.column-map {
+  display: grid;
+  grid-template-columns: 1fr 14rem;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  font-weight: 400;
+}
+
+.column-map-name {
+  font-size: 0.9rem;
+}
+
+.sheet-map select,
+.column-map select {
+  width: 100%;
+  padding: 0.35rem;
+  border: 1px solid var(--purple-medium);
+  border-radius: 4px;
+  font-size: 0.9rem;
+}

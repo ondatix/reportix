@@ -50,9 +50,17 @@ const STRINGS: Record<Locale, Dict> = {
     "ui.button.export": "Als .docx exportieren",
     "ui.button.loadValidate": "Daten laden und prüfen",
     "ui.button.generate": "Bericht erstellen",
-    "ui.data.expectedSheets": "{name}\n\t(erwartete Tabellenblätter: {sheets}): ",
     "ui.data.warningsHeading": "Warnungen bei der Datenprüfung:",
     "ui.data.warningLine": "[{source}] {message}",
+    "ui.data.format": "Dateiformat",
+    "ui.data.format.xlsx": "Excel-Arbeitsmappe",
+    "ui.data.format.csv": "Einzeldateien",
+    "ui.data.uploadWorkbook": "Arbeitsmappe hochladen (.xlsx)",
+    "ui.data.uploadFile": "Datei hochladen (.csv oder .xlsx)",
+    "ui.data.mapSheet": "Tabellenblatt zuordnen",
+    "ui.data.mapColumn": "Spalte zuordnen",
+    "ui.data.none": "— keine —",
+    "ui.data.edit": "Zuordnung bearbeiten",
 
     // — Parameter widgets (icon radios) —
     "param.orientation.portrait": "Hochformat",
@@ -68,12 +76,9 @@ const STRINGS: Record<Locale, Dict> = {
     "error.templatesMissing":
       "In config.template.files referenzierte Vorlagendateien sind nicht gebündelt: {names}. Verfügbar in templates/: {available}.",
 
-    // — Data loader —
-    "data.noFile": "Keine Datei für „{name}“ bereitgestellt.",
-    "data.missingSheet": "Tabellenblatt „{sheet}“ fehlt. Gefunden: {found}.",
-    "data.emptySheet": "Tabellenblatt „{sheet}“ ist leer.",
-    "data.missingColumns":
-      "Im Tabellenblatt „{sheet}“ fehlen Spalten: {missing}. Gefunden: {found}.",
+    // — Data loader (sheet/column mapping) —
+    "data.unmappedSheet": "Tabellenblatt „{sheet}“ wurde keiner Datenquelle zugeordnet.",
+    "data.unmappedColumn": "Spalte „{column}“ in „{sheet}“ wurde nicht zugeordnet.",
 
     // — Preprocessing (joins) —
     "join.missingLeft": "Join: Linke Datenquelle „{sheet}“ nicht gefunden.",
@@ -134,9 +139,17 @@ const STRINGS: Record<Locale, Dict> = {
     "ui.button.export": "Export as .docx",
     "ui.button.loadValidate": "Load & Validate Data",
     "ui.button.generate": "Generate Report",
-    "ui.data.expectedSheets": "{name}\n\t(expected sheets: {sheets}): ",
     "ui.data.warningsHeading": "Data validation warnings:",
     "ui.data.warningLine": "[{source}] {message}",
+    "ui.data.format": "File format",
+    "ui.data.format.xlsx": "Excel Workbook",
+    "ui.data.format.csv": "Single Files",
+    "ui.data.uploadWorkbook": "Upload workbook (.xlsx)",
+    "ui.data.uploadFile": "Upload file (.csv or .xlsx)",
+    "ui.data.mapSheet": "Map sheet",
+    "ui.data.mapColumn": "Map column",
+    "ui.data.none": "— none —",
+    "ui.data.edit": "Edit mapping",
 
     // — Parameter widgets (icon radios) —
     "param.orientation.portrait": "Portrait",
@@ -152,12 +165,9 @@ const STRINGS: Record<Locale, Dict> = {
     "error.templatesMissing":
       "Template files referenced in config.template.files are not bundled: {names}. Available in templates/: {available}.",
 
-    // — Data loader —
-    "data.noFile": 'No file provided for "{name}".',
-    "data.missingSheet": 'Missing sheet "{sheet}". Found: {found}.',
-    "data.emptySheet": 'Sheet "{sheet}" is empty.',
-    "data.missingColumns":
-      'Sheet "{sheet}" is missing columns: {missing}. Found: {found}.',
+    // — Data loader (sheet/column mapping) —
+    "data.unmappedSheet": 'Sheet "{sheet}" was not mapped to a data source.',
+    "data.unmappedColumn": 'Column "{column}" in "{sheet}" was not mapped.',
 
     // — Preprocessing (joins) —
     "join.missingLeft": 'Join: left data source "{sheet}" not found.',
