@@ -51,3 +51,6 @@ next-env.d.ts
 
 # example data
 /example
+
+# generated report templates (built from templates/master.md by scripts/gen-templates.ts)
+/templates/template_*

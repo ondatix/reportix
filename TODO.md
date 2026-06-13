@@ -16,7 +16,7 @@
 6. Unified Color coding
 7. [x] Tooltips auf Basis des Handbuchs
 8. [x] Add definitions to data columns and store in extra yaml
-9. [ ] Dynamic template generation
+9. [x] Dynamic template generation
 10. Parameter: Was für eine Art von Behörde?
 11. ODT Export
 12. SVG instead of PNG

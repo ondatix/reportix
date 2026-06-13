@@ -337,6 +337,8 @@ template:
 
 **Bündelung.** Jede `.md`-Datei unter `/templates/` wird zur Build-Zeit über `import.meta.glob` in das JS-Bundle aufgenommen. Es gibt keinen Laufzeit-Abruf (die CSP verbietet `connect-src`), daher muss die Datei zur Build-Zeit existieren.
 
+**Generiert, nicht von Hand gepflegt.** Die Dateien unter `templates/` sind **Build-Artefakte** (git-ignoriert). Sie werden aus einer einzigen Master-Datei `templates/master.md` von `scripts/gen-templates.ts` erzeugt (`npm run gen:templates`, als `predev`/`prebuild`/`pretest`-Hook verdrahtet): Für jeden Eintrag mit `id` **und** `file` wird eine gefilterte Kopie nach `templates/<file>` geschrieben. Abschnittsmarker im Master (`<!-- include: <id> -->` … `<!-- /include -->`, unmarkierter Inhalt landet in jeder Vorlage) steuern, welche Vorlage welchen Block erhält. Bearbeiten Sie `templates/master.md`, nicht die generierten Dateien.
+
 **Hard-Fail-Verhalten.** Ist eine hier referenzierte `file:` nicht im Bundle vorhanden, bricht die App beim Start ab und listet Fehlendes und Verfügbares auf. Das fängt Tippfehler und vergessene Dateien früh ab.
 
 **Minimum: ein Eintrag.** Eine leere `files:`-Liste führt ebenfalls zum Hard-Fail.
@@ -1033,6 +1035,8 @@ template:
 | `files[].file` | string | Filename inside the bundled `templates/` directory (no path). |
 
 **Bundling.** Every `.md` file under `/templates/` is included in the JS bundle at build time via `import.meta.glob`. There is no runtime fetch (the CSP forbids `connect-src`), so the file must exist at build time.
+
+**Generated, not hand-edited.** The files under `templates/` are **build artifacts** (git-ignored). They are generated from a single master, `templates/master.md`, by `scripts/gen-templates.ts` (`npm run gen:templates`, wired as a `predev`/`prebuild`/`pretest` hook): for every entry with an `id` **and** `file`, a filtered copy is written to `templates/<file>`. Section markers in the master (`<!-- include: <id> -->` … `<!-- /include -->`; unmarked content goes into every template) decide which template gets which block. Edit `templates/master.md`, not the generated files.
 
 **Hard-fail behavior.** If any `file:` referenced here isn't present in the bundle, the app throws at startup listing what's missing and what's available. This catches typos and forgotten files early.
 

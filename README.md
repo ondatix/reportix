@@ -54,7 +54,7 @@ The dev server reloads on save. The production build under `dist/` is a fully st
 The app runs a strict pipeline:
 
 1. **Load config** — `/config.yaml` is a manifest listing the per-section files under `config/`; all are bundled at build time, merged, and parsed on startup.
-2. **Choose template** — user picks one of the bundled Markdown templates listed under `template.files` in the config (radio chooser with human-readable labels). Templates live in `templates/` and are bundled at build time.
+2. **Choose template** — user picks one of the bundled Markdown templates listed under `template.files` in the config (radio chooser with human-readable labels). The `templates/` files are **generated** at build time from a single master (`templates/master.md`) by `scripts/gen-templates.ts` and bundled — see [Templates](#templates).
 3. **Load data** — user picks a format (**XLSX** workbook per source, or **CSV** — one single-table file per sheet, also accepting a single-sheet `.xlsx`) and **maps** their actual sheets/columns onto the config's sheets/columns. The mapping UI shows only the sheets/columns the chosen template needs (those whose `include` lists its `id`). Options pre-select by matching name, so a file that already uses the config names needs no manual mapping. Unmapped names surface as non-blocking warnings on Continue (blocks referencing missing data render as red "TBD" notes).
 3b. **Preprocess** — any `preprocessing` defined in the config runs before rendering: `mutations` derive new columns (if-else rules), then `joins` enrich one sheet with another's columns by a shared key.
 4. **Fill parameters** — a form is generated from the config's `parameters` section.
@@ -209,7 +209,23 @@ src/
     └── exporter/
 config.yaml               # manifest: include-list of config/*.yaml sections
 config/                   # per-section config files (parameters, data, …)
-templates/                # example Markdown templates
+templates/            # master template(s) — source of truth (tracked)
+templates/                # generated Markdown templates (git-ignored, built)
+scripts/gen-templates.ts  # generates templates/ from templates/master.md
 public/_headers           # Netlify / static-host security headers
 vite.config.ts            # Vite + SRI plugin
 ```
+
+## Templates
+
+The bundled report templates in `templates/` are **build artifacts** (git-ignored). They are generated from a single master — `templates/master.md` — by `scripts/gen-templates.ts`, run via `npm run gen:templates` (also wired as a `predev`/`prebuild`/`pretest` hook, so a fresh checkout produces them automatically).
+
+For each entry in `config/template.yaml` that has an `id` + `file`, the generator writes a filtered copy to `templates/<file>`. Section markers in the master — HTML comments reusing the config `include:` vocabulary — decide which template gets which block; unmarked content goes into every template:
+
+```markdown
+<!-- include: full -->
+…only in the template whose id is "full"…
+<!-- /include -->
+```
+
+Edit `templates/master.md`, not the generated files. (Editing the master during `dev` does not hot-reload the output — re-run `npm run gen:templates`.)

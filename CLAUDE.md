@@ -10,10 +10,11 @@ Fully client-side web app for automated report generation. Built with Vite.js. N
 ## Common Commands
 
 ```bash
-npm install        # install dependencies
-npm run dev        # start dev server
-npm run build      # production build (output: dist/)
-npm run preview    # preview production build locally
+npm install         # install dependencies
+npm run gen:templates  # generate templates/ from templates/master.md (auto-run by dev/build/test)
+npm run dev         # start dev server
+npm run build       # production build (output: dist/)
+npm run preview     # preview production build locally
 ```
 
 ## Core Utilities
@@ -266,6 +267,18 @@ The config is imported at build time via Vite's `?raw` import and parsed on app 
 ## Template Format
 
 Templates are Markdown files. Charts and tables are defined as fenced code blocks with a typed language tag. The block body is a YAML specification describing the data binding and formatting.
+
+**Templates are generated, not hand-edited.** The files under `templates/` are **build artifacts** (git-ignored). They are produced from a single master, `templates/master.md`, by `scripts/gen-templates.ts` (`npm run gen:templates`, wired as a `predev`/`prebuild`/`pretest` hook). The generator reads `config/template.yaml`, and for every entry with an `id` + `file` writes a filtered copy to `templates/<file>`. Edit `templates/master.md` — not the generated files.
+
+**Section markers** decide which templates a block lands in, reusing the config `include:` vocabulary (HTML comments, so they never render). Unmarked content goes into **every** template:
+
+````markdown
+<!-- include: full -->
+…only in the template whose id is "full"…
+<!-- /include -->
+````
+
+The id list is comma/space separated (`<!-- include: full, mandatory -->`); markers must not nest and are stripped from the output. Since the master currently carries no markers, all generated templates are identical until markers are added.
 
 **Chart block:**
 ````markdown
