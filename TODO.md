@@ -1,27 +1,19 @@
 # TODO
 
-1. Join data
-  - configurable in config.yaml
-  - extra section: data_preprocessing
-  - TODO: test
-2. table section
-3. [x] Condition config.data on template
-4. [x] More sophisticated data loading - manual mapping of columns
-5. Datenformate vereinheitlichen
+1. Edit master.md
+  - table in appendix for each chart
+  - correct include tags
+  - correct texts
+  - maybe more tasks in config
+  - parameter: Kommune vs. Landesbehörde
+2. Datenformate vereinheitlichen
    1. Datum
-   2. weiblich - männlich
+   2. weiblich - männlich (+ Unified Color coding)
    3. Arbeitszeitanteil berechnen
    4. Elternzeitberechnung
    5. QE
-6. Unified Color coding
-7. [x] Tooltips auf Basis des Handbuchs
-8. [x] Add definitions to data columns and store in extra yaml
-9. [x] Dynamic template generation
-10. Parameter: Was für eine Art von Behörde?
-11. ODT Export
-12. SVG instead of PNG
-13. Fix missing Logo
-14. Make i18n configurable
+3.  ODT Export (or .fodt export)?
+4.  Make i18n configurable
 
 ## Forks
 - Main Fork

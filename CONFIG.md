@@ -1,4 +1,4 @@
-<img src="img/ondatix_Logo_dunkel.png" alt="ondatix Logo" class="logo" height="80" align="right"/><br><br>
+<img src="img/ondatix_Logo_V1_dunkler_Hintergrund_SVG.svg" alt="ondatix Logo" class="logo" height="80" align="right"/><br><br>
 
 # reportix — `config.yaml` Handbuch · handbook
 

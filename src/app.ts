@@ -25,6 +25,10 @@ import { getFont } from "./modules/fonts";
 import { t, getLocale, setLocale, LOCALES, type Locale } from "./modules/i18n";
 import { attachInfo, resolveTooltip } from "./modules/info";
 import type { DataStore, ColumnDef } from "./modules/types";
+// Import the logo as an asset URL so Vite bundles/hashes it and rewrites the
+// path for the deploy base. A raw string path inside innerHTML is invisible to
+// the bundler, so the file is never emitted and the link breaks in production.
+import logoUrl from "../img/ondatix_Logo_V1_heller_Hintergrund_SVG.svg";
 
 /**
  * Bundled Markdown templates. Every file under `/templates/*.md` is included
@@ -63,7 +67,7 @@ export function initApp(root: HTMLElement): void {
   }
 
   root.innerHTML = `
-    <img src="../img/ondatix_Logo_hell.png" alt="ondatix Logo" class="logo" height="80" align="right"/><br>
+    <img src="${logoUrl}" alt="ondatix Logo" class="logo" height="80" align="right"/><br>
     <h1>reportix - Gleichstellungskonzept</h1>
     <div id="language-bar" class="language-bar">
       <label for="language-select">${t("ui.language")}: </label>
