@@ -4,7 +4,7 @@
  */
 import { parse as parseYAML } from "yaml";
 import { getLocale, DEFAULT_LOCALE } from "../i18n";
-import type { AppConfig, ParameterDef, DataSourceDef, SheetDef, TemplateDef, TemplateOption, ExportConfig, ChartDefaults, DataProtectionConfig, PreprocessingConfig, JoinDef, JoinColumnSelect, MutationDef, MutationCondition } from "../types";
+import type { AppConfig, ParameterDef, DataSourceDef, SheetDef, ColumnDef, TemplateDef, TemplateOption, ExportConfig, ChartDefaults, DataProtectionConfig, PreprocessingConfig, JoinDef, JoinColumnSelect, MutationDef, MutationCondition } from "../types";
 
 /**
  * Resolve a possibly-localized string for the active locale. A value may be:
@@ -62,9 +62,37 @@ function parseMutationCondition(value: unknown): MutationCondition | undefined {
   return Object.keys(c).length > 0 ? c : undefined;
 }
 
-export function parseConfig(yamlString: string): AppConfig {
-  const raw = parseYAML(yamlString) as Record<string, unknown>;
+/** Normalize an `include:` value (scalar or list) to a `string[]` (or undefined). */
+function parseInclude(value: unknown): string[] | undefined {
+  if (value === undefined || value === null) return undefined;
+  const list = Array.isArray(value) ? value : [value];
+  const out = list.map((v) => String(v)).filter((s) => s.length > 0);
+  return out.length > 0 ? out : undefined;
+}
 
+/** Parse one column entry: a plain string, or an object `{ column|name, description, notes, include }`. */
+function parseColumn(entry: unknown): ColumnDef | undefined {
+  if (typeof entry === "string") {
+    const name = entry.trim();
+    return name ? { name } : undefined;
+  }
+  if (entry && typeof entry === "object") {
+    const c = entry as Record<string, unknown>;
+    const name = String(c.column ?? c.name ?? "").trim();
+    if (!name) return undefined;
+    const definition = c.definition ?? c.description; // `description` accepted as a legacy alias
+    return {
+      name,
+      definition: definition != null ? String(definition) : undefined,
+      notes: c.notes != null ? String(c.notes) : undefined,
+      include: parseInclude(c.include),
+    };
+  }
+  return undefined;
+}
+
+/** Parse the body of a config object (already merged from one or more YAML files). */
+export function parseConfigObject(raw: Record<string, unknown>): AppConfig {
   const parameters: Record<string, ParameterDef> = {};
   if (raw.parameters && typeof raw.parameters === "object") {
     for (const [key, value] of Object.entries(raw.parameters as Record<string, unknown>)) {
@@ -86,7 +114,12 @@ export function parseConfig(yamlString: string): AppConfig {
       const rawSheets = v.sheets as Record<string, unknown>[] | undefined;
       const sheets: SheetDef[] = (rawSheets ?? []).map((s) => ({
         sheet: String(s.sheet ?? ""),
-        columns: (s.columns as string[]) ?? [],
+        columns: ((s.columns as unknown[]) ?? [])
+          .map(parseColumn)
+          .filter((c): c is ColumnDef => c !== undefined),
+        definition: (s.definition ?? s.description) != null ? String(s.definition ?? s.description) : undefined,
+        notes: s.notes != null ? String(s.notes) : undefined,
+        include: parseInclude(s.include),
       }));
       data[key] = { sheets };
     }
@@ -96,6 +129,7 @@ export function parseConfig(yamlString: string): AppConfig {
   const filesRaw = tplRaw.files as Array<Record<string, unknown>> | undefined;
   const templateFiles: TemplateOption[] = (filesRaw ?? [])
     .map((f) => ({
+      id: f.id != null ? String(f.id) : undefined,
       label: resolveLocalized(f.label, String(f.file ?? "")),
       file: String(f.file ?? ""),
     }))
@@ -329,6 +363,7 @@ export function parseConfig(yamlString: string): AppConfig {
         .map((m) => ({
           dataset: String(m.dataset ?? ""),
           column: String(m.column ?? ""),
+          definition: (m.definition ?? m.description) != null ? String(m.definition ?? m.description) : undefined,
           from: String(m.from ?? ""),
           when: parseMutationCondition(m.when),
           then: m.then as string | number | boolean,
@@ -361,12 +396,71 @@ export function parseConfig(yamlString: string): AppConfig {
   return { parameters, data, template, preprocessing, export: exportConfig, charts, dataProtection };
 }
 
+/** Parse a single YAML string into an AppConfig (standalone-friendly wrapper). */
+export function parseConfig(yamlString: string): AppConfig {
+  return parseConfigObject((parseYAML(yamlString) ?? {}) as Record<string, unknown>);
+}
+
 /**
- * Load the config from the project root (/config.yaml).
- * The file is bundled at build time via Vite's ?raw import.
+ * Whether a sheet/column with the given `include` list belongs to `templateId`.
+ * An omitted/empty `include` means "every template"; otherwise the list must
+ * contain the id. With no selected template, everything is included.
  */
-import configRaw from "/config.yaml?raw";
+export function includedFor(include: string[] | undefined, templateId?: string): boolean {
+  if (!include || include.length === 0) return true;
+  if (!templateId) return true;
+  return include.includes(templateId);
+}
+
+/**
+ * Filter data-source definitions to what the given template needs: keep only
+ * sheets included for the template, each with only its included columns.
+ */
+export function dataForTemplate(
+  data: Record<string, DataSourceDef>,
+  templateId?: string
+): Record<string, DataSourceDef> {
+  const out: Record<string, DataSourceDef> = {};
+  for (const [source, def] of Object.entries(data)) {
+    const sheets = def.sheets
+      .filter((s) => includedFor(s.include, templateId))
+      .map((s) => ({
+        ...s,
+        columns: s.columns.filter((c) => includedFor(c.include, templateId)),
+      }));
+    out[source] = { sheets };
+  }
+  return out;
+}
+
+/**
+ * Load the config from the project root. `/config.yaml` is a manifest listing
+ * the per-section files under `config/`; each is bundled at build time via
+ * Vite's `?raw` import, parsed, and shallow-merged (top-level sections are
+ * disjoint) before parsing into an AppConfig.
+ */
+import configManifestRaw from "/config.yaml?raw";
+
+const CONFIG_SECTIONS = import.meta.glob<string>("/config/*.yaml", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+});
 
 export function loadConfig(): AppConfig {
-  return parseConfig(configRaw);
+  const manifest = (parseYAML(configManifestRaw) ?? {}) as Record<string, unknown>;
+  const includes = (manifest.include as unknown[] | undefined) ?? [];
+  const paths = includes.length > 0 ? includes.map((p) => String(p)) : Object.keys(CONFIG_SECTIONS);
+
+  const merged: Record<string, unknown> = {};
+  for (const rel of paths) {
+    const key = rel.startsWith("/") ? rel : `/${rel}`;
+    const rawText = CONFIG_SECTIONS[key];
+    if (rawText === undefined) {
+      throw new Error(`Config section not found: ${rel}`);
+    }
+    const section = (parseYAML(rawText) ?? {}) as Record<string, unknown>;
+    Object.assign(merged, section);
+  }
+  return parseConfigObject(merged);
 }

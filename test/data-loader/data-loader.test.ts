@@ -82,7 +82,7 @@ describe("normalizeName / matchName", () => {
 
 const DEFS: Record<string, DataSourceDef> = {
   Quelle: {
-    sheets: [{ sheet: "Stichtag", columns: ["PersNr", "Geschlecht"] }],
+    sheets: [{ sheet: "Stichtag", columns: [{ name: "PersNr" }, { name: "Geschlecht" }] }],
   },
 };
 

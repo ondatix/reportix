@@ -1,10 +1,10 @@
-<img src="img/ondatix_Logo_dunkel.png" alt="Reportix Logo" class="logo" height="80" align="right"/><br><br>
+<img src="img/ondatix_Logo_dunkel.png" alt="ondatix Logo" class="logo" height="80" align="right"/><br><br>
 
 # reportix — `config.yaml` Handbuch · handbook
 
-`config.yaml` is the single entry point that configures the app. This handbook is **bilingual**: an English and a German version of the same reference.
+`config.yaml` is the entry point that configures the app — a thin **manifest** listing the per-section files under `config/` (`parameters.yaml`, `data.yaml` — which also carries the `preprocessing:` section — `template.yaml`, `data_protection.yaml`, `export.yaml`, `charts.yaml`), which are merged at build time. This handbook is **bilingual**: an English and a German version of the same reference.
 
-`config.yaml` ist der zentrale Einstiegspunkt zur Konfiguration der App. Dieses Handbuch ist **zweisprachig**: eine englische und eine deutsche Fassung derselben Referenz.
+`config.yaml` ist der Einstiegspunkt zur Konfiguration der App — ein schlankes **Manifest**, das die Abschnittsdateien unter `config/` auflistet (`parameters.yaml`, `data.yaml` — enthält auch den Abschnitt `preprocessing:` —, `template.yaml`, `data_protection.yaml`, `export.yaml`, `charts.yaml`), die zur Build-Zeit zusammengeführt werden. Dieses Handbuch ist **zweisprachig**: eine englische und eine deutsche Fassung derselben Referenz.
 
 **🌐 Language / Sprache:** **[Deutsch ↓](#-deutsch)** · **[English ↓](#-english)**
 
@@ -20,7 +20,7 @@
 
 <sub>[Zur englischen Fassung ↑](#-english)</sub>
 
-`config.yaml` legt fest, **was die App den Nutzer fragt, wo die Daten liegen, welche Vorlagen ausgeliefert werden und wie die Ausgabe gestaltet wird**. Die Datei liegt im Projektstamm, wird zur Build-Zeit über Vites `?raw`-Import gebündelt und **nicht von Endnutzern hochgeladen** — nur Entwickler bearbeiten sie.
+`config.yaml` legt fest, **was die App den Nutzer fragt, wo die Daten liegen, welche Vorlagen ausgeliefert werden und wie die Ausgabe gestaltet wird**. Die Konfiguration liegt im Projektstamm: `config.yaml` ist ein schlankes Manifest mit der `include:`-Liste der Abschnittsdateien unter `config/`. Jede Abschnittsdatei enthält eine oberste Ebene (`parameters:`, `data:` usw.) — `data.yaml` führt zusätzlich den eng verwandten Abschnitt `preprocessing:`; das Config-Modul lädt sie zur Build-Zeit über Vites `import.meta.glob('/config/*.yaml', { query: '?raw' })`, parst sie und führt sie flach zusammen (die obersten Ebenen sind disjunkt, die Reihenfolge dokumentiert nur die Absicht). Die Dateien werden **nicht von Endnutzern hochgeladen** — nur Entwickler bearbeiten sie.
 
 Dieser Abschnitt ist die maßgebliche Referenz für jeden Schlüssel. Jeder Unterabschnitt beginnt mit einem minimalen YAML-Beispiel und führt anschließend jedes Feld auf.
 
@@ -186,7 +186,15 @@ data:
   Datensatz:
     sheets:
       - sheet: Blatt 1
-        columns: [Spalte 1, Spalte 2]
+        definition: "Worum es in diesem Blatt geht."     # optional
+        notes: "Weitere Hinweise."                       # optional
+        include: [full]                                   # optional; weglassen ⇒ alle Vorlagen
+        columns:
+          - Spalte 1                                       # Kurzform: nur der Name
+          - column: Spalte 2                               # Langform mit Metadaten
+            definition: "Definition der Spalte."           # optional
+            notes: "Weitere Hinweise."                     # optional
+            include: [full, mandatory]                     # optional; weglassen ⇒ alle Vorlagen
       - sheet: Blatt 2
         columns: [Spalte A, Spalte B]
 ```
@@ -195,11 +203,18 @@ data:
 |---|---|---|
 | `<Quellname>` | Objekt | Der oberste Schlüssel ist die in der Upload-Oberfläche angezeigte Quellkennung. |
 | `.sheets[].sheet` | String | Name des Excel-Tabellenblatts, wie er in der Arbeitsmappe erscheint. |
-| `.sheets[].columns` | `string[]` | Pflicht-Spaltenüberschriften (verglichen nach Unicode-NFC- und Leerraum-Normalisierung). |
+| `.sheets[].definition` | String | Optional. Definition des Blatts (Metadaten). `description:` wird als veraltetes Synonym noch akzeptiert. |
+| `.sheets[].notes` | String | Optional. Weitere Hinweise zum Blatt (Metadaten) — z. B. Begriffsdefinitionen, die sich keiner einzelnen Spalte zuordnen lassen. |
+| `.sheets[].include` | `string[]` | Optional. Liste der Vorlagen-`id`s (siehe [`template:`](#de-template)), für die dieses Blatt im Datenschritt abgefragt wird. **Weglassen ⇒ alle Vorlagen.** |
+| `.sheets[].columns` | Liste aus String **oder** Objekt | Pflicht-Spaltenüberschriften (verglichen nach Unicode-NFC- und Leerraum-Normalisierung). Eine Spalte kann ein einfacher String sein oder ein Objekt mit `column:` (alias `name:`) plus optional `definition:`, `notes:`, `include:` (gleiche Semantik wie auf Blattebene). |
 
 **Zuordnung statt Validierung.** Im Datenschritt wählt der Nutzer **XLSX** (eine Arbeitsmappe je Quelle; jedes Konfig-Blatt → ein Blatt der Mappe) oder **CSV** (eine Einzeltabellen-Datei je Blatt; akzeptiert auch eine einblättrige `.xlsx`) und ordnet je Blatt/Spalte über ein Auswahlfeld zu. Die nach Name passende Option ist vorausgewählt. Nicht zugeordnete Blätter/Spalten erzeugen beim „Weiter" **nicht-blockierende Warnungen** (in der gewählten Sprache); die Verarbeitung läuft weiter, und Blöcke, die auf fehlende Daten verweisen, werden als roter „TBD"-Hinweis dargestellt. Zugeordnete Spalten werden auf die Konfig-Spaltennamen **umbenannt**.
 
 **DataStore-Schlüssel.** Intern wird jedes geladene Blatt unter seinem Blattnamen abgelegt. Diagramm- und Tabellenblöcke verweisen über diesen Schlüssel auf Daten — z. B. sucht `data: Blatt 1` in einem Diagrammblock `DataStore["Blatt 1"]`.
+
+**Vorlagenabhängiger Datenschritt.** Der Datenschritt zeigt nur die Blätter und Spalten, deren `include` die `id` der gewählten Vorlage enthält (bzw. die kein `include` haben). So fragt eine Vorlage nur die Daten ab, die sie tatsächlich nutzt. Ausgeschlossene Blätter/Spalten erzeugen keine Warnungen, da sie gar nicht abgefragt werden.
+
+**Hinweis zu den `Zeitraum_*`-Blättern.** Aus den `Zeitraum_*`-Ereignisblättern wurden Spalten bewusst entfernt, die Stammdaten doppelt führten — diese werden zur Laufzeit über den Join mit `Stichtag` (Schlüssel `PersNr`) ergänzt (siehe [`preprocessing:`](#de-preprocessing)). Ausnahme: `Zeitraum_Bewerbung` hat einen eigenen Schlüssel (`BewerberID`) und wird nicht mit `Stichtag` verknüpft, behält seine Personenmerkmale also direkt.
 
 ---
 
@@ -208,6 +223,8 @@ data:
 ## `preprocessing:`
 
 Optionale, abgeleitete Spalten und Datensätze, die **zwischen Datenladen und Rendering** aus den geladenen Blättern gebildet werden. Zwei Operationen: **`mutations`** (abgeleitete Spalten) laufen zuerst, danach **`joins`**. Ergebnisse werden im DataStore abgelegt und können in Vorlagen wie normale Blätter referenziert werden (`data: <name>`).
+
+> Dieser Abschnitt steht in derselben Datei wie [`data:`](#de-data) (`config/data.yaml`), da Mutationen und Joins direkt auf den dort definierten Blättern arbeiten.
 
 ### `mutations` — abgeleitete Spalten (Wenn-Dann-Sonst)
 
@@ -218,6 +235,7 @@ preprocessing:
   mutations:
     - dataset: Stichtag                          # Datensatz, der die Spalte erhält
       column: Beamte                             # neue (oder überschriebene) Spalte
+      definition: "Statusrechtliche Unterscheidung …"  # optional (Metadaten)
       from: "Entgeltgruppe / Besoldungsgruppe"   # Quellspalte, die die Bedingung testet
       when: { starts_with: [A, B, R, W] }        # Bedingung (weglassen → „Wert ist truthy")
       then: "Ja"
@@ -228,6 +246,7 @@ preprocessing:
 |---|---|---|---|
 | `dataset` | String | — | Datensatz, dem die Spalte hinzugefügt wird (in eine abgeleitete Kopie). |
 | `column` | String | — | Name der neuen (oder überschriebenen) Spalte. |
+| `definition` | String | — | Optional. Definition der abgeleiteten Spalte (Metadaten), analog zu `.sheets[].columns[].definition`. |
 | `from` | String | — | Quellspalte, deren Wert die Bedingung testet. |
 | `when` | Objekt | truthy | Bedingung auf `from` (siehe Operatoren). Weglassen → „Wert ist truthy". |
 | `then` | beliebig | — | Wert, wenn die Bedingung zutrifft. |
@@ -287,9 +306,11 @@ Listet die gebündelten Markdown-Vorlagen, aus denen der Nutzer in Schritt 2 wä
 ```yaml
 template:
   files:
-    - label: "Standardbericht"        # einfacher String oder eine Sprachzuordnung:
+    - id: full                        # optional, übersetzungsfreie Kennung
+      label: "Standardbericht"        # einfacher String oder eine Sprachzuordnung:
       file: report_template.md
-    - label:
+    - id: summary
+      label:
         de: "Kurzfassung"
         en: "Quick Summary"
       file: summary_template.md
@@ -297,6 +318,7 @@ template:
 
 | Feld | Typ | Anmerkungen |
 |---|---|---|
+| `files[].id` | String | Optional. Stabile, übersetzungsfreie Kennung, auf die die `include:`-Listen im [`data:`](#de-data)-Abschnitt verweisen. Bei Auswahl dieser Vorlage zeigt der Datenschritt nur die Blätter/Spalten, deren `include` diese `id` enthält (bzw. ohne `include`). |
 | `files[].label` | String \| Sprachzuordnung | Lesbarer Name in der Radioauswahl. Lokalisierbar wie jedes `label:` — siehe [Lokalisierte Beschriftungen](#de-localized-labels). |
 | `files[].file` | String | Dateiname im gebündelten Verzeichnis `templates/` (ohne Pfad). |
 
@@ -682,7 +704,7 @@ Der Exporter tauscht Breite/Höhe von A4 anhand von `orientation` automatisch, s
 
 <sub>[Jump to the German version ↓](#-deutsch)</sub>
 
-`config.yaml` tells the app **what to ask the user, where to find the data, which templates to ship, and how to style the output**. It lives at the repo root, is bundled at build time via Vite's `?raw` import, and is **not uploaded by end users** — only developers edit it.
+`config.yaml` tells the app **what to ask the user, where to find the data, which templates to ship, and how to style the output**. The configuration lives at the repo root: `config.yaml` is a thin manifest with an `include:` list of the per-section files under `config/`. Each section file holds one top-level section (`parameters:`, `data:`, etc.) — `data.yaml` additionally carries the closely-related `preprocessing:` section; the config module loads them at build time via Vite's `import.meta.glob('/config/*.yaml', { query: '?raw' })`, parses them, and shallow-merges them (the top-level sections are disjoint, so order only documents intent). The files are **not uploaded by end users** — only developers edit them.
 
 This section is the authoritative reference for every key. Each subsection opens with a minimal YAML snippet, then enumerates every field.
 
@@ -848,7 +870,15 @@ data:
   Dataset:
     sheets:
       - sheet: Sheet 1
-        columns: [Col 1, Col 2]
+        definition: "What this sheet is about."     # optional
+        notes: "Further notes."                     # optional
+        include: [full]                             # optional; omit ⇒ every template
+        columns:
+          - Col 1                                    # short form: just the name
+          - column: Col 2                            # long form with metadata
+            definition: "Column definition."          # optional
+            notes: "Further notes."                   # optional
+            include: [full, mandatory]                # optional; omit ⇒ every template
       - sheet: Sheet 2
         columns: [Col A, Col B]
 ```
@@ -857,11 +887,18 @@ data:
 |---|---|---|
 | `<source name>` | object | Top-level key is the source identifier shown in the upload UI. |
 | `.sheets[].sheet` | string | Excel sheet name as it appears in the workbook. |
-| `.sheets[].columns` | `string[]` | Required column headers (compared after Unicode NFC + whitespace normalisation). |
+| `.sheets[].definition` | string | Optional. Definition of the sheet (metadata). `description:` is still accepted as a legacy alias. |
+| `.sheets[].notes` | string | Optional. Further notes about the sheet (metadata) — e.g. concept definitions that don't map to a single column. |
+| `.sheets[].include` | `string[]` | Optional. List of template `id`s (see [`template:`](#en-template)) for which this sheet is requested in the data step. **Omit ⇒ every template.** |
+| `.sheets[].columns` | list of string **or** object | Required column headers (compared after Unicode NFC + whitespace normalisation). A column may be a plain string, or an object with `column:` (alias `name:`) plus optional `definition:`, `notes:`, `include:` (same semantics as at sheet level). |
 
 **Mapping, not validation.** In the data step the user picks **XLSX** (one workbook per source; each config sheet → a workbook sheet) or **CSV** (one single-table file per sheet; also accepts a single-sheet `.xlsx`) and maps each sheet/column via a dropdown. The option whose name matches is pre-selected. Unmapped sheets/columns produce **non-blocking warnings** on Continue (shown in the selected UI language); the pipeline proceeds and blocks referencing missing data render as a red "TBD" note. Mapped columns are **renamed** to the config column names.
 
 **DataStore keying.** Internally each loaded sheet is stored under its sheet name. Chart and table blocks reference data via this key — e.g. `data: Sheet 1` in a chart block looks up `DataStore["Sheet 1"]`.
+
+**Template-scoped data step.** The data step shows only the sheets and columns whose `include` contains the selected template's `id` (or that have no `include`). A template therefore only asks for the data it actually uses; excluded sheets/columns produce no warnings because they are never requested.
+
+**Note on the `Zeitraum_*` sheets.** Columns that duplicated master data were deliberately removed from the `Zeitraum_*` event sheets — they are supplied at runtime by joining with `Stichtag` (key `PersNr`; see [`preprocessing:`](#en-preprocessing)). Exception: `Zeitraum_Bewerbung` has its own key (`BewerberID`) and is not joined with `Stichtag`, so it keeps its person attributes directly.
 
 ---
 
@@ -870,6 +907,8 @@ data:
 ## `preprocessing:`
 
 Optional derived columns and datasets built **between data load and rendering** from the loaded sheets. Two operations: **`mutations`** (derived columns) run first, then **`joins`**. Results are stored in the DataStore and can be referenced in templates like normal sheets (`data: <name>`).
+
+> This section lives in the same file as [`data:`](#en-data) (`config/data.yaml`), since mutations and joins operate directly on the sheets defined there.
 
 ### `mutations` — derived columns (if-else)
 
@@ -880,6 +919,7 @@ preprocessing:
   mutations:
     - dataset: Stichtag                          # dataset that receives the column
       column: Beamte                             # new (or overwritten) column
+      definition: "Civil-servant vs. collective-agreement status …"  # optional (metadata)
       from: "Entgeltgruppe / Besoldungsgruppe"   # source column the condition tests
       when: { starts_with: [A, B, R, W] }        # condition (omit → "value is truthy")
       then: "Ja"
@@ -890,6 +930,7 @@ preprocessing:
 |---|---|---|---|
 | `dataset` | string | — | Dataset the column is added to (as a derived copy). |
 | `column` | string | — | Name of the new (or overwritten) column. |
+| `definition` | string | — | Optional. Definition of the derived column (metadata), mirroring `.sheets[].columns[].definition`. |
 | `from` | string | — | Source column whose value the condition tests. |
 | `when` | object | truthy | Condition on `from` (see operators). Omit → "value is truthy". |
 | `then` | any | — | Value written when the condition holds. |
@@ -949,9 +990,11 @@ Lists the bundled Markdown templates the user picks from in Step 2.
 ```yaml
 template:
   files:
-    - label: "Standard Report"        # plain string, or a per-locale map:
+    - id: full                        # optional, translation-free identifier
+      label: "Standard Report"        # plain string, or a per-locale map:
       file: report_template.md
-    - label:
+    - id: summary
+      label:
         de: "Kurzfassung"
         en: "Quick Summary"
       file: summary_template.md
@@ -959,6 +1002,7 @@ template:
 
 | Field | Type | Notes |
 |---|---|---|
+| `files[].id` | string | Optional. Stable, translation-free identifier referenced by the `include:` lists in the [`data:`](#en-data) section. When this template is selected, the data step shows only the sheets/columns whose `include` contains this `id` (or that have no `include`). |
 | `files[].label` | string \| per-locale map | Human-readable name shown in the radio chooser. Localizable like any `label:` — see [Localized labels](#en-localized-labels). |
 | `files[].file` | string | Filename inside the bundled `templates/` directory (no path). |
 

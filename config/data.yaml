@@ -1,0 +1,209 @@
+data:
+  # Each sheet and each column may carry three optional metadata fields:
+  #   definition   — human-readable definition of the sheet/column
+  #   notes        — optional further notes
+  #   include      — list of template ids (see template.yaml `id:`) this
+  #                  sheet/column belongs to. OMITTED ⇒ included in every
+  #                  template. To restrict, list the ids, e.g.
+  #                    include: [full]            # only the full template
+  #                    include: [full, mandatory] # both
+  #                  The data-loading step shows only the sheets/columns whose
+  #                  `include` matches the selected template.
+  # A column may be written as a plain string (no metadata) or as an object
+  # with `column:` (or `name:`) plus any of the fields above.
+  #
+  # Definitions are taken from the "Definitionen" callouts in
+  # templates/template_full.md (authoritative wording). Columns without a
+  # definition there carry a brief generic one; concept definitions that don't
+  # map to a single column live in the sheet's `notes`.
+  Gleichstellungsdatensatz:
+    sheets:
+      - sheet: Stichtag
+        definition: "Stichtagsbezogener Personalstand — eine Zeile je Beschäftigtem zum Stichtag."
+        columns:
+          - column: PersNr
+            definition: "Eindeutige Personalnummer; Schlüssel für die Joins mit den Zeitraum-Blättern."
+          - column: Geschlecht
+            definition: "Im Datensatz wird zwischen den Ausprägungen unterschieden, die das Personalverwaltungssystem führt."
+          - column: "Entgeltgruppe / Besoldungsgruppe"
+            definition: "Eingruppierung im Tarifvertrag bzw. der bayerischen Besoldungsordnung."
+          - column: QE
+            definition: "Qualifikationsebene: Laufbahngruppen 1–4 nach Art. 5 LlbG; entspricht im Tarifbereich näherungsweise den E-Gruppen."
+          - column: Einstiegs-QE
+            definition: "Qualifikationsebene beim Eintritt."
+          - column: "Teilzeit / Vollzeit"
+            definition: "Klassifikation der Arbeitszeit nach Anteil der vereinbarten Wochenarbeitszeit."
+          - column: Arbeitszeitanteil
+            definition: "Prozentualer Anteil an der Vollzeitstelle."
+          - column: Führungsebene
+            definition: "Hierarchische Einordnung der Führungsfunktion (1 = höchste Ebene)."
+          - column: Organisationseinheit
+            definition: "Referat / Sachgebiet / Amt — je nach Verwaltungsebene unterschiedlich tief gegliedert."
+          - column: Ausbildungsbereich
+            definition: "Ausbildungsbereich."
+          - column: Führung in Tandem
+            definition: "Geteilte Führungsverantwortung, häufig in Verbindung mit Teilzeit oder Job-Sharing."
+          - column: Führungskraft (aktiv)
+            definition: "Person, die aktuell eine Führungsfunktion mit Personalverantwortung wahrnimmt."
+          - column: Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung
+            definition: "Punktewert der zuletzt abgeschlossenen periodischen Beurteilung (0–16, dienststellenspezifisch)."
+          - column: Ab- oder Anwesenheitsart
+            definition: "Art der Ab- oder Anwesenheit."
+          - column: "Befristet / Unbefristet"
+            definition: "Befristung des Beschäftigungsverhältnisses."
+      - sheet: Zeitraum_Beurlaubung
+        definition: "Beurlaubungsereignisse im Berichtszeitraum. Personenstammdaten werden per Join mit Stichtag (PersNr) ergänzt."
+        notes: >-
+          Spalten, die bereits über den Stichtag-Join erreichbar sind, wurden hier bewusst entfernt (keine Doppelerfassung).
+          Elternzeit: Beurlaubung nach Bundeselterngeld- und Elternzeitgesetz.
+          Familienpolitische Beurlaubung: Beurlaubung aus familiären Gründen über Elternzeit hinaus.
+        columns:
+          - column: PersNr
+            definition: "Personalnummer; Join-Schlüssel zu Stichtag."
+          - column: Dauer der Elternzeit (Tage)
+            definition: "Kalendertage zwischen Antritts- und Endedatum der Elternzeit."
+      - sheet: Zeitraum_Bewerbung
+        definition: "Bewerbungsereignisse im Berichtszeitraum. Eigener Schlüssel (BewerberID), daher kein Stichtag-Join — die benötigten Personenmerkmale stehen direkt im Blatt."
+        notes: "Qualifizierte Bewerbung: Eine Bewerbung, die die formalen und fachlichen Mindestanforderungen erfüllt."
+        columns:
+          - column: BewerberID
+            definition: "Eindeutige Bewerberkennung."
+          - column: Geschlecht
+            definition: "Im Datensatz wird zwischen den Ausprägungen unterschieden, die das Personalverwaltungssystem führt."
+          - column: "Entgeltgruppe / Besoldungsgruppe"
+            definition: "Eingruppierung im Tarifvertrag bzw. der bayerischen Besoldungsordnung."
+          - column: QE
+            definition: "Qualifikationsebene: Laufbahngruppen 1–4 nach Art. 5 LlbG; entspricht im Tarifbereich näherungsweise den E-Gruppen."
+          - column: Führungsebene
+            definition: "Hierarchische Einordnung der Führungsfunktion (1 = höchste Ebene)."
+          - column: "Intern / Extern"
+            definition: "Internbewerbung aus der eigenen Dienststelle bzw. Bewerbung von außerhalb."
+          - column: Organisationseinheit
+            definition: "Referat / Sachgebiet / Amt — je nach Verwaltungsebene unterschiedlich tief gegliedert."
+      - sheet: Zeitraum_Einstellung
+        definition: "Einstellungen im Berichtszeitraum — Begründung eines Beschäftigungs- oder Beamtenverhältnisses. Personenstammdaten werden per Join mit Stichtag (PersNr) ergänzt."
+        notes: "Doppelt vorgehaltene Stammdatenspalten wurden entfernt; sie stammen aus dem Stichtag-Join."
+        columns:
+          - column: PersNr
+            definition: "Personalnummer; Join-Schlüssel zu Stichtag."
+      - sheet: Zeitraum_Fortbildung
+        definition: "Fortbildungen im Berichtszeitraum — anlassbezogene Weiterbildungsmaßnahmen, nicht zwingend mit Abschluss. Personenstammdaten werden per Join mit Stichtag (PersNr) ergänzt."
+        notes: "Doppelt vorgehaltene Stammdatenspalten wurden entfernt; sie stammen aus dem Stichtag-Join."
+        columns:
+          - column: PersNr
+            definition: "Personalnummer; Join-Schlüssel zu Stichtag."
+      - sheet: Zeitraum_Qualifikation
+        definition: "Qualifizierungsereignisse im Berichtszeitraum. Personenstammdaten werden per Join mit Stichtag (PersNr) ergänzt."
+        notes: >-
+          Doppelt vorgehaltene Stammdatenspalten wurden entfernt; sie stammen aus dem Stichtag-Join.
+          Bewilligt vs. abgeschlossen: Eine bewilligte Maßnahme kann noch offen sein; abgeschlossen heißt erfolgreich beendet.
+        columns:
+          - column: PersNr
+            definition: "Personalnummer; Join-Schlüssel zu Stichtag."
+          - column: Qualifikationsart
+            definition: "Modulare Qualifizierung (MQ), Ausbildungsqualifizierung (AQ), Beförderung in höhere Laufbahn (BL) u. a."
+      - sheet: Zeitraum_Leistungskomponente
+        definition: "Leistungskomponenten (LK) im Berichtszeitraum — Sammelbegriff für Leistungsprämien, Leistungsentgelte und leistungsorientierte Bezahlung (LOB). Personenstammdaten werden per Join mit Stichtag (PersNr) ergänzt."
+        notes: "Doppelt vorgehaltene Stammdatenspalten wurden entfernt; sie stammen aus dem Stichtag-Join."
+        columns:
+          - column: PersNr
+            definition: "Personalnummer; Join-Schlüssel zu Stichtag."
+          - column: "Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB)"
+            definition: "Auszahlungsbetrag im Berichtszeitraum."
+      - sheet: Zeitraum_Befoerderung
+        definition: "Beförderungs-/Höhergruppierungsereignisse im Berichtszeitraum. Personenstammdaten (inkl. abgeleiteter Beamte/Tarifbeschäftigte-Klassifikation) werden per Join mit Stichtag (PersNr) ergänzt."
+        notes: "Doppelt vorgehaltene Stammdatenspalten wurden entfernt; sie stammen aus dem Stichtag-Join."
+        columns:
+          - column: PersNr
+            definition: "Personalnummer; Join-Schlüssel zu Stichtag."
+          - column: Maßnahmenantrag
+            definition: "Beantragung der Höhergruppierung durch die beschäftigte Person bzw. Stelle."
+          - column: Maßnahmenart
+            definition: "Art der Maßnahme; Grundlage der abgeleiteten Flags Beförderung (ja/nein) und Höhergruppierung genehmigt."
+
+# Derived columns and datasets, built from the sheets above before rendering.
+# Kept in this file because mutations/joins operate directly on the `data`
+# sheets and share their context.
+#   `mutations` (run first) add a column via a simple if-else rule, then
+#   `joins` enrich one sheet with another's columns by a shared key.
+# A mutation may carry an optional `definition` (metadata) describing the
+# derived column, mirroring the column metadata above.
+preprocessing:
+  mutations:
+    # Beamte/Tarifbeschäftigte aus der Entgelt-/Besoldungsgruppe ableiten:
+    # Besoldungsgruppen (A…, B…, R…, W…) ⇒ Beamte; Entgeltgruppen (E…) ⇒ Tarif.
+    # Auf Stichtag abgeleitet — der Join unten trägt sie nach Zeitraum_Befoerderung.
+    - dataset: Stichtag
+      column: Beamte
+      definition: "Statusrechtliche Unterscheidung Beamte vs. Tarifbeschäftigte (separate Auswertung wegen unterschiedlicher Beurteilungssysteme); Ja für Besoldungsgruppen (A/B/R/W), abgeleitet aus der Entgelt-/Besoldungsgruppe."
+      from: "Entgeltgruppe / Besoldungsgruppe"
+      when:
+        starts_with: [A, B, R, W]
+      then: "Ja"
+      else: "Nein"
+    - dataset: Stichtag
+      column: Tarifbeschäftigte
+      definition: "Statusrechtliche Unterscheidung Beamte vs. Tarifbeschäftigte (separate Auswertung wegen unterschiedlicher Beurteilungssysteme); Ja für Entgeltgruppen (E), abgeleitet aus der Entgelt-/Besoldungsgruppe."
+      from: "Entgeltgruppe / Besoldungsgruppe"
+      when:
+        starts_with: [E]
+      then: "Ja"
+      else: "Nein"
+    # Beförderungsereignisse klassifizieren (eigene Spalten von Zeitraum_Befoerderung):
+    - dataset: Zeitraum_Befoerderung
+      column: "Beförderung (ja/nein)"
+      definition: "Beförderung: Verleihung eines höheren statusrechtlichen Amtes (Beamte); abgeleitet aus der Maßnahmenart."
+      from: Maßnahmenart
+      when:
+        equals: "Beförderung"
+      then: "Ja"
+      else: "Nein"
+    - dataset: Zeitraum_Befoerderung
+      column: "Höhergruppierung genehmigt"
+      definition: "Höhergruppierung: Eingruppierung in eine höhere Entgeltgruppe (Tarifbeschäftigte); abgeleitet aus der Maßnahmenart."
+      from: Maßnahmenart
+      when:
+        equals: "Höhergruppierung"
+      then: "Ja"
+      else: "Nein"
+
+  # ── Joins: look up matching rows in `right` by key (first match wins — left
+  #    rows are never duplicated) and copy its columns onto `left`. Setting
+  #    `name` = `left` enriches the source in place, so the template's existing
+  #    `data:` blocks pick up the added columns automatically. ──
+  joins:
+    # Beförderungsereignisse mit den Stammdaten der Person aus `Stichtag`
+    # anreichern (Schlüssel: PersNr). Trägt u. a. die oben abgeleitete
+    # Beamte/Tarifbeschäftigte-Klassifikation in Zeitraum_Befoerderung, die die
+    # Beförderungs-Diagramme als `filter:` nutzen. `select` weggelassen → alle
+    # Stichtag-Spalten, die in Zeitraum_Befoerderung noch nicht vorhanden sind.
+    - name: Zeitraum_Befoerderung   # in-place enrichment of the source sheet
+      left: Zeitraum_Befoerderung
+      right: Stichtag
+      on: PersNr
+      type: left
+    - name: Zeitraum_Beurlaubung
+      left: Zeitraum_Beurlaubung
+      right: Stichtag
+      on: PersNr
+      type: left
+    - name: Zeitraum_Einstellung
+      left: Zeitraum_Einstellung
+      right: Stichtag
+      on: PersNr
+      type: left
+    - name: Zeitraum_Fortbildung
+      left: Zeitraum_Fortbildung
+      right: Stichtag
+      on: PersNr
+      type: left
+    - name: Zeitraum_Qualifikation
+      left: Zeitraum_Qualifikation
+      right: Stichtag
+      on: PersNr
+      type: left
+    - name: Zeitraum_Leistungskomponente
+      left: Zeitraum_Leistungskomponente
+      right: Stichtag
+      on: PersNr
+      type: left

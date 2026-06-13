@@ -2,7 +2,7 @@
  * App orchestration — wires the modular pipeline together:
  *   config (bundled) → data upload → template choice → parameters → render → export
  */
-import { loadConfig } from "./modules/config";
+import { loadConfig, dataForTemplate } from "./modules/config";
 import {
   parseWorkbook,
   parseTable,
@@ -62,7 +62,7 @@ export function initApp(root: HTMLElement): void {
   }
 
   root.innerHTML = `
-    <img src="../img/ondatix_Logo_hell.png" alt="Reportix Logo" class="logo" height="80" align="right"/><br>
+    <img src="../img/ondatix_Logo_hell.png" alt="ondatix Logo" class="logo" height="80" align="right"/><br>
     <h1>reportix - Gleichstellungskonzept</h1>
     <div id="language-bar" class="language-bar">
       <label for="language-select">${t("ui.language")}: </label>
@@ -105,6 +105,7 @@ export function initApp(root: HTMLElement): void {
 
   let dataStore: DataStore;
   let templateText: string;
+  let selectedTemplateId: string | undefined;
 
   showTemplateStep();
 
@@ -143,6 +144,7 @@ export function initApp(root: HTMLElement): void {
       const bundled = getBundledTemplate(selected.value);
       if (bundled === undefined) return; // startup guard already ruled this out
       templateText = bundled;
+      selectedTemplateId = config.template.files.find((f) => f.file === selected.value)?.id;
       showDataLoadingStep();
     };
   }
@@ -155,6 +157,9 @@ export function initApp(root: HTMLElement): void {
     const container = root.querySelector<HTMLElement>("#data-inputs")!;
     stepData.hidden = false;
     container.innerHTML = "";
+
+    // Only request the sheets/columns the selected template actually uses.
+    const defs = dataForTemplate(config.data, selectedTemplateId);
 
     let dataFormat: "xlsx" | "csv" = "xlsx";
 
@@ -232,7 +237,7 @@ export function initApp(root: HTMLElement): void {
       workbooks.clear();
       sheetFiles.clear();
 
-      for (const [source, def] of Object.entries(config.data)) {
+      for (const [source, def] of Object.entries(defs)) {
         const group = document.createElement("div");
         group.className = "source-group";
         const h = document.createElement("h3");
@@ -278,8 +283,8 @@ export function initApp(root: HTMLElement): void {
         const colsWrap = document.createElement("div");
         colsWrap.className = "column-maps";
         for (const col of sheetDef.columns) {
-          const { row, select } = buildColumnRow(col);
-          colSelMap.set(col, select);
+          const { row, select } = buildColumnRow(col.name);
+          colSelMap.set(col.name, select);
           colsWrap.appendChild(row);
         }
         sheetRow.appendChild(colsWrap);
@@ -289,7 +294,7 @@ export function initApp(root: HTMLElement): void {
         sheetSel.addEventListener("change", () => {
           const table = workbooks.get(source)?.[sheetSel.value];
           for (const col of sheetDef.columns) {
-            fillSelect(colSelMap.get(col)!, table?.columns ?? [], col);
+            fillSelect(colSelMap.get(col.name)!, table?.columns ?? [], col.name);
           }
         });
       }
@@ -306,7 +311,7 @@ export function initApp(root: HTMLElement): void {
           const table = tables[sheetSel.value];
           const colSelMap = columnSelects.get(sheetDef.sheet)!;
           for (const col of sheetDef.columns) {
-            fillSelect(colSelMap.get(col)!, table?.columns ?? [], col);
+            fillSelect(colSelMap.get(col.name)!, table?.columns ?? [], col.name);
           }
         }
       });
@@ -335,8 +340,8 @@ export function initApp(root: HTMLElement): void {
         const colsWrap = document.createElement("div");
         colsWrap.className = "column-maps";
         for (const col of sheetDef.columns) {
-          const { row, select } = buildColumnRow(col);
-          colSelMap.set(col, select);
+          const { row, select } = buildColumnRow(col.name);
+          colSelMap.set(col.name, select);
           colsWrap.appendChild(row);
         }
         sheetRow.appendChild(colsWrap);
@@ -348,7 +353,7 @@ export function initApp(root: HTMLElement): void {
           const table = parseTable(await f.arrayBuffer(), f.name, sheetDef.sheet);
           sheetFiles.set(sheetDef.sheet, table);
           for (const col of sheetDef.columns) {
-            fillSelect(colSelMap.get(col)!, table.columns, col);
+            fillSelect(colSelMap.get(col.name)!, table.columns, col.name);
           }
         });
       }
@@ -390,7 +395,7 @@ export function initApp(root: HTMLElement): void {
     // ── Continue: assemble the store and proceed ──
     function onContinue() {
       const mapping: DataMapping = {};
-      for (const [source, def] of Object.entries(config.data)) {
+      for (const [source, def] of Object.entries(defs)) {
         for (const sheetDef of def.sheets) {
           let table: SourceTable | undefined;
           if (dataFormat === "xlsx") {
@@ -401,12 +406,12 @@ export function initApp(root: HTMLElement): void {
           }
           const columns: Record<string, string> = {};
           const colSelMap = columnSelects.get(sheetDef.sheet);
-          for (const col of sheetDef.columns) columns[col] = colSelMap?.get(col)?.value ?? "";
+          for (const col of sheetDef.columns) columns[col.name] = colSelMap?.get(col.name)?.value ?? "";
           mapping[sheetDef.sheet] = { table, columns };
         }
       }
 
-      const result = assembleStore(config.data, mapping);
+      const result = assembleStore(defs, mapping);
       // Build derived datasets (mutations + joins) before rendering; surface
       // their warnings alongside the mapping ones.
       const pre = applyPreprocessing(result.store, config.preprocessing);

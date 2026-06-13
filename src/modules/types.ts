@@ -26,9 +26,25 @@ export interface ParameterDef {
   bind?: string;
 }
 
+/**
+ * One required column of a config sheet, plus optional metadata.
+ * `include` lists the template ids (see `TemplateOption.id`) this column
+ * belongs to; omitted/empty ⇒ included in every template.
+ */
+export interface ColumnDef {
+  name: string;
+  definition?: string;
+  notes?: string;
+  include?: string[];
+}
+
 export interface SheetDef {
   sheet: string;
-  columns: string[];
+  columns: ColumnDef[];
+  definition?: string;
+  notes?: string;
+  /** Template ids this sheet belongs to; omitted/empty ⇒ every template. */
+  include?: string[];
 }
 
 export interface DataSourceDef {
@@ -36,6 +52,11 @@ export interface DataSourceDef {
 }
 
 export interface TemplateOption {
+  /**
+   * Stable, translation-free identifier referenced by data `include:` lists to
+   * scope which sheets/columns the data step requests for this template.
+   */
+  id?: string;
   /** Human-readable name shown in the template chooser. */
   label: string;
   /** Filename within the bundled `templates/` directory (e.g. `report_template.md`). */
@@ -354,6 +375,8 @@ export interface MutationDef {
   dataset: string;
   /** New (or overwritten) column name. */
   column: string;
+  /** Human-readable definition of the derived column (metadata). */
+  definition?: string;
   /** Source column whose value the condition tests. */
   from: string;
   /** Condition on the `from` value (default: truthy). */

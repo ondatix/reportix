@@ -1,0 +1,73 @@
+export:
+  filename: report.docx        # bound by parameters.filename
+  locale: de-DE                # bound by parameters.locale
+  section_numbering: false     # bound by parameters.section_numbering
+  toc: false                   # bound by parameters.toc
+
+  document:
+    title: Report
+    subject: ""                # bound by parameters.doc_subject
+    creator: ""                # bound by parameters.doc_creator
+    description: ""
+    keywords: ""
+
+  font:
+    family: Arial              # overridden at runtime by the `font` parameter
+    size: 11                   # bound by parameters.font_size
+    heading_family: Arial      # overridden at runtime by the `font` parameter
+    color: "1A1A1A"
+
+  headings:
+    color: "1F3864"            # bound by parameters.heading_color
+    h1_size: 20                # pt
+    h2_size: 16
+    h3_size: 13
+    h4_size: 12
+
+  paragraph:
+    alignment: left            # left | center | right | justify
+    spacing_before: 0          # twips
+    spacing_after: 120         # twips (~6 pt)
+    line_spacing: 276          # twips (276 ≈ single at 11 pt)
+
+  page:
+    orientation: portrait      # bound by parameters.page_orientation
+    # A4 in twips (1 mm ≈ 56.7 twips); remove to use orientation defaults
+    width: 11906
+    height: 16838
+    margin:
+      top: 1418                # ~25 mm
+      right: 1418
+      bottom: 1418
+      left: 1418
+      header: 709              # ~12 mm from top edge to header
+      footer: 709              # ~12 mm from bottom edge to footer
+
+  page_numbers:
+    position: center           # left | center | right | none — bound by parameters.page_numbers
+    start: 1
+    format: decimal            # decimal | upperRoman | lowerRoman | upperLetter | lowerLetter
+
+  header:
+    text: ""                   # bound by parameters.header_text
+
+  footer:
+    text: ""                   # bound by parameters.footer_text
+
+  table:
+    border_style: single       # single | double | dashed | dotted | thick | none
+    border_color: "AAAAAA"     # hex without #
+    border_size: 4             # eighths of a point
+    cell_padding: 80           # twips (~1.5 mm)
+
+  # Callout boxes — applies to DOCX export.
+  # definition_box styles `::: {.callout-note} … :::` (used for Definitionen).
+  # summary_box    styles `::: {.callout-tip}  … :::` (used for Fazit).
+  # `color`      = accent (left border + title), 6-digit hex without #
+  # `background` = true → pale tint derived from `color`; false → no fill
+  definition_box:
+    color: "1F77B4"            # blue accent
+    background: true
+  summary_box:
+    color: "2CA02C"            # green accent
+    background: true

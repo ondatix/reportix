@@ -46,7 +46,7 @@ To add UI text: add the key to both `de` and `en` dictionaries in `src/modules/i
 
 ## Config File
 
-A single YAML config file (`/config.yaml` in the project root) is the entry point for the app. It is bundled at build time and **not uploaded by the user** — only developers edit it. It declares what to ask the user, where to find the data, and which template to use.
+The config is the entry point for the app. It is **modular**: `/config.yaml` in the project root is a thin **manifest** with an `include:` list of the per-section files under `config/` (`parameters.yaml`, `data.yaml` — which also carries the `preprocessing:` section, since mutations/joins operate on those sheets — `template.yaml`, `data_protection.yaml`, `export.yaml`, `charts.yaml`). Each section file holds one or more top-level sections; `loadConfig` (in `src/modules/config/`) globs them via `import.meta.glob('/config/*.yaml', { query: '?raw', eager: true })`, parses each, and shallow-merges them (top-level sections are disjoint, so order only documents intent) before `parseConfigObject` builds the `AppConfig`. The files are bundled at build time and **not uploaded by the user** — only developers edit them. The config declares what to ask the user, where to find the data, and which templates to use.
 
 **Top-level sections**
 
@@ -59,9 +59,13 @@ data:
   # Defines expected data sources. Each source declares the sheet names
   # and required columns — these are the **mapping targets** the user maps
   # their uploaded file's actual sheets/columns onto (see Data Loading).
+  # Sheets and columns may carry optional metadata: `definition`, `notes`,
+  # and an `include` list of template ids (omit ⇒ every template).
 
 template:
-  # Points to the Markdown template file and sets rendering options.
+  # Lists the bundled Markdown templates the user picks from. Each entry has a
+  # `file`, an optional localized `label`, and an optional `id` referenced by
+  # the data `include` lists to scope which sheets/columns that template needs.
 ```
 
 **Example**
@@ -86,12 +90,22 @@ data:
   financials:
     sheets:
       - sheet: Monthly
-        columns: [month, revenue, growth]
+        definition: "One row per month"     # optional metadata
+        include: [full]                     # optional; omit ⇒ every template
+        columns:
+          - month                           # plain string, or…
+          - column: revenue                 # …object with optional metadata
+            definition: "Net revenue"
+            include: [full, mandatory]
+          - growth
       - sheet: Quarterly
         columns: [quarter, revenue, target]
 
 template:
-  file: report_template.md
+  files:
+    - id: full                              # referenced by data `include` lists
+      label: Full report
+      file: report_template.md
 
 export:
   filename: report.docx
@@ -409,6 +423,7 @@ data_protection:
 
 The data step (`src/modules/data-loader/`, driven by `src/app.ts`) does **not** validate the upload against fixed names — instead the user maps their actual data onto the `config.data` sheets/columns. There is no hard schema check; mismatches are resolved by the user, not rejected.
 
+- **Template-scoped definitions** — before rendering the mapping UI, `app.ts` computes `dataForTemplate(config.data, selectedTemplateId)` (exported from `src/modules/config/`), keeping only the sheets/columns whose `include` list contains the selected template's `id` (an omitted/empty `include` ⇒ included in every template). That filtered set drives both the UI and `assembleStore`, so excluded sheets/columns are never requested and produce no warnings. `SheetDef`/`ColumnDef` also carry optional `definition`/`notes` metadata (parsed and stored; not yet surfaced in the UI). Derived columns (`preprocessing.mutations[]`) likewise accept an optional `definition`.
 - **Format choice** — two buttons: **XLSX** (one workbook per data source; map each config sheet → a workbook sheet) or **CSV** (one single-table file per config sheet — the per-sheet input also accepts a single-sheet `.xlsx`).
 - **Mapping UI** — the config's source→sheets→columns hierarchy is rendered with a `<select>` per sheet (XLSX only) and per column. Options come from the parsed file; the option whose **normalized name** (NFC, trimmed, lower-cased) matches the config name is **pre-selected** (`matchName`). Any choice may be left "(none)".
 - **Module API** — `parseWorkbook(buffer)` → `Record<sheet, SourceTable>`; `parseTable(buffer, filename, preferSheet?)` → one `SourceTable` (CSV decoded as text, XLSX prefers the named sheet then the first); `assembleStore(definitions, mapping)` builds the `DataStore` **keyed by config sheet name**, copying each row with the chosen source columns **renamed to the config column names** (only mapped columns are kept). `SourceTable = { columns, rows }`, `DataMapping = Record<configSheet, { table?, columns: Record<configCol, sourceCol> }>`.
@@ -427,6 +442,7 @@ preprocessing:
   mutations:
     - dataset: Stichtag                          # dataset to add the column to
       column: Beamte                             # new (or overwritten) column
+      definition: "…"                            # optional metadata for the derived column
       from: "Entgeltgruppe / Besoldungsgruppe"   # source column the condition tests
       when: { starts_with: [A, B, R, W] }        # condition (omit → "value is truthy")
       then: "Ja"

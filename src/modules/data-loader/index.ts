@@ -117,9 +117,9 @@ export function assembleStore(
       // Per config column, resolve the chosen source column (if any).
       const pairs: Array<[string, string]> = [];
       for (const col of sheetDef.columns) {
-        const actual = map.columns[col];
-        if (actual) pairs.push([col, actual]);
-        else warnings.push({ source, message: t("data.unmappedColumn", { sheet: sheetDef.sheet, column: col }) });
+        const actual = map.columns[col.name];
+        if (actual) pairs.push([col.name, actual]);
+        else warnings.push({ source, message: t("data.unmappedColumn", { sheet: sheetDef.sheet, column: col.name }) });
       }
 
       store[sheetDef.sheet] = map.table.rows.map((row) => {

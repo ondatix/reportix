@@ -1,12 +1,6 @@
 # {{title}}
 
 **{{office}}**
-<!-- 
-::: {.callout-note title='Über dieses Dokument'}
-Diese Vorlage wurde aus der `Steckbrief-Daten.csv` der Quarto-Referenzimplementierung (`main.qmd`) übertragen. Jede Frage des Konzepts wird durch ein Diagramm beantwortet; die Konfiguration für Datenquelle, Gruppierung, Aggregation und Personenkreis ist im jeweiligen YAML-Block hinterlegt.
-
-Datenschutz ist global aktiv (siehe `config.yaml → data_protection.smallest_group`). Aggregierte Werte unterhalb des Schwellwerts werden in Tabellen als `<5` und in Diagrammen mit gekapptem Balken plus maskiertem Tooltip dargestellt.
-::: -->
 
 ## Einleitung
 

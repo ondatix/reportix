@@ -5,9 +5,8 @@
   - extra section: data_preprocessing
   - TODO: test
 2. table section
-3. Condition config.data on template
-4. More sophisticated data loading
-  - manual mapping of columns
+3. [x] Condition config.data on template
+4. [x] More sophisticated data loading - manual mapping of columns
 5. Datenformate vereinheitlichen
    1. Datum
    2. weiblich - männlich
@@ -16,10 +15,11 @@
    5. QE
 6. Unified Color coding
 7. Tooltips auf Basis des Handbuchs
-8. Add definitions to data columns and store in extra yaml
-9. Parameter: Was für eine Art von Behörde?
-10. CSV Support
-11. ODT Export
+8. [x] Add definitions to data columns and store in extra yaml
+9.  Parameter: Was für eine Art von Behörde?
+10. ODT Export
+11. SVG instead of PNG
+12. Fix missing Logo
 
 ## Forks
 - Main Fork

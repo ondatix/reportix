@@ -1,0 +1,2 @@
+data_protection:
+  smallest_group: 5  # bound by parameters.smallest_group

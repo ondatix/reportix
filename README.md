@@ -1,4 +1,4 @@
-<img src="img/ondatix_Logo_dunkel.png" alt="Reportix Logo" class="logo" height="80" align="right"/><br><br>
+<img src="img/ondatix_Logo_dunkel.png" alt="ondatix Logo" class="logo" height="80" align="right"/><br><br>
 
 # reportix
 
@@ -53,9 +53,9 @@ The dev server reloads on save. The production build under `dist/` is a fully st
 
 The app runs a strict pipeline:
 
-1. **Load config** — `/config.yaml` is bundled at build time and parsed on startup.
+1. **Load config** — `/config.yaml` is a manifest listing the per-section files under `config/`; all are bundled at build time, merged, and parsed on startup.
 2. **Choose template** — user picks one of the bundled Markdown templates listed under `template.files` in the config (radio chooser with human-readable labels). Templates live in `templates/` and are bundled at build time.
-3. **Load data** — user picks a format (**XLSX** workbook per source, or **CSV** — one single-table file per sheet, also accepting a single-sheet `.xlsx`) and **maps** their actual sheets/columns onto the config's sheets/columns. Options pre-select by matching name, so a file that already uses the config names needs no manual mapping. Unmapped names surface as non-blocking warnings on Continue (blocks referencing missing data render as red "TBD" notes).
+3. **Load data** — user picks a format (**XLSX** workbook per source, or **CSV** — one single-table file per sheet, also accepting a single-sheet `.xlsx`) and **maps** their actual sheets/columns onto the config's sheets/columns. The mapping UI shows only the sheets/columns the chosen template needs (those whose `include` lists its `id`). Options pre-select by matching name, so a file that already uses the config names needs no manual mapping. Unmapped names surface as non-blocking warnings on Continue (blocks referencing missing data render as red "TBD" notes).
 3b. **Preprocess** — any `preprocessing` defined in the config runs before rendering: `mutations` derive new columns (if-else rules), then `joins` enrich one sheet with another's columns by a shared key.
 4. **Fill parameters** — a form is generated from the config's `parameters` section.
 5. **Render preview** — Markdown becomes semantic HTML; chart / table YAML blocks become Chart.js canvases and accessible `<table>`s with auto-generated alt text.
@@ -68,9 +68,9 @@ No step talks to a server. The XLSX/CSV is read in-browser via SheetJS; the DOCX
 The config is the entry point — a developer edits it, the end user never touches it. It declares:
 
 - **`parameters`** — form fields shown before report generation (`text`, `number`, `date`, `select`, `multiselect`, `boolean`). Each entry is either **standalone** (template variable, prefilled from `default:`) or **bound** to a config leaf via `bind: <dotted.path>` — bound entries prefill from the path's preset and write the user's value back to that path at runtime, letting most styling and metadata keys be overridden per report. The names `palette`, `font`, `page_orientation`, and `page_numbers` get special UI widgets (illustrated / icon radios — translation-free choices). Each `label` may be a plain string or a per-locale map `{ de: "…", en: "…" }` resolved to the [selected language](#features). **Bind paths target the parsed config (camelCase)** — e.g. `export.pageNumbers.position`, `export.sectionNumbering`, `dataProtection.smallestGroup` — not the snake_case YAML keys.
-- **`data`** — expected data sources, each with sheet names and required columns. These are the **mapping targets**: the user maps their uploaded file's actual sheets/columns onto these names (pre-selected when names match), rather than the upload being hard-validated.
+- **`data`** — expected data sources, each with sheet names and required columns. These are the **mapping targets**: the user maps their uploaded file's actual sheets/columns onto these names (pre-selected when names match), rather than the upload being hard-validated. Each sheet and column may carry optional `definition`/`notes` metadata and an `include` list of template `id`s — the data step only requests sheets/columns whose `include` contains the selected template's id (omit `include` ⇒ every template). A column is either a plain string or an object (`{ column, definition, notes, include }`).
 - **`preprocessing`** — optional derived columns and datasets built before rendering. **`mutations`** (run first) add a column via a simple if-else rule: where `when` holds for the `from` value the new `column` gets `then`, else `else` (operators: `equals`, `in`, `contains`, `starts_with`, `ends_with`, `matches`, `gt`/`lt`/`gte`/`lte`, `empty`, `truthy`). **`joins`** then enrich a `left` sheet with columns from a `right` sheet matched on a key (`on`, or `left_on`/`right_on`); `type` is `left` or `inner`; omit `select` to copy all non-overlapping right columns, or list specific ones (`{column, as}` to rename); `indicator` adds a boolean "matched?" column. Setting `name` = `left` enriches the sheet in place. First-match lookup (left rows are never duplicated).
-- **`template.files`** — list of bundled Markdown templates shown as a radio chooser in Step 2. Each entry has a `label` (shown to the user) and a `file` (filename within `templates/`). The app hard-fails at startup if any referenced file isn't bundled.
+- **`template.files`** — list of bundled Markdown templates shown as a radio chooser in Step 2. Each entry has a `label` (shown to the user), a `file` (filename within `templates/`), and an optional `id` referenced by the data `include` lists to scope which sheets/columns that template requests. The app hard-fails at startup if any referenced file isn't bundled.
 - **`export`** — DOCX styling: filename, locale, document metadata, fonts, heading sizes/colours, paragraph spacing, page size & margins, **page numbers** (`page_numbers.position`: `left`/`center`/`right`/`none`), header/footer text, table borders, **section numbering** (`section_numbering: true` numbers section headings `1.`, `1.1.`, … in both preview and DOCX), **table of contents** (`toc: true` builds one in the preview and as a Word TOC field), **callout box colours and backgrounds** (`definition_box`, `summary_box`). The first `# {{title}}` is treated as the document title (placed before the TOC, not numbered).
 - **`charts`** — Chart.js defaults: animation, aspect ratio, fonts, title/legend/tooltip placement, axis grid colours, line/bar element styling.
 - **`data_protection.smallest_group`** — privacy threshold for aggregated counts/shares (default 5).
@@ -116,9 +116,9 @@ Each utility is a self-contained module under `src/modules/` with a clean public
 | Module | Responsibility |
 |---|---|
 | `i18n/` | Central translation layer (German / English) with `t(key, params)` lookup; drives all UI text, error messages, and chart alt text. |
-| `config/` | Parse `/config.yaml` (bundled via `?raw` import) into a typed `AppConfig`. |
+| `config/` | Load the modular config — `/config.yaml` manifest + `config/*.yaml` sections (bundled via `?raw`), merged and parsed into a typed `AppConfig`. Also exposes `dataForTemplate` for template-scoped data filtering. |
 | `data-loader/` | Parse `.xlsx` workbooks / CSV files via SheetJS; assemble a DataStore from the user's sheet/column mapping (renames to config names). |
-| `preprocessing/` | Derive columns and datasets from the loaded sheets before rendering — mutations (if-else derived columns) and joins (lookup/enrichment), defined in `config.yaml`. |
+| `preprocessing/` | Derive columns and datasets from the loaded sheets before rendering — mutations (if-else derived columns) and joins (lookup/enrichment), defined in the config's `preprocessing:` section (in `config/data.yaml`). |
 | `parameters/` | Render the form from `AppConfig.parameters`, collect typed values. |
 | `template/` | Parse Markdown into typed blocks (`text` / `chart` / `table`). |
 | `aggregation/` | Aggregation ops, row filtering, data-protection helpers. |
@@ -205,7 +205,8 @@ src/
     ├── renderer/         # text, chart, table, index
     ├── alt-text/
     └── exporter/
-config.yaml               # bundled at build time
+config.yaml               # manifest: include-list of config/*.yaml sections
+config/                   # per-section config files (parameters, data, …)
 templates/                # example Markdown templates
 public/_headers           # Netlify / static-host security headers
 vite.config.ts            # Vite + SRI plugin
