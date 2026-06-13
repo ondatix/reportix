@@ -85,6 +85,8 @@ parameters:
     bind: export.font.size
 ```
 
+Jeder Parameter kann zusätzlich `definition:` (nur Deutsch) oder `info:` (zweisprachig) tragen — der Text erscheint als anklickbarer ⓘ-Tooltip neben der Beschriftung (siehe [Tooltips](#de-tooltips)).
+
 <a id="de-localized-labels"></a>
 
 ### Lokalisierte Beschriftungen (`label:`)
@@ -203,10 +205,11 @@ data:
 |---|---|---|
 | `<Quellname>` | Objekt | Der oberste Schlüssel ist die in der Upload-Oberfläche angezeigte Quellkennung. |
 | `.sheets[].sheet` | String | Name des Excel-Tabellenblatts, wie er in der Arbeitsmappe erscheint. |
-| `.sheets[].definition` | String | Optional. Definition des Blatts (Metadaten). `description:` wird als veraltetes Synonym noch akzeptiert. |
+| `.sheets[].definition` | String | Optional. Definition des Blatts (nur Deutsch), als Tooltip angezeigt — siehe [Tooltips](#de-tooltips). `description:` wird als veraltetes Synonym noch akzeptiert. |
+| `.sheets[].info` | String \| Sprachzuordnung | Optional. Zweisprachiger Tooltip-Text; hat Vorrang vor `definition`. |
 | `.sheets[].notes` | String | Optional. Weitere Hinweise zum Blatt (Metadaten) — z. B. Begriffsdefinitionen, die sich keiner einzelnen Spalte zuordnen lassen. |
 | `.sheets[].include` | `string[]` | Optional. Liste der Vorlagen-`id`s (siehe [`template:`](#de-template)), für die dieses Blatt im Datenschritt abgefragt wird. **Weglassen ⇒ alle Vorlagen.** |
-| `.sheets[].columns` | Liste aus String **oder** Objekt | Pflicht-Spaltenüberschriften (verglichen nach Unicode-NFC- und Leerraum-Normalisierung). Eine Spalte kann ein einfacher String sein oder ein Objekt mit `column:` (alias `name:`) plus optional `definition:`, `notes:`, `include:` (gleiche Semantik wie auf Blattebene). |
+| `.sheets[].columns` | Liste aus String **oder** Objekt | Pflicht-Spaltenüberschriften (verglichen nach Unicode-NFC- und Leerraum-Normalisierung). Eine Spalte kann ein einfacher String sein oder ein Objekt mit `column:` (alias `name:`) plus optional `definition:`, `info:`, `notes:`, `include:` (gleiche Semantik wie auf Blattebene). |
 
 **Zuordnung statt Validierung.** Im Datenschritt wählt der Nutzer **XLSX** (eine Arbeitsmappe je Quelle; jedes Konfig-Blatt → ein Blatt der Mappe) oder **CSV** (eine Einzeltabellen-Datei je Blatt; akzeptiert auch eine einblättrige `.xlsx`) und ordnet je Blatt/Spalte über ein Auswahlfeld zu. Die nach Name passende Option ist vorausgewählt. Nicht zugeordnete Blätter/Spalten erzeugen beim „Weiter" **nicht-blockierende Warnungen** (in der gewählten Sprache); die Verarbeitung läuft weiter, und Blöcke, die auf fehlende Daten verweisen, werden als roter „TBD"-Hinweis dargestellt. Zugeordnete Spalten werden auf die Konfig-Spaltennamen **umbenannt**.
 
@@ -215,6 +218,14 @@ data:
 **Vorlagenabhängiger Datenschritt.** Der Datenschritt zeigt nur die Blätter und Spalten, deren `include` die `id` der gewählten Vorlage enthält (bzw. die kein `include` haben). So fragt eine Vorlage nur die Daten ab, die sie tatsächlich nutzt. Ausgeschlossene Blätter/Spalten erzeugen keine Warnungen, da sie gar nicht abgefragt werden.
 
 **Hinweis zu den `Zeitraum_*`-Blättern.** Aus den `Zeitraum_*`-Ereignisblättern wurden Spalten bewusst entfernt, die Stammdaten doppelt führten — diese werden zur Laufzeit über den Join mit `Stichtag` (Schlüssel `PersNr`) ergänzt (siehe [`preprocessing:`](#de-preprocessing)). Ausnahme: `Zeitraum_Bewerbung` hat einen eigenen Schlüssel (`BewerberID`) und wird nicht mit `Stichtag` verknüpft, behält seine Personenmerkmale also direkt.
+
+<a id="de-tooltips"></a>
+
+**Tooltips (`definition` / `info`).** Vorlagen, Blätter, Spalten und Parameter können erklärenden Tooltip-Text tragen. In der App erscheint daneben ein anklickbares **ⓘ**-Symbol, das den Text als kleines Popup zeigt (Klick außerhalb oder Esc schließt es). Zwei Felder:
+- `definition` — **nur Deutsch** (einfacher String). In jeder Sprache derselbe Text.
+- `info` — **zweisprachig** (`{ de, en }` oder einfacher String), zur Build-Zeit wie `label` an die aktive Sprache gebunden.
+
+Sind beide vorhanden, gewinnt `info`. Fehlen beide, wird kein ⓘ angezeigt. Auf Mutationen (abgeleitete Spalten, siehe [`preprocessing:`](#de-preprocessing)) ist `definition` ebenfalls erlaubt. Die Tooltips der drei Schritte (Vorlage, Daten, Parameter) stammen aus dem i18n-Modul.
 
 ---
 
@@ -320,6 +331,8 @@ template:
 |---|---|---|
 | `files[].id` | String | Optional. Stabile, übersetzungsfreie Kennung, auf die die `include:`-Listen im [`data:`](#de-data)-Abschnitt verweisen. Bei Auswahl dieser Vorlage zeigt der Datenschritt nur die Blätter/Spalten, deren `include` diese `id` enthält (bzw. ohne `include`). |
 | `files[].label` | String \| Sprachzuordnung | Lesbarer Name in der Radioauswahl. Lokalisierbar wie jedes `label:` — siehe [Lokalisierte Beschriftungen](#de-localized-labels). |
+| `files[].definition` | String | Optional. Deutscher Tooltip-Text zur Vorlage — siehe [Tooltips](#de-tooltips). |
+| `files[].info` | String \| Sprachzuordnung | Optional. Zweisprachiger Tooltip-Text; hat Vorrang vor `definition`. |
 | `files[].file` | String | Dateiname im gebündelten Verzeichnis `templates/` (ohne Pfad). |
 
 **Bündelung.** Jede `.md`-Datei unter `/templates/` wird zur Build-Zeit über `import.meta.glob` in das JS-Bundle aufgenommen. Es gibt keinen Laufzeit-Abruf (die CSP verbietet `connect-src`), daher muss die Datei zur Build-Zeit existieren.
@@ -769,6 +782,8 @@ parameters:
     bind: export.font.size
 ```
 
+A parameter may additionally carry `definition:` (German only) or `info:` (bilingual) — the text appears as a clickable ⓘ tooltip next to the label (see [Tooltips](#en-tooltips)).
+
 <a id="en-localized-labels"></a>
 
 ### Localized labels (`label:`)
@@ -887,10 +902,11 @@ data:
 |---|---|---|
 | `<source name>` | object | Top-level key is the source identifier shown in the upload UI. |
 | `.sheets[].sheet` | string | Excel sheet name as it appears in the workbook. |
-| `.sheets[].definition` | string | Optional. Definition of the sheet (metadata). `description:` is still accepted as a legacy alias. |
+| `.sheets[].definition` | string | Optional. Definition of the sheet (German only), shown as a tooltip — see [Tooltips](#en-tooltips). `description:` is still accepted as a legacy alias. |
+| `.sheets[].info` | string \| per-locale map | Optional. Bilingual tooltip text; takes precedence over `definition`. |
 | `.sheets[].notes` | string | Optional. Further notes about the sheet (metadata) — e.g. concept definitions that don't map to a single column. |
 | `.sheets[].include` | `string[]` | Optional. List of template `id`s (see [`template:`](#en-template)) for which this sheet is requested in the data step. **Omit ⇒ every template.** |
-| `.sheets[].columns` | list of string **or** object | Required column headers (compared after Unicode NFC + whitespace normalisation). A column may be a plain string, or an object with `column:` (alias `name:`) plus optional `definition:`, `notes:`, `include:` (same semantics as at sheet level). |
+| `.sheets[].columns` | list of string **or** object | Required column headers (compared after Unicode NFC + whitespace normalisation). A column may be a plain string, or an object with `column:` (alias `name:`) plus optional `definition:`, `info:`, `notes:`, `include:` (same semantics as at sheet level). |
 
 **Mapping, not validation.** In the data step the user picks **XLSX** (one workbook per source; each config sheet → a workbook sheet) or **CSV** (one single-table file per sheet; also accepts a single-sheet `.xlsx`) and maps each sheet/column via a dropdown. The option whose name matches is pre-selected. Unmapped sheets/columns produce **non-blocking warnings** on Continue (shown in the selected UI language); the pipeline proceeds and blocks referencing missing data render as a red "TBD" note. Mapped columns are **renamed** to the config column names.
 
@@ -899,6 +915,14 @@ data:
 **Template-scoped data step.** The data step shows only the sheets and columns whose `include` contains the selected template's `id` (or that have no `include`). A template therefore only asks for the data it actually uses; excluded sheets/columns produce no warnings because they are never requested.
 
 **Note on the `Zeitraum_*` sheets.** Columns that duplicated master data were deliberately removed from the `Zeitraum_*` event sheets — they are supplied at runtime by joining with `Stichtag` (key `PersNr`; see [`preprocessing:`](#en-preprocessing)). Exception: `Zeitraum_Bewerbung` has its own key (`BewerberID`) and is not joined with `Stichtag`, so it keeps its person attributes directly.
+
+<a id="en-tooltips"></a>
+
+**Tooltips (`definition` / `info`).** Templates, sheets, columns, and parameters can carry explanatory tooltip text. In the app a clickable **ⓘ** icon appears next to them and shows the text as a small popup (click outside or Esc to close). Two fields:
+- `definition` — **German only** (plain string). Same text in every language.
+- `info` — **bilingual** (`{ de, en }` or a plain string), bound to the active language at build time like `label`.
+
+When both are present, `info` wins. When neither is present, no ⓘ is shown. Mutations (derived columns, see [`preprocessing:`](#en-preprocessing)) also accept `definition`. The three step tooltips (template, data, parameters) come from the i18n module.
 
 ---
 
@@ -1004,6 +1028,8 @@ template:
 |---|---|---|
 | `files[].id` | string | Optional. Stable, translation-free identifier referenced by the `include:` lists in the [`data:`](#en-data) section. When this template is selected, the data step shows only the sheets/columns whose `include` contains this `id` (or that have no `include`). |
 | `files[].label` | string \| per-locale map | Human-readable name shown in the radio chooser. Localizable like any `label:` — see [Localized labels](#en-localized-labels). |
+| `files[].definition` | string | Optional. German tooltip text for the template — see [Tooltips](#en-tooltips). |
+| `files[].info` | string \| per-locale map | Optional. Bilingual tooltip text; takes precedence over `definition`. |
 | `files[].file` | string | Filename inside the bundled `templates/` directory (no path). |
 
 **Bundling.** Every `.md` file under `/templates/` is included in the JS bundle at build time via `import.meta.glob`. There is no runtime fetch (the CSP forbids `connect-src`), so the file must exist at build time.

@@ -23,7 +23,8 @@ import { exportToDocx } from "./modules/exporter";
 import { getPalette } from "./modules/palettes";
 import { getFont } from "./modules/fonts";
 import { t, getLocale, setLocale, LOCALES, type Locale } from "./modules/i18n";
-import type { DataStore } from "./modules/types";
+import { attachInfo, resolveTooltip } from "./modules/info";
+import type { DataStore, ColumnDef } from "./modules/types";
 
 /**
  * Bundled Markdown templates. Every file under `/templates/*.md` is included
@@ -103,6 +104,16 @@ export function initApp(root: HTMLElement): void {
     initApp(root);
   });
 
+  // Per-step explanatory tooltips on each step heading (text lives in i18n).
+  for (const [stepId, infoKey] of [
+    ["step-template", "ui.step.template.info"],
+    ["step-data", "ui.step.data.info"],
+    ["step-params", "ui.step.params.info"],
+  ] as const) {
+    const h2 = root.querySelector<HTMLElement>(`#${stepId} > h2`);
+    if (h2) attachInfo(h2, t(infoKey));
+  }
+
   let dataStore: DataStore;
   let templateText: string;
   let selectedTemplateId: string | undefined;
@@ -132,6 +143,7 @@ export function initApp(root: HTMLElement): void {
       name.className = "template-name";
       name.textContent = opt.label;
       wrapper.appendChild(name);
+      attachInfo(wrapper, resolveTooltip(opt.info, opt.definition));
 
       choices.appendChild(wrapper);
     });
@@ -273,6 +285,7 @@ export function initApp(root: HTMLElement): void {
         const nameSpan = document.createElement("span");
         nameSpan.className = "sheet-map-name";
         nameSpan.textContent = `${sheetDef.sheet} — ${t("ui.data.mapSheet")}`;
+        attachInfo(nameSpan, resolveTooltip(sheetDef.info, sheetDef.definition));
         const sheetSel = makeSelect();
         lbl.append(nameSpan, sheetSel);
         sheetRow.appendChild(lbl);
@@ -283,7 +296,7 @@ export function initApp(root: HTMLElement): void {
         const colsWrap = document.createElement("div");
         colsWrap.className = "column-maps";
         for (const col of sheetDef.columns) {
-          const { row, select } = buildColumnRow(col.name);
+          const { row, select } = buildColumnRow(col);
           colSelMap.set(col.name, select);
           colsWrap.appendChild(row);
         }
@@ -325,6 +338,7 @@ export function initApp(root: HTMLElement): void {
 
         const head = document.createElement("h4");
         head.textContent = sheetDef.sheet;
+        attachInfo(head, resolveTooltip(sheetDef.info, sheetDef.definition));
         sheetRow.appendChild(head);
 
         const fileInput = document.createElement("input");
@@ -340,7 +354,7 @@ export function initApp(root: HTMLElement): void {
         const colsWrap = document.createElement("div");
         colsWrap.className = "column-maps";
         for (const col of sheetDef.columns) {
-          const { row, select } = buildColumnRow(col.name);
+          const { row, select } = buildColumnRow(col);
           colSelMap.set(col.name, select);
           colsWrap.appendChild(row);
         }
@@ -369,12 +383,13 @@ export function initApp(root: HTMLElement): void {
       return sel;
     }
 
-    function buildColumnRow(col: string): { row: HTMLElement; select: HTMLSelectElement } {
+    function buildColumnRow(col: ColumnDef): { row: HTMLElement; select: HTMLSelectElement } {
       const row = document.createElement("label");
       row.className = "column-map";
       const name = document.createElement("span");
       name.className = "column-map-name";
-      name.textContent = col;
+      name.textContent = col.name;
+      attachInfo(name, resolveTooltip(col.info, col.definition));
       const select = makeSelect();
       row.append(name, select);
       return { row, select };

@@ -46,6 +46,12 @@ const STRINGS: Record<Locale, Dict> = {
     "ui.step.data": "2. Daten laden",
     "ui.step.params": "3. Berichtsparameter",
     "ui.step.preview": "Berichtsvorschau",
+    "ui.step.template.info":
+      "Wählen Sie die zu erstellende Berichtsvorlage. Die Auswahl bestimmt, welche Daten im nächsten Schritt abgefragt werden.",
+    "ui.step.data.info":
+      "Laden Sie Ihre Datei(en) hoch und ordnen Sie deren Tabellenblätter und Spalten den erwarteten Feldern zu. Gleichnamige Felder werden automatisch vorausgewählt.",
+    "ui.step.params.info":
+      "Füllen Sie die Berichtsparameter aus. Diese Werte fließen in den Bericht ein bzw. überschreiben Gestaltungsvorgaben.",
     "ui.button.continue": "Weiter",
     "ui.button.export": "Als .docx exportieren",
     "ui.button.loadValidate": "Daten laden und prüfen",
@@ -135,6 +141,12 @@ const STRINGS: Record<Locale, Dict> = {
     "ui.step.data": "2. Load Data Files",
     "ui.step.params": "3. Report Parameters",
     "ui.step.preview": "Report Preview",
+    "ui.step.template.info":
+      "Choose the report template to generate. Your choice determines which data is requested in the next step.",
+    "ui.step.data.info":
+      "Upload your file(s) and map their sheets and columns onto the expected fields. Fields with matching names are pre-selected automatically.",
+    "ui.step.params.info":
+      "Fill in the report parameters. These values feed into the report or override styling presets.",
     "ui.button.continue": "Continue",
     "ui.button.export": "Export as .docx",
     "ui.button.loadValidate": "Load & Validate Data",

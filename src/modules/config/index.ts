@@ -62,6 +62,16 @@ function parseMutationCondition(value: unknown): MutationCondition | undefined {
   return Object.keys(c).length > 0 ? c : undefined;
 }
 
+/**
+ * Resolve an `info:` value (plain string or `{ de, en }` map) to the active
+ * locale's string, or undefined when absent/empty. Config is re-parsed on
+ * locale switch, so the resolved text follows the language like `label`.
+ */
+function parseInfo(value: unknown): string | undefined {
+  if (value == null) return undefined;
+  return resolveLocalized(value, "") || undefined;
+}
+
 /** Normalize an `include:` value (scalar or list) to a `string[]` (or undefined). */
 function parseInclude(value: unknown): string[] | undefined {
   if (value === undefined || value === null) return undefined;
@@ -84,6 +94,7 @@ function parseColumn(entry: unknown): ColumnDef | undefined {
     return {
       name,
       definition: definition != null ? String(definition) : undefined,
+      info: parseInfo(c.info),
       notes: c.notes != null ? String(c.notes) : undefined,
       include: parseInclude(c.include),
     };
@@ -103,6 +114,8 @@ export function parseConfigObject(raw: Record<string, unknown>): AppConfig {
         default: v.default as ParameterDef["default"],
         options: v.options as string[] | undefined,
         bind: v.bind as string | undefined,
+        definition: v.definition != null ? String(v.definition) : undefined,
+        info: parseInfo(v.info),
       };
     }
   }
@@ -118,6 +131,7 @@ export function parseConfigObject(raw: Record<string, unknown>): AppConfig {
           .map(parseColumn)
           .filter((c): c is ColumnDef => c !== undefined),
         definition: (s.definition ?? s.description) != null ? String(s.definition ?? s.description) : undefined,
+        info: parseInfo(s.info),
         notes: s.notes != null ? String(s.notes) : undefined,
         include: parseInclude(s.include),
       }));
@@ -132,6 +146,8 @@ export function parseConfigObject(raw: Record<string, unknown>): AppConfig {
       id: f.id != null ? String(f.id) : undefined,
       label: resolveLocalized(f.label, String(f.file ?? "")),
       file: String(f.file ?? ""),
+      definition: f.definition != null ? String(f.definition) : undefined,
+      info: parseInfo(f.info),
     }))
     .filter((f) => f.file.length > 0);
   const template: TemplateDef = { files: templateFiles };

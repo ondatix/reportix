@@ -14,12 +14,14 @@
    4. Elternzeitberechnung
    5. QE
 6. Unified Color coding
-7. Tooltips auf Basis des Handbuchs
+7. [x] Tooltips auf Basis des Handbuchs
 8. [x] Add definitions to data columns and store in extra yaml
-9.  Parameter: Was für eine Art von Behörde?
-10. ODT Export
-11. SVG instead of PNG
-12. Fix missing Logo
+9. [ ] Dynamic template generation
+10. Parameter: Was für eine Art von Behörde?
+11. ODT Export
+12. SVG instead of PNG
+13. Fix missing Logo
+14. Make i18n configurable
 
 ## Forks
 - Main Fork

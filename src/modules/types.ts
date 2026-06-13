@@ -24,6 +24,10 @@ export interface ParameterDef {
    * don't map to a config setting, e.g. `title`, `office`).
    */
   bind?: string;
+  /** German-only explanatory text shown as a click-to-open tooltip. */
+  definition?: string;
+  /** Bilingual tooltip text, resolved to the active locale at parse time. Wins over `definition`. */
+  info?: string;
 }
 
 /**
@@ -34,6 +38,8 @@ export interface ParameterDef {
 export interface ColumnDef {
   name: string;
   definition?: string;
+  /** Bilingual tooltip text, resolved to the active locale at parse time. Wins over `definition`. */
+  info?: string;
   notes?: string;
   include?: string[];
 }
@@ -42,6 +48,8 @@ export interface SheetDef {
   sheet: string;
   columns: ColumnDef[];
   definition?: string;
+  /** Bilingual tooltip text, resolved to the active locale at parse time. Wins over `definition`. */
+  info?: string;
   notes?: string;
   /** Template ids this sheet belongs to; omitted/empty ⇒ every template. */
   include?: string[];
@@ -61,6 +69,10 @@ export interface TemplateOption {
   label: string;
   /** Filename within the bundled `templates/` directory (e.g. `report_template.md`). */
   file: string;
+  /** German-only explanatory text shown as a click-to-open tooltip. */
+  definition?: string;
+  /** Bilingual tooltip text, resolved to the active locale at parse time. Wins over `definition`. */
+  info?: string;
 }
 
 export interface TemplateDef {

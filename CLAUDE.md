@@ -59,8 +59,10 @@ data:
   # Defines expected data sources. Each source declares the sheet names
   # and required columns — these are the **mapping targets** the user maps
   # their uploaded file's actual sheets/columns onto (see Data Loading).
-  # Sheets and columns may carry optional metadata: `definition`, `notes`,
-  # and an `include` list of template ids (omit ⇒ every template).
+  # Sheets and columns may carry optional metadata: `definition` (German-only)
+  # or `info` (bilingual) tooltip text, `notes`, and an `include` list of
+  # template ids (omit ⇒ every template). Tooltips also apply to parameters
+  # and template options — see the Info Module.
 
 template:
   # Lists the bundled Markdown templates the user picks from. Each entry has a
@@ -423,7 +425,7 @@ data_protection:
 
 The data step (`src/modules/data-loader/`, driven by `src/app.ts`) does **not** validate the upload against fixed names — instead the user maps their actual data onto the `config.data` sheets/columns. There is no hard schema check; mismatches are resolved by the user, not rejected.
 
-- **Template-scoped definitions** — before rendering the mapping UI, `app.ts` computes `dataForTemplate(config.data, selectedTemplateId)` (exported from `src/modules/config/`), keeping only the sheets/columns whose `include` list contains the selected template's `id` (an omitted/empty `include` ⇒ included in every template). That filtered set drives both the UI and `assembleStore`, so excluded sheets/columns are never requested and produce no warnings. `SheetDef`/`ColumnDef` also carry optional `definition`/`notes` metadata (parsed and stored; not yet surfaced in the UI). Derived columns (`preprocessing.mutations[]`) likewise accept an optional `definition`.
+- **Template-scoped definitions** — before rendering the mapping UI, `app.ts` computes `dataForTemplate(config.data, selectedTemplateId)` (exported from `src/modules/config/`), keeping only the sheets/columns whose `include` list contains the selected template's `id` (an omitted/empty `include` ⇒ included in every template). That filtered set drives both the UI and `assembleStore`, so excluded sheets/columns are never requested and produce no warnings. `SheetDef`/`ColumnDef` also carry optional `definition`/`info`/`notes` metadata; `definition`/`info` surface as click-to-open tooltips in the mapping UI (see Info Module). Derived columns (`preprocessing.mutations[]`) likewise accept an optional `definition`.
 - **Format choice** — two buttons: **XLSX** (one workbook per data source; map each config sheet → a workbook sheet) or **CSV** (one single-table file per config sheet — the per-sheet input also accepts a single-sheet `.xlsx`).
 - **Mapping UI** — the config's source→sheets→columns hierarchy is rendered with a `<select>` per sheet (XLSX only) and per column. Options come from the parsed file; the option whose **normalized name** (NFC, trimmed, lower-cased) matches the config name is **pre-selected** (`matchName`). Any choice may be left "(none)".
 - **Module API** — `parseWorkbook(buffer)` → `Record<sheet, SourceTable>`; `parseTable(buffer, filename, preferSheet?)` → one `SourceTable` (CSV decoded as text, XLSX prefers the named sheet then the first); `assembleStore(definitions, mapping)` builds the `DataStore` **keyed by config sheet name**, copying each row with the chosen source columns **renamed to the config column names** (only mapped columns are kept). `SourceTable = { columns, rows }`, `DataMapping = Record<configSheet, { table?, columns: Record<configCol, sourceCol> }>`.
@@ -533,6 +535,16 @@ A dedicated submodule responsible for generating descriptive alt texts for chart
 ```ts
 generateAltText(spec: ChartSpec, data?: DataSet): string
 ```
+
+## Info Module
+
+A small self-contained module (`src/modules/info/`) that renders **click-to-open tooltips**. A clickable `ⓘ` trigger is placed next to a label/heading; clicking it opens a popup with the text, dismissed by clicking outside or pressing Escape (one popup open at a time). It takes plain strings and returns DOM nodes — no dependency on the rest of the app.
+
+**Two text fields** drive tooltips on config entities (parameters, template options, sheets, columns):
+- `definition` — German-only plain string.
+- `info` — bilingual `{ de, en }` (or plain string), resolved to the active locale at parse time like `label` (config is re-parsed on locale switch, so tooltips follow the language). `info` wins over `definition`.
+
+**API:** `resolveTooltip(info?, definition?)` picks the text (info first); `createInfoControl(text)` builds the trigger+popup; `attachInfo(target, text?)` appends a control when `text` is non-empty (no-op otherwise). Each workflow **step** heading (template, data, parameters) also gets a tooltip whose text comes from i18n keys `ui.step.<x>.info`. Consumers: `src/app.ts` (steps, template options, sheet/column names) and `src/modules/parameters/` (parameter labels/legends).
 
 ## Key Conventions
 

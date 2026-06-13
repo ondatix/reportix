@@ -664,3 +664,62 @@ button:hover {
   border-radius: 4px;
   font-size: 0.9rem;
 }
+
+/* ── Info tooltips (click-to-open) ────────────────────────────────────── */
+.info-control {
+  position: relative;
+  display: inline-block;
+  margin-left: 0.35rem;
+  margin-bottom: 1rem;
+  vertical-align: middle;
+}
+
+.info-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--seafoam-full);
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.info-trigger:hover {
+  color: var(--deep-violet);
+}
+
+.info-trigger:focus-visible {
+  outline: 2px solid var(--seafoam-full);
+  outline-offset: 2px;
+}
+
+.info-popup {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  z-index: 20;
+  display: block;
+  width: max-content;
+  max-width: 22rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--purple-medium);
+  border-radius: 6px;
+  background: var(--white);
+  box-shadow: 0 4px 14px rgba(45, 27, 78, 0.18);
+  color: var(--black);
+  font-size: 0.85rem;
+  font-weight: 400;
+  line-height: 1.45;
+  white-space: normal;
+  text-align: left;
+}
+
+.info-popup[hidden] {
+  display: none;
+}

@@ -18,6 +18,7 @@ import type { AppConfig, ParameterDef, ParameterValues } from "../types";
 import { PALETTES } from "../palettes";
 import { FONTS } from "../fonts";
 import { t } from "../i18n";
+import { attachInfo, resolveTooltip } from "../info";
 
 /**
  * Resolve the default value to prefill into the form for a single parameter.
@@ -127,6 +128,7 @@ export function buildParameterForm(
     const label = document.createElement("label");
     label.htmlFor = `param-${key}`;
     label.textContent = def.label;
+    attachInfo(label, resolveTooltip(def.info, def.definition));
     fieldset.appendChild(label);
 
     let input: HTMLElement;
@@ -236,6 +238,7 @@ function buildPaletteField(
 
   const legend = document.createElement("legend");
   legend.textContent = def.label;
+  attachInfo(legend, resolveTooltip(def.info, def.definition));
   fieldset.appendChild(legend);
 
   const defaultId = typeof initial === "string" ? initial : undefined;
@@ -291,6 +294,7 @@ function buildFontField(
 
   const legend = document.createElement("legend");
   legend.textContent = def.label;
+  attachInfo(legend, resolveTooltip(def.info, def.definition));
   fieldset.appendChild(legend);
 
   const defaultId = typeof initial === "string" ? initial : undefined;
@@ -342,6 +346,7 @@ function buildIconRadioField(
 
   const legend = document.createElement("legend");
   legend.textContent = def.label;
+  attachInfo(legend, resolveTooltip(def.info, def.definition));
   fieldset.appendChild(legend);
 
   const defaultId = typeof initial === "string" ? initial : undefined;
