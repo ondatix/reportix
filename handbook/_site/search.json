@@ -1,0 +1,206 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Reportix Handbuch",
+    "section": "",
+    "text": "Willkommen\nDies ist das Nutzer:innenhandbuch für die Erstellung von Gleichstellungskonzepten in Bayern mit Reportix.",
+    "crumbs": [
+      "Willkommen"
+    ]
+  },
+  {
+    "objectID": "index.html#willkommen",
+    "href": "index.html#willkommen",
+    "title": "Reportix Handbuch",
+    "section": "",
+    "text": "Quick Start\n\n\nHandbuch",
+    "crumbs": [
+      "Willkommen"
+    ]
+  },
+  {
+    "objectID": "index.html#was-ist-reportix",
+    "href": "index.html#was-ist-reportix",
+    "title": "Reportix Handbuch",
+    "section": "Was ist Reportix?",
+    "text": "Was ist Reportix?\nReportix ist ein Tool zur teil-automatisierten Erstellung von Gleichstellungskkonzepten in bayrischen Behörden.\nEin paar klicks und Sie erhalten ein vorformuliertes, datenschutzkonformes und barrierefreies Gleichstellungskonzept mit Grafiken und Tabellen als Word- oder odt-Dokument.\n\n\n\nScreenshot von Reportix: 1. Vorlage wählen (Auswahlmöglichkeiten: Gleichstellungskonzept (vollständig); Gleichstellungskonzept (verpflichtend))",
+    "crumbs": [
+      "Willkommen"
+    ]
+  },
+  {
+    "objectID": "quick-start.html",
+    "href": "quick-start.html",
+    "title": "Quick Start",
+    "section": "",
+    "text": "Gleich loslegen!\nEinfach auf\ngleichstellung.bayern.ondatix.org\ngehen und reportix ausprobieren.",
+    "crumbs": [
+      "Quick Start"
+    ]
+  },
+  {
+    "objectID": "quick-start.html#gleich-loslegen",
+    "href": "quick-start.html#gleich-loslegen",
+    "title": "Quick Start",
+    "section": "",
+    "text": "TODO: richtiger link\n\n\n\n\n\nScreenshot von Reportix: 1. Vorlage wählen (Auswahlmöglichkeiten: Gleichstellungskonzept (vollständig); Gleichstellungskonzept (verpflichtend))\n\n\n\nTODO: Gif oder Video einfügen",
+    "crumbs": [
+      "Quick Start"
+    ]
+  },
+  {
+    "objectID": "quick-start.html#die-wichtigen-schritte",
+    "href": "quick-start.html#die-wichtigen-schritte",
+    "title": "Quick Start",
+    "section": "Die wichtigen Schritte",
+    "text": "Die wichtigen Schritte\n\n\n\n\n\n\n\n\nWichtig(1) Vorbereitung: Daten\n\n\n\nDatensätze im csv- oder xlsx-Format mit einer Zeile pro Person/Ereignis.\nMehr\n\n\n\n\n\n\n\n\n\n\nHinweis(2) Arbeit in reportix\n\n\n\n\nDaten laden\nEinstellungen auswählen\nDokument exportieren als docx oder odt\n\nMehr\n\n\n\n\n\n\n\n\n\n\nWichtig(3) Nachbereitung: Dokument\n\n\n\nEigene Inhalte hinzufügen und Texte bearbeiten.\nMehr",
+    "crumbs": [
+      "Quick Start"
+    ]
+  },
+  {
+    "objectID": "musterkonzept.html",
+    "href": "musterkonzept.html",
+    "title": "1  Musterkonzept",
+    "section": "",
+    "text": "Das Musterkonzept ist die gemeinsame Grundlage für alle Gleichstellungskonzepte in Bayern und damit auch die Grundlage für reportix-Outputs.\nDas Musterkonzept legt eine einheitliche Struktur fest und enthält Textbausteine, die als Formulierungshilfe dienen und bei der Erstellung der Gleichstellungskonzepte bei Bedarf angepasst werden können. Es kann auch unabhängig von reportix genutzt werden. Für diesen Fall können sie es hier herunterladen.\nDas Musterkonzept als Baukasten: Das Musterkonzept ist nicht als einengendes Korsett gedacht, sondern soll die Erstellung vereinfachen und den wichtigen Raum schaffen, weitere Inhalte hinzuzufügen.\n\n\n\n\n\n\nHinweisPflichtinhalte\n\n\n\nFür alle verpflichtende Inhalte.\n\n\n\n\n\n\n\n\nTippOptionale Inhalte\n\n\n\nEmpfohlene aber nicht verpflichtende Inhalte. Sie konnen ganz oder auch teilweise genutzt werden. Sie dürfen dabei knappgehalten oder ausführlich ausgearbeitet werden, je nachdem, was für die jeweilige Dienststelle als passend und notwendig angesehen wird. Der Detailgrad wird daher durch die Dienststelle bestimmt.\n\n\n\n\n\n\n\n\nWichtigZusätzliche Inhalte\n\n\n\nWeitere - möglicherweise dienststellenspezifische - Inhalte sind erwünscht.\n\n\nWelche konkreten Inhalte in das jeweilige Gleichstellungskonzept aufgenommen werden, wird von der Dienststellenleitung bestimmt. Die Gleichstellungsbeauftragten können dabei unterstützend tätig werden.",
+    "crumbs": [
+      "Handbuch",
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Musterkonzept</span>"
+    ]
+  },
+  {
+    "objectID": "datenvorbereitung.html",
+    "href": "datenvorbereitung.html",
+    "title": "2  Datenvorbereitung",
+    "section": "",
+    "text": "2.1 Datengrundlage",
+    "crumbs": [
+      "Handbuch",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Datenvorbereitung</span>"
+    ]
+  },
+  {
+    "objectID": "datenvorbereitung.html#datengrundlage",
+    "href": "datenvorbereitung.html#datengrundlage",
+    "title": "2  Datenvorbereitung",
+    "section": "",
+    "text": "2.1.1 Personalverwaltungssystem und weitere Datenquellen\n\n\n\n\n\n\n\n\nHinweisPersonalverwaltungssystem\n\n\n\nDie meisten Daten werden Sie aus Ihrem Personalverwaltungssystem entnehmen können.\n\n\n\n\n\n\n\n\n\n\nHinweisWeitere Datenquellen\n\n\n\nFür z.B. Bewerbungen wird es andere Datenquellen geben, wie Auszüge aus Bewerbungssystemen oder händische Erfassung.\n\n\n\n\nUnabhängig von der Datenquelle sollte der Export oder die Erhebung als csv- oder xlsx-Dateien beachtet werden (siehe Kapitel 2.2).\n\n\n2.1.2 Untersuchungskörper: Wer muss berücksichtigt werden?\nDer sogenannte Untersuchungskörper beschreibt den gesamten Personenkreis, über den im Gleichstellungskonzept berichtet wird. Er umfasst also alle Personen, die im Konzept berücksichtigt werden müssen.\nBei der Erstellung eines Gleichstellungskonzepts stellen sich dazu zwei grundlegende Fragen:\n\n(1) Welche Personen gehören zum Untersuchungskörper?\nDas Gesetz legt den Rahmen fest, welche Personen das Konzept mindestens berücksichtigen muss. Wenn darüber hinaus Unklarheiten bestehen (z. B. bei besonderen Beschäftigtengruppen), entscheidet die jeweilige Dienststelle, ob diese Personen in den Untersuchungskörper einbezogen werden.\n\n\n(2) Wie wird der Untersuchungskörper im Konzept dargestellt und gegliedert?\nDer gesamte Untersuchungskörper kann als Einheit betrachtet und im Konzept gemeinsam ausgewertet werden. Oder Sie entscheiden sich dafür, einzelne Bereiche getrennt zu betrachten, zum Beispiel nachgeordnete Behörden. In diesem Fall können diese in Unterkonzepten beschrieben werden, beispielsweise im optionalen Kapitel Situationsbeschreibung nachgelagerter Behörden.\nDiese Strukturierung ist eine individuelle Entscheidung der Dienststelle und sollte sich daran orientieren, was für eine sinnvolle und aussagekräftige Analyse der Situation vor Ort hilfreich ist.\n\n\nSie können wie folgt vorgehen, um zu klären, über welche Personen in Ihrem Gleichstellungs- konzept berichtet werden soll:\n\n\n\n(a) Gesetzlichen Rahmen prüfen\nPrüfen Sie zunächst anhand von Art. 4 Abs. 2, Art. 5 BayGlG i.V.m. Art. 3 Abs. 2 BayGlG sowie Art. 6 Bayerisches Personalvertretungsgesetz (PVG), welche Organisationseinheit als Dienststelle gilt und für welche Beschäftigten- gruppen daher ein Gleichstellungskonzept zu erstellen ist.\nÜberlegen Sie, ob nachgeordnete Behörden, die zum betrachteten Personenkreis gehören, im Gleichstellungskonzept gesondert dargestellt werden sollen – zum Beispiel in Form eines Unterkonzepts im optionalen Kapitel Situationsbeschreibung nachgelagerter Behörden.\nEine getrennte Darstellung ist vor allem dann sinnvoll, wenn sich die nachgeordneten Behörden deutlich voneinander oder von der übergeordneten Behörde unterscheiden (z. B. in Aufgabenprofil, Struktur oder Beschäftigtenzusammensetzung).\n\n\n\n\n\n\nHinweisBeispiel:\n\n\n\nIm Gleichstellungskonzept des StMFH wird zum einen über das Ministerium selbst be- richtet. Zusätzlich werden eigene Situations- beschreibungen u. a. für die nachgelagerten Bereiche Steuern, Vermessung und Schlösserverwaltung erstellt, da sich diese Bereiche sowohl voneinander als auch vom Ministerium deutlich unterscheiden.\n\n\n\n\n(b) Zusätzliche Bereiche bewusst einbeziehen (optional)\nÜberlegen Sie anschließend, ob es sinnvoll ist, weitere Bereiche oder Personengruppen zusätzlich in das Konzept aufzunehmen. Gründe hierfür können zum Beispiel sein:\n\nPersonengruppen, die sonst in keinem anderen Gleichstellungskonzept erfasst werden,\nder Wunsch nach vollständigeren Daten sowie\neine höhere Aussagekraft der Auswertungen.\n\n\n\n\n\n\n\nHinweisBeispiel:\n\n\n\nAußertariflich Beschäftigte sind per Defini- tion weder Beamtinnen und Beamte noch Tarifbeschäftigte. Wenn sie im Konzept zum Beispiel den Tarifbeschäftigten zugerechnet und die gesamte Gruppe als „Arbeitnehmer“ bezeichnet wird, sollte dies in der Definition des betrachteten Personenkreises eindeutig und ausdrücklich erläutert werden.",
+    "crumbs": [
+      "Handbuch",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Datenvorbereitung</span>"
+    ]
+  },
+  {
+    "objectID": "datenvorbereitung.html#sec-standards",
+    "href": "datenvorbereitung.html#sec-standards",
+    "title": "2  Datenvorbereitung",
+    "section": "2.2 Standards",
+    "text": "2.2 Standards\nDie Daten für die Nutzung von reportix müssen klaren Standards entsprechen.\n\n2.2.1 Dateiformate: csv und xlsx\nreportix kann mit Tabellen im Format csv oder xlsx (Excel) arbeiten.\n\n\n\n\n\n\n\n\nHinweiscsv\n\n\n\nBei csv-Dateien muss jede Tabelle eine einzelne Datei sein (z.B. Stichtagsdaten.csv, Beurlaubung.csv, …).\n\n\n\n\n\n\n\n\n\n\nHinweisxlsx\n\n\n\nBei xlsx-Dateien gibt es zwei Möglichkeiten:\n\nEine Datei mit Sheets/Arbeitsblättern (z.B. Alle-Daten.xlsx)\n\nEinzelne Dateien für die verschiedenen Tabellen (z. B. Stichtagsdaten.xlsx, Beurlaubung.xlsx, …).\n\n\n\n\n\n\n\n\n2.2.2 Tabellenform: Eine Zeile pro Person / Ereignis\nPersonalverwaltungssysteme (VIVA, PWS, etc.) können Datensätze exportieren, in der jede Zeile eine Person (Stichtagsdaten) oder Ereignis (Zeitraumdaten) repräsentiert und jede Spalte ein Merkmal (z.B. Geschlecht, Arbeitszeitanteil) darstellt. Jeder Datensatz sollte die Personalnummer als eine weitere Spalte enthalten, damit ggf. Datensätze zusammengefügt werden können. Die Personalnummer selbst wird nie in Grafiken oder Tabellen auftauchen.\nBeispiel Stichtagsdaten:\n\n\n\nPersNr\nGeschlecht\nQE\n…\n\n\n\n\n1001\nweiblich\n1\n…\n\n\n1011\nmännlich\n2\n…\n\n\n1012\nweiblich\n2\n…\n\n\n…\n…\n…\n…\n\n\n\nBeispiel Zeitraumsdaten (z.B. Beförderungen in 2025):\n\n\n\nPersNr\nDatum\n…\n\n\n\n\n1001\n01.01.2025\n…\n\n\n1001\n01.11.2025\n…\n\n\n1011\n01.04.2025\n…\n\n\n1012\n01.10.2025\n…\n\n\n…\n…\n…\n\n\n\nBei Zeitraumdaten ist das stichtagsbezogene Vorjahr verlangt (soweit nicht anderweitig ausgewiesen). Ist z.B. der Stichtag der 30.06.2026, so wird bei Zeitraumdaten der 01.01.2025-31.12.2025 betrachtet. Ausnahmen sind in den Definitionen beschrieben: z.B. Einstellungen werden für den gesamten Berichtszeitraum (letzter Stichtag (ausgeschlossen) bis aktueller Stichtag (eingeschlossen), i.d.R. 5 Jahre) ausgewiesen.\nEs werden folgende Datensätze benötigt (optionale Inhalte sind als solches gekennzeichnet):\n\n2.2.2.1 Stichtagsdaten\nDer Stichtagsdatensatz enthält die Spalten:\n\nPersNr: Personalnummer\nGeschlecht: … …\n\nHier Definitionen-yml einbinden\n\n\n2.2.2.2 Zeitraumsdaten\nBei Zeitraumsdaten wird pro Ereignistyp eine Tabelle benötigt:\n\n2.2.2.2.1 Beurlaubung\n\n\n2.2.2.2.2 Bewerbung\n\n\n2.2.2.2.3 Einstellung\n\n\n2.2.2.2.4 Fortbildung\n\n\n2.2.2.2.5 Qualifikation\n\n\n2.2.2.2.6 Leistungskomponente\n\n\n2.2.2.2.7 Beförderung",
+    "crumbs": [
+      "Handbuch",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Datenvorbereitung</span>"
+    ]
+  },
+  {
+    "objectID": "datenvorbereitung.html#anpassungen",
+    "href": "datenvorbereitung.html#anpassungen",
+    "title": "2  Datenvorbereitung",
+    "section": "2.3 Anpassungen",
+    "text": "2.3 Anpassungen\nEs gibt verschiedene Szenarien, in denen Anpassungen nötig sind.\n\n2.3.1 Daten liegen nicht vor\nSollten Informationen, die für das Gleichstellungskonzept benötigt werden nicht vorliegen, können diese nacherhoben werden und eine Tabelle im vorgegeben Format auch händisch erstellt werden.\nBeispiel: Bewerbungen\n… TODO …\n\n\n2.3.2 Daten liegen nur als Kreuztabelle vor\nIn manchen Fällen liegen die Daten nur als Kreuztabelle vor, z.B. wenn Strichlisten mit Bewerbungen geführt werden.\nBeispiel Bewerbungen mit QE bzw. QE-äquivalenten:\n\n\n\n\n\n\n\n\n\nBeschäftigungsart\nQE\nBewerbungen weiblich\nBewerbungen männlich\n\n\n\n\nBeamte/Beamtinnen\n1\n78\n64\n\n\nBeamte/Beamtinnen\n2\n91\n55\n\n\nBeamte/Beamtinnen\n3\n67\n88\n\n\nBeamte/Beamtinnen\n4\n54\n73\n\n\nTarifbeschäftigte\n1\n82\n96\n\n\nTarifbeschäftigte\n2\n59\n61\n\n\nTarifbeschäftigte\n3\n100\n77\n\n\nTarifbeschäftigte\n4\n69\n84\n\n\n\nSollten die Daten nur als bereits fertige Kreuztabelle vorliegen, gibt es zwei Möglichkeiten:\nMöglichkeit 1: Tabelle umwandeln\nIn Excel können mit M-Code Daten umgewandelt werden. In LibreOffice und Excel können alternativ eine Mischung aus händischer Bearbeitung und Formeln gearbeitet werden: Erst “Frauen/Männer” trennen, dann per Hilfsspalte + ZÄHLENWENN + VERGLEICH zu einer Zeile pro Person aufblasen.\nDas Ergebnis sollte dann so aussehen:\n\n\n\nBeschäftigungsart\nQE\nGeschlecht\n\n\n\n\nBeamte/Beamtinnen\n4\nweiblich\n\n\nTarifbeschäftigte\n3\nmännlich\n\n\nTarifbeschäftigte\n1\nmännlich\n\n\n…\n…\n…\n\n\n\nMöglichkeit 2: Grafiken selbst erstellen\nGrafiken können auch selbst erstellt werden und händisch in die von reportix erstellte docx- bzw odt-Datei eingefügt werden. Zur Erstellung von passenden Grafiken verweisen wir auf den Leitfaden (TODO: Link einfügen).",
+    "crumbs": [
+      "Handbuch",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Datenvorbereitung</span>"
+    ]
+  },
+  {
+    "objectID": "webapp.html",
+    "href": "webapp.html",
+    "title": "3  Arbeit mit der Web-App reportix",
+    "section": "",
+    "text": "WarnungWichtige Hinweise um den sicheren Umgang mit reportix zu gewährleisten\n\n\n\n\nNutzen in reportix in einer aktuellen Browserversion.\nTeilen Sie keine Screenshots oder Bildschirmaufnahmen von reportix oder den Daten.",
+    "crumbs": [
+      "Handbuch",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Arbeit mit der Web-App reportix</span>"
+    ]
+  },
+  {
+    "objectID": "nachbereitung.html",
+    "href": "nachbereitung.html",
+    "title": "4  Nachbereitung in Word / Writer",
+    "section": "",
+    "text": "TODO",
+    "crumbs": [
+      "Handbuch",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Nachbereitung in Word / Writer</span>"
+    ]
+  },
+  {
+    "objectID": "datenschutz.html",
+    "href": "datenschutz.html",
+    "title": "5  Datenschutz",
+    "section": "",
+    "text": "5.1 Das wichtigste im Überblick\nreportix in der Anwendung für Gleichstellungskonzepte in Bayern verarbeitet Daten ausschließlich dort, wo sie tatsächlich benötigt werden – direkt auf dem Endgerät der Nutzer:innen:",
+    "crumbs": [
+      "Handbuch",
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Datenschutz</span>"
+    ]
+  },
+  {
+    "objectID": "datenschutz.html#das-wichtigste-im-überblick",
+    "href": "datenschutz.html#das-wichtigste-im-überblick",
+    "title": "5  Datenschutz",
+    "section": "",
+    "text": "TippClient-side Only\n\n\n\nDie gesamte Verarbeitung findet ausschließlich im Browser bzw. direkt auf dem Endgerät der Nutzer:innen statt. Es erfolgt keine Übertragung von Daten an externe Server.\n\n\n\n\n\n\n\n\nTippKeine Datenspeicherung\n\n\n\nDie App speichert keinerlei personenbezogene oder nutzungsbezogene Daten dauerhaft. Nach der Nutzung bleiben keine Daten zurück.\n\n\n\n\n\n\n\n\n\n\nTippDatenschutzkonforme Ausweisung geringer Fallzahlen\n\n\n\nGeringe Fallzahlen werden nicht direkt sondern z.B. als “&lt;5” dargestellt. Die Nutzer:innen können die Schwelle (z.B. 5) selbst festlegen.\n\n\n\n\n\n\n\n\nTippKeine gespeicherten Sessions\n\n\n\nEs werden keine Sessions gespeichert. Jeder Nutzungsvorgang ist vollständig unabhängig und kann nicht später wiederhergestellt oder weiterverwendet werden.",
+    "crumbs": [
+      "Handbuch",
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Datenschutz</span>"
+    ]
+  },
+  {
+    "objectID": "datenschutz.html#details",
+    "href": "datenschutz.html#details",
+    "title": "5  Datenschutz",
+    "section": "5.2 Details",
+    "text": "5.2 Details\n\n5.2.1 Beschreibung der Datenverarbeitung\n\n\n\n\n\n\n\nZweck\nAutomatische Erstellung eines Gleichstellungskonzepts nach Art. 4 BayGlG\n\n\nRechtsgrundlagen/Befugnis\nArt. 6 Abs. 1 S. 1 lit. c), e) DSGVO i. V. m. Art. 4 Abs. 1 BayDSG i. V. m. Art. 4, 5 BayGlG\n\n\nKategorien personenbezogener Daten\nSiehe Kapitel 2.2.2.1 und Kapitel 2.2.2.2\n\n\nBetroffene Personen\nSiehe Kapitel 2.1.2\n\n\n\n\n\n5.2.2 Technische und organisatorische Maßnahmen (TOM)\n\n5.2.2.1 Vertraulichkeit (Art. 32 Abs. 1 lit. b DSGVO)\n\n\n\n\n\n\n\nMaßnahme\nBeschreibung\n\n\n\n\nZutrittskontrolle\nKeine physische Zutrittskontrolle erforderlich, da keine Server-Infrastruktur betrieben wird\n\n\nZugangskontrolle\n\nBrowser-basierte Sandbox-Umgebung\nSame-Origin-Policy verhindert unbefugten Zugriff\nKein Backend-System, daher keine Zugriffsberechtigungen erforderlich\n\n\n\nZugriffskontrolle\n\nClient-Side-Only-Verarbeitung: Daten verlassen niemals das Endgerät\nKeine persistente Speicherung\nKeine Zugriffsmöglichkeit durch Dritte\n\n\n\nTrennungskontrolle\n\nAutomatische Isolation durch Browser-Architektur\nKeine Vermischung mit anderen Datenbeständen möglich\nJede Session ist vollständig getrennt\n\n\n\nPseudonymisierung\nNicht erforderlich, da keine dauerhafte Speicherung oder Übermittlung erfolgt\n\n\n\n\n\n5.2.2.2 Integrität (Art. 32 Abs. 1 lit. b DSGVO)\n\n\n\n\n\n\n\nMaßnahme\nBeschreibung\n\n\n\n\nWeitergabekontrolle\n\nKeine Datenübertragung an Server oder Dritte\nKein E-Mail-Versand oder Export-Funktionen\nContent Security Policy (CSP) verhindert unautorisierten Datenabfluss\n\n\n\nEingabekontrolle\n\nBrowser-Console-Logs dokumentieren Verarbeitungsschritte (optional)\nTransparente Verarbeitung für den Nutzer sichtbar\n\n\n\n\n\n\n5.2.2.3 Verfügbarkeit und Belastbarkeit (Art. 32 Abs. 1 lit. b DSGVO)\n\n\n\n\n\n\n\nMaßnahme\nBeschreibung\n\n\n\n\nVerfügbarkeitskontrolle\n\nHTTPS-only Deployment zur sicheren Übertragung der Webapp\nHosting auf zuverlässiger Infrastruktur\nRegelmäßige Verfügbarkeitsprüfung\n\n\n\nRasche Wiederherstellbarkeit\n\nStatische Webapp kann schnell neu deployed werden\nVersionskontrolle (Git) für schnelle Rollbacks\nKeine Datenbanken oder persistente Systeme, die wiederhergestellt werden müssen\n\n\n\n\n\n\n5.2.2.4 Verfahren zur Überprüfung, Bewertung und Evaluierung (Art. 32 Abs.1 lit. d DSGVO)\n\n\n\n\n\n\n\nMaßnahme\nBeschreibung\n\n\n\n\nDatenschutz-Management\n\nRegelmäßige Überprüfung der Client-Side-Verarbeitung\nCode-Reviews vor Updates\nDokumentation aller Änderungen\n\n\n\nIncident-Response\n\nProzess zur Meldung von Sicherheitsvorfällen etabliert\nBei Verdacht auf Datenleck: Sofortige Abschaltung möglich\nKontaktperson für Sicherheitsfragen benannt\n\n\n\nDatenschutzfreundliche Voreinstellungen\n\nPrivacy by Design: Keine Datensammlung vorgesehen\nPrivacy by Default: Minimale Datenverarbeitung\nTransparente Informationen für Nutzer\n\n\n\n\n\n\n5.2.2.5 Technische Sicherheitsmaßnahmen\n\n\n\n\n\n\n\nMaßnahme\nBeschreibung\n\n\n\n\nTransportverschlüsselung\n\nHTTPS-Verschlüsselung (TLS 1.2 oder höher) für die Webapp\nHSTS (HTTP Strict Transport Security) aktiviert\nSichere Cipher Suites konfiguriert\n\n\n\nContent Security Policy\n\nCSP-Header konfiguriert\nBlockierung externer Scripts und Ressourcen\nVerhinderung von Cross-Site-Scripting (XSS)\n\n\n\nSubresource Integrity\n\nSRI-Hashes für alle eingebundenen Bibliotheken\nSchutz vor kompromittierten CDN-Ressourcen\nSicherstellung der Code-Integrität\n\n\n\nKeine externen Abhängigkeiten\n\nKeine Einbindung externer APIs\nKeine Third-Party-Services\nVollständige Kontrolle über Code-Basis\nAlle Bibliotheken gebundelt und geprüft\n\n\n\n\n\n\n5.2.2.6 Besondere Risiken und Gegenmaßnahmen\n\n\n\n\n\n\n\n\nRisiko\nEintrittswahrscheinlichkeit\nGegenmaßnahme\n\n\n\n\nBrowser-Schwachstellen könnten zu Datenabfluss führen\nGering (Browser-Sicherheit wird von Herstellern kontinuierlich verbessert)\n\nHinweis an Nutzer, aktuelle Browser-Versionen zu verwenden\nCSP und SRI als zusätzliche Schutzebenen\n\n\n\nVersehentliches Teilen von Screenshots/Bildschirmaufnahmen\nMittel (liegt im Verantwortungsbereich der Nutzer)\n\nDeutlicher Hinweis in der Webapp\nSchulung der Nutzer\nDokumentation der Verantwortlichkeiten\n\n\n\nKompromittierung des Hosting-Servers (Code-Manipulation)\nGering bei Einsatz sicherer Hosting-Infrastruktur\n\nDeployment auf vertrauenswürdiger Infrastruktur (deutscher/bayerischer Server)\nRegelmäßige Integritätsprüfungen\nVersionskontrolle und Change-Management",
+    "crumbs": [
+      "Handbuch",
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Datenschutz</span>"
+    ]
+  },
+  {
+    "objectID": "noch-fragen.html",
+    "href": "noch-fragen.html",
+    "title": "Noch Fragen?",
+    "section": "",
+    "text": "Für Fragen kontaktieren Sie uns unter info@ondatix.org.\nIn Berichtsjahren bieten wir Webinare und online Q&As an. Termine werden von der Leitstelle Gleichstellung des StMAS mitgeteilt.",
+    "crumbs": [
+      "Noch Fragen?"
+    ]
+  },
+  {
+    "objectID": "ueber-reportix.html",
+    "href": "ueber-reportix.html",
+    "title": "Über reportix",
+    "section": "",
+    "text": "reportix wird von der ondatix Datenwerkstatt GmbH entwickelt.",
+    "crumbs": [
+      "Über reportix"
+    ]
+  },
+  {
+    "objectID": "impressum.html",
+    "href": "impressum.html",
+    "title": "Impressum",
+    "section": "",
+    "text": "Kontakt:\nAngaben gemäß § 5 TMG\nondatix Datenwerkstatt GmbH\nBayerstraße 77c\n80335 München\nDeutschland\nGeschäftsführung: Julia von Bartenwerffer, Jacob Beck\nHandelsregister: HRB 311520\nUSt-ID: folgt\nE-Mail: info@ondatix.org"
+  },
+  {
+    "objectID": "impressum.html#haftungsausschluss",
+    "href": "impressum.html#haftungsausschluss",
+    "title": "Impressum",
+    "section": "Haftungsausschluss:",
+    "text": "Haftungsausschluss:\n\nHaftung für Links\nUnser Angebot enthält Links zu externen Webseiten Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich. Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße überprüft. Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar. Eine permanente inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konkrete Anhaltspunkte einer Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Links umgehend entfernen.\n\n\nUrheberrecht\nDie durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers. Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch gestattet. Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet. Insbesondere werden Inhalte Dritter als solche gekennzeichnet. Sollten Sie trotzdem auf eine Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden Hinweis. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Inhalte umgehend entfernen.\n\n\nDatenschutz\nDie Nutzung unserer Webseite ist in der Regel ohne Angabe personenbezogener Daten möglich. Soweit auf unseren Seiten personenbezogene Daten (beispielsweise Name, Anschrift oder eMail-Adressen) erhoben werden, erfolgt dies, soweit möglich, stets auf freiwilliger Basis. Diese Daten werden ohne Ihre ausdrückliche Zustimmung nicht an Dritte weitergegeben. Wir weisen darauf hin, dass die Datenübertragung im Internet (z.B. bei der Kommunikation per E-Mail) Sicherheitslücken aufweisen kann. Ein lückenloser Schutz der Daten vor dem Zugriff durch Dritte ist nicht möglich. Der Nutzung von im Rahmen der Impressumspflicht veröffentlichten Kontaktdaten durch Dritte zur Übersendung von nicht ausdrücklich angeforderter Werbung und Informationsmaterialien wird hiermit ausdrücklich widersprochen. Die Betreiber der Seiten behalten sich ausdrücklich rechtliche Schritte im Falle der unverlangten Zusendung von Werbeinformationen, etwa durch Spam-Mails, vor.\nWebsite Impressum erstellt durch impressum-generator.de von der Kanzlei Hasselbach"
+  }
+]

@@ -35,7 +35,8 @@ Many reporting workflows (HR equality reports, internal KPIs, compliance summari
 - A Markdown template (see [Template Format](#template-format))
 
 **To deploy:**
-- Any static host (Netlify, Vercel, Cloudflare Pages, GitHub Pages, S3+CloudFront, nginx, …). The build output in `dist/` is fully static — no runtime, no environment variables, no secrets.
+- **Static host** (Netlify, Vercel, Cloudflare Pages, GitHub Pages, S3+CloudFront, nginx, …) — the build output in `dist/` is fully static, no runtime, no environment variables, no secrets.
+- **Docker container** — the repo ships a multi-stage `Dockerfile` that builds the webapp **and** renders the Quarto handbuch, then serves both from one nginx image (`/` → webapp, `/handbuch/` → handbuch). This is what the mittwald deploy (`.github/workflows/zerodeploy.yml`) uses. See [handbuch](#handbuch).
 
 ## Quick Start
 Open a terminal/shell in the repository root to use these commands, when you need them.
@@ -184,6 +185,21 @@ The generated report output is built to be accessible:
 - **Curated fonts** — the bundled font picker offers system fonts on accessibility shortlists (Verdana, Tahoma, Arial, Georgia).
 - **DOCX exports** preserve alt text, heading structure, and table semantics.
 
+## handbuch
+
+A user handbuch (German) lives under `handbuch/` as a [Quarto](https://quarto.org) **book**. It is maintained in its own repo (`ondatix/stmas-reportix-Handbuch`) and vendored into this one via **git subtree** (full history, no `--squash`), so it can keep evolving upstream:
+
+```bash
+# pull upstream handbuch changes into handbuch/
+git subtree pull --prefix handbuch https://github.com/ondatix/stmas-reportix-Handbuch.git main
+```
+
+**Deployment.** The `Dockerfile` has a dedicated stage that installs the Quarto CLI (from the official release tarball, arch-aware) and runs `quarto render handbuch`; the rendered `handbuch/_site` is copied into the nginx image under `/handbuch/`. So a single container serves the webapp at `/` and the handbuch at `/handbuch/` — the webapp links to it via the **Handbuch / handbuch** button in the header.
+
+**No R at deploy time.** `handbuch/_quarto.yml` sets `execute: freeze: auto`. Any page that runs code (e.g. R generating tables from `config/*.yaml`) is executed **locally** by the author; the cached results in `handbuch/_freeze/` are committed and reused by the deploy build, so the container needs only the Quarto CLI. Render locally with `cd handbuch && quarto render` (output: `handbuch/_site/`, git-ignored).
+
+> **Note:** the handbuch reads its own files only. Wiring it to consume the app's `templates/master.md` and `config/*.yaml` as a single source of truth (so docs can't drift from the actual template/config) is planned but not yet implemented — and such references would only resolve inside this monorepo, not in the standalone handbuch repo.
+
 ## License
 
 Apache License 2.0 — see [LICENSE](LICENSE).
@@ -214,6 +230,9 @@ templates/                # generated Markdown templates (git-ignored, built)
 scripts/gen-templates.ts  # generates templates/ from templates/master.md
 public/_headers           # Netlify / static-host security headers
 vite.config.ts            # Vite + SRI plugin
+handbuch/                 # Quarto book (vendored via git subtree) — served at /handbuch/
+Dockerfile                # multi-stage: webapp build + handbuch render → nginx
+nginx.conf                # serves / (webapp) and /handbuch/ (book)
 ```
 
 ## Templates

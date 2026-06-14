@@ -1,0 +1,12 @@
+node_modules
+dist
+.git
+.github
+*.local
+.env
+.env*.local
+npm-debug.log*
+
+# Quarto build artifacts — rebuilt in the handbuch stage (keep handbuch/_freeze).
+handbuch/_site
+handbuch/.quarto

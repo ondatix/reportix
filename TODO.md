@@ -12,8 +12,9 @@
    3. Arbeitszeitanteil berechnen
    4. Elternzeitberechnung
    5. QE
-3.  ODT Export (or .fodt export)?
-4.  Make i18n configurable
+3. Include handbuch
+4. ODT Export (or .fodt export)?
+5. Make i18n configurable
 
 ## Forks
 - Main Fork

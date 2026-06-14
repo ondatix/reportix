@@ -1,8 +1,8 @@
 <img src="img/ondatix_Logo_V1_dunkler_Hintergrund_SVG.svg" alt="ondatix Logo" class="logo" height="80" align="right"/><br><br>
 
-# reportix — `config.yaml` Handbuch · handbook
+# reportix — `config.yaml` Handbuch · handbuch
 
-`config.yaml` is the entry point that configures the app — a thin **manifest** listing the per-section files under `config/` (`parameters.yaml`, `data.yaml` — which also carries the `preprocessing:` section — `template.yaml`, `data_protection.yaml`, `export.yaml`, `charts.yaml`), which are merged at build time. This handbook is **bilingual**: an English and a German version of the same reference.
+`config.yaml` is the entry point that configures the app — a thin **manifest** listing the per-section files under `config/` (`parameters.yaml`, `data.yaml` — which also carries the `preprocessing:` section — `template.yaml`, `data_protection.yaml`, `export.yaml`, `charts.yaml`), which are merged at build time. This handbuch is **bilingual**: an English and a German version of the same reference.
 
 `config.yaml` ist der Einstiegspunkt zur Konfiguration der App — ein schlankes **Manifest**, das die Abschnittsdateien unter `config/` auflistet (`parameters.yaml`, `data.yaml` — enthält auch den Abschnitt `preprocessing:` —, `template.yaml`, `data_protection.yaml`, `export.yaml`, `charts.yaml`), die zur Build-Zeit zusammengeführt werden. Dieses Handbuch ist **zweisprachig**: eine englische und eine deutsche Fassung derselben Referenz.
 
@@ -709,7 +709,7 @@ Der Exporter tauscht Breite/Höhe von A4 anhand von `orientation` automatisch, s
 - [src/modules/exporter/](src/modules/exporter/index.ts) — Verbraucher von `export.*`
 - [src/modules/renderer/chart.ts](src/modules/renderer/chart.ts) — Verbraucher von `charts.*`
 
-<sub>[↑ Zum Seitenanfang](#reportix--configyaml-handbook--handbuch) · [Zur englischen Fassung ↑](#-english)</sub>
+<sub>[↑ Zum Seitenanfang](#reportix--configyaml-handbuch--handbuch) · [Zur englischen Fassung ↑](#-english)</sub>
 
 ---
 
@@ -1408,5 +1408,5 @@ The exporter auto-swaps A4 width/height based on `orientation`, so margins/page 
 - [src/modules/exporter/](src/modules/exporter/index.ts) — consumer of `export.*`
 - [src/modules/renderer/chart.ts](src/modules/renderer/chart.ts) — consumer of `charts.*`
 
-<sub>[↑ Back to top](#reportix--configyaml-handbook--handbuch) · [Jump to the German version ↓](#-deutsch)</sub>
+<sub>[↑ Back to top](#reportix--configyaml-handbuch--handbuch) · [Jump to the German version ↓](#-deutsch)</sub>
 

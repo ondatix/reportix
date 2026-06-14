@@ -67,6 +67,28 @@ h1 {
   outline-offset: 1px;
 }
 
+/* Link to the Quarto handbuch, served as a sibling sub-path (/handbuch/). */
+.handbuch-link {
+  margin-left: 0.6rem;
+  padding: 0.3rem 0.8rem;
+  background: var(--seafoam-full);
+  color: var(--deep-violet);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+.handbuch-link:hover {
+  background: var(--sunshine-full);
+}
+
+.handbuch-link:focus-visible {
+  outline: 2px solid var(--purple-full);
+  outline-offset: 1px;
+}
+
 .step {
   margin: 1.5rem 0;
   padding: 1rem;

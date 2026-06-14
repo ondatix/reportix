@@ -500,6 +500,19 @@ preprocessing:
 - No sensitive data leaves the browser
 - Build output in `dist/` is fully static and deployable to any CDN or static host
 
+## Deployment & handbuch
+
+The app deploys two ways:
+
+- **Static host** — `dist/` is a self-contained static bundle (no runtime/secrets).
+- **Docker container** — the multi-stage `Dockerfile` (tracked; the original `.gitignore` wrongly ignored it, so it must stay un-ignored) builds the webapp **and** renders the Quarto handbuch, then serves both from one nginx image. `nginx.conf` maps `/` → webapp (SPA fallback to `/index.html`) and `/handbuch/` → the handbuch (its own `/handbuch/index.html` fallback). This is what `.github/workflows/zerodeploy.yml` (mittwald) deploys — committing the `Dockerfile` switches the deploy from mittwald's autodetect buildpack to a Dockerfile build.
+
+**handbuch** (`handbuch/`) — a [Quarto](https://quarto.org) **book** (German), vendored from its own repo (`ondatix/stmas-reportix-Handbuch`) via `git subtree` (no `--squash`, full history). Update with `git subtree pull --prefix handbuch <url> main`. The only locally-changed file inside `handbuch/` is `_quarto.yml` (we set `output-dir: _site` — books default to `_book/` — and `execute: freeze: auto`); keep edits there minimal to avoid subtree-pull conflicts.
+
+- **Render pipeline.** The `Dockerfile` `handbuch` stage installs only the Quarto CLI (official release tarball, arch-aware via `TARGETARCH`) — **no R/Python**. Pages that execute code are served from the committed `handbuch/_freeze/` cache, produced by rendering **locally** (`cd handbuch && quarto render`). This is the mechanism that lets dynamic (R) handbuch content stay out of the deploy build. `handbuch/_site` and `handbuch/.quarto` are git-ignored; `handbuch/_freeze` is **committed**.
+- **Webapp link.** The header has a Handbuch/handbuch button (`#handbuch-link` in `src/app.ts`, label via i18n key `ui.handbuch`) pointing at `/handbuch/`.
+- **Single source of truth (planned, not yet built).** The intent is for the handbuch to consume the app's `templates/master.md` and `config/*.yaml` so docs can't drift. Such references (`{{< include ../templates/master.md >}}`, R reading `../config/*.yaml`) resolve only inside this monorepo — they break the standalone handbuch repo and must not be pushed back upstream via `git subtree push`. Keep them in monorepo-only files when implemented.
+
 ## Accessibility
 
 The generated report output must be accessible. The following measures apply across all rendering modules:
@@ -565,4 +578,4 @@ A small self-contained module (`src/modules/info/`) that renders **click-to-open
 - Each module exposes a clean public API so it can be extracted and reused in isolation
 - `.env` and `.env*.local` are gitignored — do not hardcode secrets
 - **After any change, check `README.md` and update it if necessary.** The README documents user-facing features (chart types, aggregation ops, callout syntax, config keys, modules, security posture). If a change adds, removes, or renames any of those, the README must be updated in the same commit. CLAUDE.md is the canonical reference for the full schema and behaviour — keep the README's summary aligned with it.
-- **Whenever `config.yaml` (or the config schema in `src/modules/config/`) changes, update `CONFIG.md` in the same commit.** `CONFIG.md` is the authoritative per-key handbook and must stay in sync with what the parser accepts. It is **bilingual** — keep **both the English and the German version** aligned: any added, removed, renamed, or re-defaulted key must be reflected in both language sections.
+- **Whenever `config.yaml` (or the config schema in `src/modules/config/`) changes, update `CONFIG.md` in the same commit.** `CONFIG.md` is the authoritative per-key handbuch and must stay in sync with what the parser accepts. It is **bilingual** — keep **both the English and the German version** aligned: any added, removed, renamed, or re-defaulted key must be reflected in both language sections.

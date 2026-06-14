@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="de" xml:lang="de"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>2&nbsp; Datenvorbereitung – Reportix Handbuch</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./webapp.html" rel="next">
+<link href="./musterkonzept.html" rel="prev">
+<link href="./images/ondatix_Bildmarke_dunkler_Hintergrund_PNG.png" rel="icon" type="image/png">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-b0e1761da8663a479b749ccfec64d1d1.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "Keine Treffer",
+    "search-matching-documents-text": "Treffer",
+    "search-copy-link-title": "Link in die Suche kopieren",
+    "search-hide-matches-text": "Zusätzliche Treffer verbergen",
+    "search-more-match-text": "weitere Treffer in diesem Dokument",
+    "search-more-matches-text": "weitere Treffer in diesem Dokument",
+    "search-clear-button-title": "Zurücksetzen",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Abbrechen",
+    "search-submit-button-title": "Abschicken",
+    "search-label": "Suchen"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.scss">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    <img src="./images/ondatix_Logo_V1_heller_Hintergrund_PNG.png" alt="" class="navbar-logo light-content">
+    <img src="./images/ondatix_Logo_V1_heller_Hintergrund_PNG.png" alt="" class="navbar-logo dark-content">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Reportix Handbuch</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+</div>
+          <div id="quarto-search" class="" title="Suchen"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Seitenleiste umschalten" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./musterkonzept.html">Handbuch</a></li><li class="breadcrumb-item"><a href="./datenvorbereitung.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Datenvorbereitung</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Seitenleiste umschalten" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Willkommen</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./quick-start.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Quick Start</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Handbuch</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Abschnitt umschalten">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./musterkonzept.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Musterkonzept</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datenvorbereitung.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Datenvorbereitung</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./webapp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Arbeit mit der Web-App reportix</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./nachbereitung.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Nachbereitung in Word / Writer</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datenschutz.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Datenschutz</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./noch-fragen.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Noch Fragen?</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ueber-reportix.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Über reportix</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Inhaltsverzeichnis</h2>
+   
+  <ul>
+  <li><a href="#datengrundlage" id="toc-datengrundlage" class="nav-link active" data-scroll-target="#datengrundlage"><span class="header-section-number">2.1</span> Datengrundlage</a>
+  <ul class="collapse">
+  <li><a href="#personalverwaltungssystem-und-weitere-datenquellen" id="toc-personalverwaltungssystem-und-weitere-datenquellen" class="nav-link" data-scroll-target="#personalverwaltungssystem-und-weitere-datenquellen"><span class="header-section-number">2.1.1</span> Personalverwaltungssystem und weitere Datenquellen</a></li>
+  <li><a href="#sec-untersuchungskoerper" id="toc-sec-untersuchungskoerper" class="nav-link" data-scroll-target="#sec-untersuchungskoerper"><span class="header-section-number">2.1.2</span> Untersuchungskörper: Wer muss berücksichtigt werden?</a></li>
+  </ul></li>
+  <li><a href="#sec-standards" id="toc-sec-standards" class="nav-link" data-scroll-target="#sec-standards"><span class="header-section-number">2.2</span> Standards</a>
+  <ul class="collapse">
+  <li><a href="#dateiformate-csv-und-xlsx" id="toc-dateiformate-csv-und-xlsx" class="nav-link" data-scroll-target="#dateiformate-csv-und-xlsx"><span class="header-section-number">2.2.1</span> Dateiformate: csv und xlsx</a></li>
+  <li><a href="#tabellenform-eine-zeile-pro-person-ereignis" id="toc-tabellenform-eine-zeile-pro-person-ereignis" class="nav-link" data-scroll-target="#tabellenform-eine-zeile-pro-person-ereignis"><span class="header-section-number">2.2.2</span> Tabellenform: Eine Zeile pro Person / Ereignis</a></li>
+  </ul></li>
+  <li><a href="#anpassungen" id="toc-anpassungen" class="nav-link" data-scroll-target="#anpassungen"><span class="header-section-number">2.3</span> Anpassungen</a>
+  <ul class="collapse">
+  <li><a href="#daten-liegen-nicht-vor" id="toc-daten-liegen-nicht-vor" class="nav-link" data-scroll-target="#daten-liegen-nicht-vor"><span class="header-section-number">2.3.1</span> Daten liegen nicht vor</a></li>
+  <li><a href="#daten-liegen-nur-als-kreuztabelle-vor" id="toc-daten-liegen-nur-als-kreuztabelle-vor" class="nav-link" data-scroll-target="#daten-liegen-nur-als-kreuztabelle-vor"><span class="header-section-number">2.3.2</span> Daten liegen nur als Kreuztabelle vor</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./musterkonzept.html">Handbuch</a></li><li class="breadcrumb-item"><a href="./datenvorbereitung.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Datenvorbereitung</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Datenvorbereitung</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="datengrundlage" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="datengrundlage"><span class="header-section-number">2.1</span> Datengrundlage</h2>
+<section id="personalverwaltungssystem-und-weitere-datenquellen" class="level3" data-number="2.1.1">
+<h3 data-number="2.1.1" class="anchored" data-anchor-id="personalverwaltungssystem-und-weitere-datenquellen"><span class="header-section-number">2.1.1</span> Personalverwaltungssystem und weitere Datenquellen</h3>
+<div class="grid">
+<div class="g-col-6">
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Hinweis</span>Personalverwaltungssystem
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Die meisten Daten werden Sie aus Ihrem Personalverwaltungssystem entnehmen können.</p>
+</div>
+</div>
+</div>
+<div class="g-col-6">
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Hinweis</span>Weitere Datenquellen
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Für z.B. Bewerbungen wird es andere Datenquellen geben, wie Auszüge aus Bewerbungssystemen oder händische Erfassung.</p>
+</div>
+</div>
+</div>
+</div>
+<p>Unabhängig von der Datenquelle sollte der Export oder die Erhebung als <code>csv</code>- oder <code>xlsx</code>-Dateien beachtet werden (siehe <a href="#sec-standards" class="quarto-xref"><span>Kapitel 2.2</span></a>).</p>
+</section>
+<section id="sec-untersuchungskoerper" class="level3" data-number="2.1.2">
+<h3 data-number="2.1.2" class="anchored" data-anchor-id="sec-untersuchungskoerper"><span class="header-section-number">2.1.2</span> Untersuchungskörper: Wer muss berücksichtigt werden?</h3>
+<p>Der sogenannte <strong>Untersuchungskörper</strong> beschreibt den gesamten Personenkreis, über den im Gleichstellungskonzept berichtet wird. Er umfasst also alle Personen, die im Konzept berücksichtigt werden müssen.</p>
+<p>Bei der Erstellung eines Gleichstellungskonzepts stellen sich dazu zwei grundlegende Fragen:</p>
+<section id="welche-personen-gehören-zum-untersuchungskörper" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="welche-personen-gehören-zum-untersuchungskörper">(1) Welche Personen gehören zum Untersuchungskörper?</h4>
+<p>Das Gesetz legt den Rahmen fest, welche Personen das Konzept mindestens berücksichtigen muss. Wenn darüber hinaus Unklarheiten bestehen (z. B. bei besonderen Beschäftigtengruppen), entscheidet die jeweilige Dienststelle, ob diese Personen in den Untersuchungskörper einbezogen werden.</p>
+</section>
+<section id="wie-wird-der-untersuchungskörper-im-konzept-dargestellt-und-gegliedert" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="wie-wird-der-untersuchungskörper-im-konzept-dargestellt-und-gegliedert">(2) Wie wird der Untersuchungskörper im Konzept dargestellt und gegliedert?</h4>
+<p>Der gesamte Untersuchungskörper kann als Einheit betrachtet und im Konzept gemeinsam ausgewertet werden. Oder Sie entscheiden sich dafür, einzelne Bereiche getrennt zu betrachten, zum Beispiel <strong>nachgeordnete Behörden</strong>. In diesem Fall können diese in Unterkonzepten beschrieben werden, beispielsweise im optionalen Kapitel <em>Situationsbeschreibung nachgelagerter Behörden</em>.</p>
+<p>Diese Strukturierung ist eine individuelle Entscheidung der Dienststelle und sollte sich daran orientieren, was für eine <strong>sinnvolle und aussagekräftige Analyse</strong> der Situation vor Ort hilfreich ist.</p>
+<details>
+<summary>
+Sie können wie folgt vorgehen, um zu klären, über welche Personen in Ihrem Gleichstellungs- konzept berichtet werden soll:
+</summary>
+<div class="grid">
+<div class="g-col-6">
+<p><strong>(a) Gesetzlichen Rahmen prüfen</strong></p>
+<p>Prüfen Sie zunächst anhand von Art. 4 Abs. 2, Art. 5 BayGlG i.V.m. Art. 3 Abs. 2 BayGlG sowie Art. 6 Bayerisches Personalvertretungsgesetz (PVG), welche Organisationseinheit als Dienststelle gilt und für welche Beschäftigten- gruppen daher ein Gleichstellungskonzept zu erstellen ist.</p>
+<p>Überlegen Sie, ob nachgeordnete Behörden, die zum betrachteten Personenkreis gehören, im Gleichstellungskonzept gesondert dargestellt werden sollen – zum Beispiel in Form eines Unterkonzepts im optionalen Kapitel <em>Situationsbeschreibung nachgelagerter Behörden</em>.</p>
+<p>Eine getrennte Darstellung ist vor allem dann sinnvoll, wenn sich die nachgeordneten Behörden deutlich voneinander oder von der übergeordneten Behörde unterscheiden (z. B. in Aufgabenprofil, Struktur oder Beschäftigtenzusammensetzung).</p>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Hinweis</span>Beispiel:
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Im Gleichstellungskonzept des StMFH wird zum einen über das Ministerium selbst be- richtet. Zusätzlich werden eigene Situations- beschreibungen u. a. für die nachgelagerten Bereiche Steuern, Vermessung und Schlösserverwaltung erstellt, da sich diese Bereiche sowohl voneinander als auch vom Ministerium deutlich unterscheiden.</p>
+</div>
+</div>
+</div>
+<div class="g-col-6">
+<p><strong>(b) Zusätzliche Bereiche bewusst einbeziehen (optional)</strong></p>
+<p>Überlegen Sie anschließend, ob es sinnvoll ist, weitere Bereiche oder Personengruppen zusätzlich in das Konzept aufzunehmen. Gründe hierfür können zum Beispiel sein:</p>
+<ul>
+<li>Personengruppen, die sonst in keinem anderen Gleichstellungskonzept erfasst werden,</li>
+<li>der Wunsch nach vollständigeren Daten sowie</li>
+<li>eine höhere Aussagekraft der Auswertungen.</li>
+</ul>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Hinweis</span>Beispiel:
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Außertariflich Beschäftigte sind per Defini- tion weder Beamtinnen und Beamte noch Tarifbeschäftigte. Wenn sie im Konzept zum Beispiel den Tarifbeschäftigten zugerechnet und die gesamte Gruppe als „Arbeitnehmer“ bezeichnet wird, sollte dies in der Definition des betrachteten Personenkreises eindeutig und ausdrücklich erläutert werden.</p>
+</div>
+</div>
+</div>
+</div>
+</details>
+</section>
+</section>
+</section>
+<section id="sec-standards" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="sec-standards"><span class="header-section-number">2.2</span> Standards</h2>
+<p>Die Daten für die Nutzung von <strong>reportix</strong> müssen klaren Standards entsprechen.</p>
+<section id="dateiformate-csv-und-xlsx" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="dateiformate-csv-und-xlsx"><span class="header-section-number">2.2.1</span> Dateiformate: csv und xlsx</h3>
+<p><strong>reportix</strong> kann mit Tabellen im Format <code>csv</code> oder <code>xlsx</code> (Excel) arbeiten.</p>
+<div class="grid">
+<div class="g-col-6">
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Hinweis</span>csv
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Bei <code>csv</code>-Dateien muss jede Tabelle eine einzelne Datei sein (z.B. <code>Stichtagsdaten.csv</code>, <code>Beurlaubung.csv</code>, …).</p>
+</div>
+</div>
+</div>
+<div class="g-col-6">
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Hinweis</span>xlsx
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Bei <code>xlsx</code>-Dateien gibt es zwei Möglichkeiten:</p>
+<ul>
+<li>Eine Datei mit Sheets/Arbeitsblättern (z.B. <code>Alle-Daten.xlsx</code>)<br>
+</li>
+<li>Einzelne Dateien für die verschiedenen Tabellen (z. B. <code>Stichtagsdaten.xlsx</code>, <code>Beurlaubung.xlsx</code>, …).<br>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="tabellenform-eine-zeile-pro-person-ereignis" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2" class="anchored" data-anchor-id="tabellenform-eine-zeile-pro-person-ereignis"><span class="header-section-number">2.2.2</span> Tabellenform: Eine Zeile pro Person / Ereignis</h3>
+<p>Personalverwaltungssysteme (VIVA, PWS, etc.) können Datensätze exportieren, in der jede Zeile eine Person (Stichtagsdaten) oder Ereignis (Zeitraumdaten) repräsentiert und jede Spalte ein Merkmal (z.B. Geschlecht, Arbeitszeitanteil) darstellt. Jeder Datensatz sollte die Personalnummer als eine weitere Spalte enthalten, damit ggf. Datensätze zusammengefügt werden können. Die Personalnummer selbst wird nie in Grafiken oder Tabellen auftauchen.</p>
+<p>Beispiel Stichtagsdaten:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">PersNr</th>
+<th style="text-align: left;">Geschlecht</th>
+<th style="text-align: left;">QE</th>
+<th style="text-align: left;">…</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1001</td>
+<td style="text-align: left;">weiblich</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">…</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1011</td>
+<td style="text-align: left;">männlich</td>
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">…</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1012</td>
+<td style="text-align: left;">weiblich</td>
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">…</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">…</td>
+<td style="text-align: left;">…</td>
+<td style="text-align: left;">…</td>
+<td style="text-align: left;">…</td>
+</tr>
+</tbody>
+</table>
+<p>Beispiel Zeitraumsdaten (z.B. Beförderungen in 2025):</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">PersNr</th>
+<th style="text-align: left;">Datum</th>
+<th style="text-align: left;">…</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1001</td>
+<td style="text-align: left;">01.01.2025</td>
+<td style="text-align: left;">…</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1001</td>
+<td style="text-align: left;">01.11.2025</td>
+<td style="text-align: left;">…</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1011</td>
+<td style="text-align: left;">01.04.2025</td>
+<td style="text-align: left;">…</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1012</td>
+<td style="text-align: left;">01.10.2025</td>
+<td style="text-align: left;">…</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">…</td>
+<td style="text-align: left;">…</td>
+<td style="text-align: left;">…</td>
+</tr>
+</tbody>
+</table>
+<p>Bei <strong>Zeitraumdaten</strong> ist das stichtagsbezogene Vorjahr verlangt (soweit nicht anderweitig ausgewiesen). Ist z.B. der Stichtag der 30.06.2026, so wird bei Zeitraumdaten der 01.01.2025-31.12.2025 betrachtet. Ausnahmen sind in den Definitionen beschrieben: z.B. Einstellungen werden für den gesamten Berichtszeitraum (letzter Stichtag (ausgeschlossen) bis aktueller Stichtag (eingeschlossen), i.d.R. 5 Jahre) ausgewiesen.</p>
+<p>Es werden folgende Datensätze benötigt (optionale Inhalte sind als solches gekennzeichnet):</p>
+<section id="sec-stichtagsdaten" class="level4" data-number="2.2.2.1">
+<h4 data-number="2.2.2.1" class="anchored" data-anchor-id="sec-stichtagsdaten"><span class="header-section-number">2.2.2.1</span> Stichtagsdaten</h4>
+<p>Der Stichtagsdatensatz enthält die Spalten:</p>
+<ul>
+<li>PersNr: Personalnummer</li>
+<li>Geschlecht: … …</li>
+</ul>
+<p>Hier Definitionen-yml einbinden</p>
+</section>
+<section id="sec-zeitraumsdaten" class="level4" data-number="2.2.2.2">
+<h4 data-number="2.2.2.2" class="anchored" data-anchor-id="sec-zeitraumsdaten"><span class="header-section-number">2.2.2.2</span> Zeitraumsdaten</h4>
+<p>Bei Zeitraumsdaten wird pro Ereignistyp eine Tabelle benötigt:</p>
+<section id="beurlaubung" class="level5" data-number="2.2.2.2.1">
+<h5 data-number="2.2.2.2.1" class="anchored" data-anchor-id="beurlaubung"><span class="header-section-number">2.2.2.2.1</span> Beurlaubung</h5>
+</section>
+<section id="bewerbung" class="level5" data-number="2.2.2.2.2">
+<h5 data-number="2.2.2.2.2" class="anchored" data-anchor-id="bewerbung"><span class="header-section-number">2.2.2.2.2</span> Bewerbung</h5>
+</section>
+<section id="einstellung" class="level5" data-number="2.2.2.2.3">
+<h5 data-number="2.2.2.2.3" class="anchored" data-anchor-id="einstellung"><span class="header-section-number">2.2.2.2.3</span> Einstellung</h5>
+</section>
+<section id="fortbildung" class="level5" data-number="2.2.2.2.4">
+<h5 data-number="2.2.2.2.4" class="anchored" data-anchor-id="fortbildung"><span class="header-section-number">2.2.2.2.4</span> Fortbildung</h5>
+</section>
+<section id="qualifikation" class="level5" data-number="2.2.2.2.5">
+<h5 data-number="2.2.2.2.5" class="anchored" data-anchor-id="qualifikation"><span class="header-section-number">2.2.2.2.5</span> Qualifikation</h5>
+</section>
+<section id="leistungskomponente" class="level5" data-number="2.2.2.2.6">
+<h5 data-number="2.2.2.2.6" class="anchored" data-anchor-id="leistungskomponente"><span class="header-section-number">2.2.2.2.6</span> Leistungskomponente</h5>
+</section>
+<section id="beförderung" class="level5" data-number="2.2.2.2.7">
+<h5 data-number="2.2.2.2.7" class="anchored" data-anchor-id="beförderung"><span class="header-section-number">2.2.2.2.7</span> Beförderung</h5>
+</section>
+</section>
+</section>
+</section>
+<section id="anpassungen" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="anpassungen"><span class="header-section-number">2.3</span> Anpassungen</h2>
+<p>Es gibt verschiedene Szenarien, in denen Anpassungen nötig sind.</p>
+<section id="daten-liegen-nicht-vor" class="level3" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="daten-liegen-nicht-vor"><span class="header-section-number">2.3.1</span> Daten liegen nicht vor</h3>
+<p>Sollten Informationen, die für das Gleichstellungskonzept benötigt werden nicht vorliegen, können diese nacherhoben werden und eine Tabelle im vorgegeben Format auch händisch erstellt werden.</p>
+<p>Beispiel: Bewerbungen</p>
+<p>… TODO …</p>
+</section>
+<section id="daten-liegen-nur-als-kreuztabelle-vor" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="daten-liegen-nur-als-kreuztabelle-vor"><span class="header-section-number">2.3.2</span> Daten liegen nur als Kreuztabelle vor</h3>
+<p>In manchen Fällen liegen die Daten nur als Kreuztabelle vor, z.B. wenn Strichlisten mit Bewerbungen geführt werden.</p>
+<p>Beispiel Bewerbungen mit QE bzw. QE-äquivalenten:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 31%">
+<col style="width: 11%">
+<col style="width: 28%">
+<col style="width: 28%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Beschäftigungsart</th>
+<th>QE</th>
+<th>Bewerbungen weiblich</th>
+<th>Bewerbungen männlich</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Beamte/Beamtinnen</td>
+<td>1</td>
+<td>78</td>
+<td>64</td>
+</tr>
+<tr class="even">
+<td>Beamte/Beamtinnen</td>
+<td>2</td>
+<td>91</td>
+<td>55</td>
+</tr>
+<tr class="odd">
+<td>Beamte/Beamtinnen</td>
+<td>3</td>
+<td>67</td>
+<td>88</td>
+</tr>
+<tr class="even">
+<td>Beamte/Beamtinnen</td>
+<td>4</td>
+<td>54</td>
+<td>73</td>
+</tr>
+<tr class="odd">
+<td>Tarifbeschäftigte</td>
+<td>1</td>
+<td>82</td>
+<td>96</td>
+</tr>
+<tr class="even">
+<td>Tarifbeschäftigte</td>
+<td>2</td>
+<td>59</td>
+<td>61</td>
+</tr>
+<tr class="odd">
+<td>Tarifbeschäftigte</td>
+<td>3</td>
+<td>100</td>
+<td>77</td>
+</tr>
+<tr class="even">
+<td>Tarifbeschäftigte</td>
+<td>4</td>
+<td>69</td>
+<td>84</td>
+</tr>
+</tbody>
+</table>
+<p>Sollten die Daten nur als bereits fertige Kreuztabelle vorliegen, gibt es zwei Möglichkeiten:</p>
+<p><strong>Möglichkeit 1: Tabelle umwandeln</strong></p>
+<p>In Excel können mit M-Code Daten umgewandelt werden. In LibreOffice und Excel können alternativ eine Mischung aus händischer Bearbeitung und Formeln gearbeitet werden: Erst “Frauen/Männer” trennen, dann per Hilfsspalte + <code>ZÄHLENWENN</code> + <code>VERGLEICH</code> zu einer Zeile pro Person <em>aufblasen</em>.</p>
+<p>Das Ergebnis sollte dann so aussehen:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Beschäftigungsart</th>
+<th>QE</th>
+<th>Geschlecht</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Beamte/Beamtinnen</td>
+<td>4</td>
+<td>weiblich</td>
+</tr>
+<tr class="even">
+<td>Tarifbeschäftigte</td>
+<td>3</td>
+<td>männlich</td>
+</tr>
+<tr class="odd">
+<td>Tarifbeschäftigte</td>
+<td>1</td>
+<td>männlich</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Möglichkeit 2: Grafiken selbst erstellen</strong></p>
+<p>Grafiken können auch selbst erstellt werden und händisch in die von reportix erstellte docx- bzw odt-Datei eingefügt werden. Zur Erstellung von passenden Grafiken verweisen wir auf den Leitfaden (TODO: Link einfügen).</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Kopiert");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Kopiert");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./musterkonzept.html" class="pagination-link" aria-label="Musterkonzept">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Musterkonzept</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./webapp.html" class="pagination-link" aria-label="Arbeit mit der Web-App reportix">
+        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Arbeit mit der Web-App reportix</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+    <a class="nav-link" href="./impressum.html">
+<p>Impressum</p>
+</a>
+  </li>  
+</ul>
+    </div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

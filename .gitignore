@@ -16,11 +16,6 @@
 /build
 /dist
 
-# docker
-Dockerfile
-.dockerignore
-nginx.conf
-
 # misc
 .DS_Store
 *.pem
@@ -54,3 +49,8 @@ next-env.d.ts
 
 # generated report templates (built from templates/master.md by scripts/gen-templates.ts)
 /templates/template_*
+
+# Quarto handbuch build artifacts (handbuch/_freeze IS committed — it carries the
+# R output so the deploy build renders without R)
+/handbuch/_site/
+/handbuch/.quarto/

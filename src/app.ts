@@ -72,6 +72,7 @@ export function initApp(root: HTMLElement): void {
     <div id="language-bar" class="language-bar">
       <label for="language-select">${t("ui.language")}: </label>
       <select id="language-select"></select>
+      <a id="handbuch-link" class="handbuch-link" href="/handbuch/" target="_blank" rel="noopener">${t("ui.handbuch")}</a>
     </div>
     <div id="step-template" class="step">
       <h2>${t("ui.step.template")}</h2>
