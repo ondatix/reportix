@@ -1,0 +1,40 @@
+# Musterkonzept
+
+Das Musterkonzept ist die gemeinsame Grundlage für alle Gleichstellungskonzepte in Bayern und damit auch die Grundlage für **reportix**-Outputs.
+
+Das Musterkonzept legt eine einheitliche Struktur fest und enthält Textbausteine, die als Formulierungshilfe dienen und bei der Erstellung der Gleichstellungskonzepte bei Bedarf angepasst werden können.
+*Es kann auch unabhängig von **reportix** genutzt werden. Für diesen Fall können sie es [hier](TODO: Link einfügen) herunterladen.*
+
+
+**Das Musterkonzept als Baukasten:**
+Das Musterkonzept ist nicht als einengendes Korsett gedacht, sondern soll die Erstellung vereinfachen und den wichtigen Raum schaffen, weitere Inhalte hinzuzufügen.
+
+
+::: {.callout-note icon=false}
+## Pflichtinhalte
+
+Für alle verpflichtende Inhalte.
+:::
+
+::: {.callout-tip icon=false}
+## Optionale Inhalte
+
+Empfohlene aber nicht verpflichtende Inhalte. 
+Sie konnen ganz oder auch teilweise genutzt werden. 
+Sie dürfen dabei knappgehalten oder ausführlich ausgearbeitet werden, je nachdem, was für die jeweilige Dienststelle als passend und notwendig angesehen wird. 
+Der Detailgrad wird daher durch die Dienststelle bestimmt.
+:::
+
+::: {.callout-important icon=false}
+## Zusätzliche Inhalte
+
+Weitere - möglicherweise dienststellenspezifische - Inhalte sind erwünscht.
+:::
+
+
+
+Welche konkreten Inhalte in das jeweilige Gleichstellungskonzept aufgenommen werden, wird von der Dienststellenleitung bestimmt.
+Die Gleichstellungsbeauftragten können dabei unterstützend tätig werden.
+
+
+

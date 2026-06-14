@@ -1,0 +1,8 @@
+# Arbeit mit der Web-App reportix
+
+::: {.callout-warning}
+## Wichtige Hinweise um den sicheren Umgang mit **reportix** zu gewährleisten
+
+- Nutzen in **reportix** in einer aktuellen Browserversion.
+- Teilen Sie *keine* Screenshots oder Bildschirmaufnahmen von **reportix** oder den Daten.
+:::

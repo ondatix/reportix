@@ -1,0 +1,285 @@
+# Datenvorbereitung
+
+## Datengrundlage
+
+### Personalverwaltungssystem und weitere Datenquellen
+
+::: {.grid}
+
+::: {.g-col-6}
+::: {.callout-note icon=false}
+## Personalverwaltungssystem
+
+Die meisten Daten werden Sie aus Ihrem Personalverwaltungssystem entnehmen können.
+:::
+:::
+
+::: {.g-col-6}
+::: {.callout-note icon=false}
+## Weitere Datenquellen
+
+Für z.B. Bewerbungen wird es andere Datenquellen geben, wie Auszüge aus Bewerbungssystemen oder händische Erfassung.
+:::
+:::
+
+:::
+
+Unabhängig von der Datenquelle sollte der Export oder die Erhebung als `csv`- oder `xlsx`-Dateien beachtet werden (siehe @sec-standards).
+
+
+
+
+### Untersuchungskörper: Wer muss berücksichtigt werden? {#sec-untersuchungskoerper}
+
+Der sogenannte **Untersuchungskörper**
+beschreibt den gesamten Personenkreis, über
+den im Gleichstellungskonzept berichtet wird. Er
+umfasst also alle Personen, die im Konzept
+berücksichtigt werden müssen.
+
+Bei der Erstellung eines Gleichstellungskonzepts
+stellen sich dazu zwei grundlegende Fragen:
+
+#### (1) Welche Personen gehören zum Untersuchungskörper? {.unnumbered}
+
+Das Gesetz legt den Rahmen fest, welche Personen das Konzept mindestens berücksichtigen muss. 
+Wenn darüber hinaus Unklarheiten bestehen (z. B. bei besonderen Beschäftigtengruppen), entscheidet die jeweilige Dienststelle, ob diese Personen in den Untersuchungskörper einbezogen werden.
+
+#### (2) Wie wird der Untersuchungskörper im Konzept dargestellt und gegliedert? {.unnumbered}
+
+Der gesamte Untersuchungskörper kann als Einheit betrachtet und im Konzept gemeinsam ausgewertet werden. 
+Oder Sie entscheiden sich dafür, einzelne Bereiche getrennt zu betrachten, zum Beispiel **nachgeordnete Behörden**. 
+In diesem Fall können diese in Unterkonzepten beschrieben werden, beispielsweise im optionalen Kapitel *Situationsbeschreibung nachgelagerter Behörden*.
+
+Diese Strukturierung ist eine individuelle
+Entscheidung der Dienststelle und sollte sich
+daran orientieren, was für eine **sinnvolle und
+aussagekräftige Analyse** der Situation vor Ort
+hilfreich ist.
+
+<details>
+<summary>
+Sie können wie folgt vorgehen, um zu klären,
+über welche Personen in Ihrem Gleichstellungs-
+konzept berichtet werden soll:
+</summary>
+::: {.grid}
+
+::: {.g-col-6}
+**(a) Gesetzlichen Rahmen prüfen**
+
+Prüfen Sie zunächst anhand von Art. 4 Abs.
+2, Art. 5 BayGlG i.V.m. Art. 3 Abs. 2 BayGlG
+sowie Art. 6 Bayerisches Personalvertretungsgesetz (PVG), welche Organisationseinheit als
+Dienststelle gilt und für welche Beschäftigten-
+gruppen daher ein Gleichstellungskonzept zu erstellen ist.
+
+Überlegen Sie, ob nachgeordnete Behörden,
+die zum betrachteten Personenkreis gehören,
+im Gleichstellungskonzept gesondert dargestellt
+werden sollen – zum Beispiel in Form
+eines Unterkonzepts im optionalen Kapitel
+*Situationsbeschreibung nachgelagerter
+Behörden*.
+
+Eine getrennte Darstellung ist vor allem
+dann sinnvoll, wenn sich die nachgeordneten
+Behörden deutlich voneinander oder von
+der übergeordneten Behörde unterscheiden
+(z. B. in Aufgabenprofil, Struktur oder
+Beschäftigtenzusammensetzung).
+
+::: {.callout-note appearance="minimal"}
+## Beispiel:  
+Im Gleichstellungskonzept des StMFH wird
+zum einen über das Ministerium selbst be-
+richtet. Zusätzlich werden eigene Situations-
+beschreibungen u. a. für die nachgelagerten
+Bereiche Steuern, Vermessung und
+Schlösserverwaltung erstellt, da sich diese
+Bereiche sowohl voneinander als auch vom
+Ministerium deutlich unterscheiden.
+:::
+:::
+
+::: {.g-col-6}
+**(b) Zusätzliche Bereiche bewusst einbeziehen (optional)**
+
+Überlegen Sie anschließend, ob es sinnvoll ist,
+weitere Bereiche oder Personengruppen zusätzlich
+in das Konzept aufzunehmen. Gründe
+hierfür können zum Beispiel sein:
+
+- Personengruppen, die sonst in keinem anderen Gleichstellungskonzept erfasst werden,
+- der Wunsch nach vollständigeren Daten sowie
+- eine höhere Aussagekraft der Auswertungen.
+
+::: {.callout-note appearance="minimal"}
+## Beispiel:
+Außertariflich Beschäftigte sind per Defini-
+tion weder Beamtinnen und Beamte noch
+Tarifbeschäftigte. Wenn sie im Konzept zum
+Beispiel den Tarifbeschäftigten zugerechnet
+und die gesamte Gruppe als „Arbeitnehmer“
+bezeichnet wird, sollte dies in der Definition
+des betrachteten Personenkreises eindeutig
+und ausdrücklich erläutert werden.
+:::
+:::
+:::
+
+</details>
+
+
+
+
+## Standards {#sec-standards}
+Die Daten für die Nutzung von **reportix** müssen klaren Standards entsprechen. 
+
+### Dateiformate: csv und xlsx
+**reportix** kann mit Tabellen im Format `csv` oder `xlsx` (Excel) arbeiten.
+
+::: {.grid}
+
+::: {.g-col-6}
+::: {.callout-note icon=false}
+## csv
+
+Bei `csv`-Dateien muss jede Tabelle eine einzelne Datei sein (z.B. `Stichtagsdaten.csv`, `Beurlaubung.csv`, ...).
+:::
+:::
+
+::: {.g-col-6}
+::: {.callout-note icon=false}
+## xlsx
+
+Bei `xlsx`-Dateien gibt es zwei Möglichkeiten:
+
+- Eine Datei mit Sheets/Arbeitsblättern (z.B. `Alle-Daten.xlsx`)  
+- Einzelne Dateien für die verschiedenen Tabellen (z. B. `Stichtagsdaten.xlsx`, `Beurlaubung.xlsx`, ...).  
+:::
+:::
+
+:::
+
+
+### Tabellenform: Eine Zeile pro Person / Ereignis  
+Personalverwaltungssysteme (VIVA, PWS, etc.) können Datensätze exportieren, in der jede Zeile eine Person (Stichtagsdaten) oder Ereignis (Zeitraumdaten) repräsentiert und jede Spalte ein Merkmal (z.B. Geschlecht, Arbeitszeitanteil) darstellt. 
+Jeder Datensatz sollte die Personalnummer als eine weitere Spalte enthalten, damit ggf. Datensätze zusammengefügt werden können. 
+Die Personalnummer selbst wird nie in Grafiken oder Tabellen auftauchen.
+
+Beispiel Stichtagsdaten:
+
+| PersNr | Geschlecht | QE | … |
+| :---- | :---- | :---- | :---- |
+| 1001 | weiblich | 1 | … |
+| 1011 | männlich | 2 | … |
+| 1012 | weiblich | 2 | … |
+| … | … | … | … |
+
+Beispiel Zeitraumsdaten (z.B. Beförderungen in 2025):
+
+| PersNr | Datum | … |
+| :----  | :---- | :---- |
+| 1001   | 01.01.2025 | … |
+| 1001   | 01.11.2025 | … |
+| 1011   | 01.04.2025 | … |
+| 1012   | 01.10.2025 | … |
+| … | … | … | 
+
+Bei **Zeitraumdaten** ist das stichtagsbezogene Vorjahr verlangt (soweit nicht anderweitig ausgewiesen). 
+Ist z.B. der Stichtag der 30.06.2026, so wird bei Zeitraumdaten der 01.01.2025-31.12.2025 betrachtet. 
+Ausnahmen sind in den Definitionen beschrieben: 
+z.B. Einstellungen werden für den gesamten Berichtszeitraum (letzter Stichtag (ausgeschlossen) bis aktueller Stichtag (eingeschlossen), i.d.R. 5 Jahre) ausgewiesen.
+
+Es werden folgende Datensätze benötigt (optionale Inhalte sind als solches gekennzeichnet):
+
+#### Stichtagsdaten {#sec-stichtagsdaten}
+
+Der Stichtagsdatensatz enthält die Spalten:
+
+- PersNr: Personalnummer
+- Geschlecht: ...
+... 
+
+Hier Definitionen-yml einbinden
+
+
+#### Zeitraumsdaten {#sec-zeitraumsdaten}
+
+Bei Zeitraumsdaten wird pro Ereignistyp eine Tabelle benötigt:
+
+##### Beurlaubung
+
+##### Bewerbung
+
+##### Einstellung
+
+##### Fortbildung
+
+##### Qualifikation
+
+##### Leistungskomponente
+
+##### Beförderung
+
+
+## Anpassungen
+
+Es gibt verschiedene Szenarien, in denen Anpassungen nötig sind.
+
+### Daten liegen nicht vor
+Sollten Informationen, die für das Gleichstellungskonzept benötigt werden nicht vorliegen, können diese nacherhoben werden und eine Tabelle im vorgegeben Format auch händisch erstellt werden. 
+
+Beispiel: Bewerbungen
+
+... TODO ...
+
+### Daten liegen nur als Kreuztabelle vor
+
+In manchen Fällen liegen die Daten nur als Kreuztabelle vor, z.B. wenn Strichlisten mit Bewerbungen geführt werden.
+
+Beispiel Bewerbungen mit QE bzw. QE-äquivalenten:
+
+| Beschäftigungsart    | QE     | Bewerbungen weiblich | Bewerbungen männlich |
+|----------------------|--------|--------------------|--------------------|
+| Beamte/Beamtinnen    | 1      | 78                 | 64                 |
+| Beamte/Beamtinnen    | 2      | 91                 | 55                 |
+| Beamte/Beamtinnen    | 3      | 67                 | 88                 |
+| Beamte/Beamtinnen    | 4      | 54                 | 73                 |
+| Tarifbeschäftigte    | 1      | 82                 | 96                 |
+| Tarifbeschäftigte    | 2      | 59                 | 61                 |
+| Tarifbeschäftigte    | 3      | 100                | 77                 |
+| Tarifbeschäftigte    | 4      | 69                 | 84                 |
+
+
+Sollten die Daten nur als bereits fertige Kreuztabelle vorliegen, gibt es zwei Möglichkeiten:
+
+**Möglichkeit 1: Tabelle umwandeln**
+
+In Excel können mit M-Code Daten umgewandelt werden.
+In LibreOffice und Excel können alternativ eine Mischung aus händischer Bearbeitung und Formeln gearbeitet werden:
+Erst "Frauen/Männer" trennen, dann per Hilfsspalte + `ZÄHLENWENN` + `VERGLEICH` zu einer Zeile pro Person *aufblasen*.
+
+Das Ergebnis sollte dann so aussehen:
+
+| Beschäftigungsart    | QE                     | Geschlecht |
+|----------------------|------------------------|------------|
+| Beamte/Beamtinnen    | 4                      | weiblich   | 
+| Tarifbeschäftigte    | 3                      | männlich   | 
+| Tarifbeschäftigte    | 1                      | männlich   | 
+| ...                  | ...                    | ...        | 
+
+
+**Möglichkeit 2: Grafiken selbst erstellen**
+
+Grafiken können auch selbst erstellt werden und händisch in die von reportix erstellte docx- bzw odt-Datei eingefügt werden. 
+Zur Erstellung von passenden Grafiken verweisen wir auf den Leitfaden (TODO: Link einfügen).
+
+
+
+
+
+
+
+

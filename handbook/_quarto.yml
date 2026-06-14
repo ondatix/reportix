@@ -1,0 +1,39 @@
+project:
+  type: book
+
+book:
+  title: "Reportix Handbuch"
+  date: last-modified
+  chapters:
+    - index.qmd
+    - quick-start.qmd
+    - part: "Handbuch"
+      chapters: 
+        - musterkonzept.qmd
+        - datenvorbereitung.qmd
+        - webapp.qmd
+        - nachbereitung.qmd
+        - datenschutz.qmd
+    - noch-fragen.qmd
+    - ueber-reportix.qmd
+  page-footer:
+    center: 
+      - text: "Impressum"
+        href: impressum.qmd
+  favicon: images/ondatix_Bildmarke_dunkler_Hintergrund_PNG.png
+  navbar: 
+    background: white
+    logo: images/ondatix_Logo_V1_heller_Hintergrund_PNG.png
+
+lang: de
+
+format:
+  html:
+    from: markdown+smart
+    theme:
+      - cosmo       # 1. Basis Bootstrap theme
+      - brand.scss  # 2. Eigene Farben für feste Bestandteile
+    css: styles.scss  # 3. Font
+
+
+
