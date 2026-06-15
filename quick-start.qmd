@@ -1,5 +1,14 @@
 # Quick Start {.unnumbered}
 
+
+::: {.callout-caution}
+## Under Construction
+
+Dieses Handbuch ist noch in Bearbeitung. Bitte mit Vorsicht genießen ;)
+
+Stand: Wenige TODOs offen
+:::
+
 ## Gleich loslegen!
 
 Einfach auf 

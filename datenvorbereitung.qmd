@@ -1,5 +1,18 @@
 # Datenvorbereitung
 
+::: {.callout-caution}
+## Under Construction
+
+Dieses Handbuch ist noch in Bearbeitung. Bitte mit Vorsicht genießen ;)
+
+Stand: 
+
+- Grundlagen vorhanden
+- TODO: Spaltennamen abgleichen
+- TODO: Einfügen der Definitionen 
+- TODO: Anleitung für den Export aus VIVA, PWS und eine generische Anleitung
+:::
+
 ## Datengrundlage
 
 ### Personalverwaltungssystem und weitere Datenquellen
@@ -56,6 +69,8 @@ Entscheidung der Dienststelle und sollte sich
 daran orientieren, was für eine **sinnvolle und
 aussagekräftige Analyse** der Situation vor Ort
 hilfreich ist.
+
+---
 
 <details>
 <summary>
@@ -130,7 +145,7 @@ und ausdrücklich erläutert werden.
 
 </details>
 
-
+---
 
 
 ## Standards {#sec-standards}

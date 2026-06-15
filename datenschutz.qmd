@@ -1,9 +1,16 @@
 # Datenschutz
 
-> TODO:
->
-> - Hier Datenschutz erläutern. 
-> - Entscheidungsgrundlage für Datenschützer (welche Fragen stellen sich die Datenschützer bei der Entscheidung, ob das Tool ok ist?).
+
+::: {.callout-caution}
+## Under Construction
+
+Dieses Handbuch ist noch in Bearbeitung. Bitte mit Vorsicht genießen ;)
+
+Stand: 
+
+- Viele Inhalte verfügbar
+- Prüfung: Reicht "Das wichtigste im Überblick", um einen schnelle Entscheidung für Datenschützer zu ermöglichen? Welche Fragen stellen sich die Datenschützer bei der Entscheidung, ob das Tool ok ist?
+:::
 
 
 ## Das wichtigste im Überblick
