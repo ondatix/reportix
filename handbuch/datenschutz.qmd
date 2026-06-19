@@ -20,7 +20,7 @@ Stand:
 
 ::: {.g-col-6}
 ::: {.callout-tip}
-### Client-side Only
+### Client-side only
 Die gesamte Verarbeitung findet ausschließlich im Browser bzw. direkt auf dem Endgerät der Nutzer:innen statt. Es erfolgt keine Übertragung von Daten an externe Server.
 :::
 
