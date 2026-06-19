@@ -1,6 +1,17 @@
 # Noch Fragen? {.unnumbered}
 
-Für Fragen kontaktieren Sie uns unter info@ondatix.org.
+::: {.callout-caution}
+## Under Construction
+
+Dieses Handbuch ist noch in Bearbeitung. Bitte mit Vorsicht genießen ;)
+
+Stand: 
+
+- Kapitel vorerst fertig. Anpassen, sobald wir eine andere Art haben, Fragen zu stellen.
+- Wo kommen FAQs hin?
+:::
+
+Für Fragen kontaktieren Sie uns unter [info@ondatix.org](mailto:info@ondatix.org).
 
 In Berichtsjahren bieten wir Webinare und online Q&As an. 
 Termine werden von der Leitstelle Gleichstellung des StMAS mitgeteilt.

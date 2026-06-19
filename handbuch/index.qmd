@@ -1,5 +1,11 @@
 ## Willkommen {.unnumbered}
 
+::: {.callout-caution}
+## Under Construction
+
+Dieses Handbuch ist noch in Bearbeitung. Bitte mit Vorsicht genießen ;)
+:::
+
 Dies ist das Nutzer:innenhandbuch für die Erstellung von Gleichstellungskonzepten in Bayern mit Reportix.
 
 ::: {.grid .gap-3 .pb-3 .pt-4}

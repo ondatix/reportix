@@ -1,3 +1,9 @@
 # Nachbereitung in Word / Writer
 
-TODO
+::: {.callout-caution}
+## Under Construction
+
+Dieses Handbuch ist noch in Bearbeitung. Bitte mit Vorsicht genießen ;)
+
+Stand: Nicht begonnen
+:::
