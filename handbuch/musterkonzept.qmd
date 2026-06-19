@@ -1,6 +1,17 @@
 # Musterkonzept
 
+
+::: {.callout-caution}
+## Under Construction
+
+Dieses Handbuch ist noch in Bearbeitung. Bitte mit Vorsicht genießen ;)
+
+Stand: Wenige TODOs offen.
+:::
+
 Das Musterkonzept ist die gemeinsame Grundlage für alle Gleichstellungskonzepte in Bayern und damit auch die Grundlage für **reportix**-Outputs.
+
+> TODO: Link zum offiziellen Musterkonzept
 
 Das Musterkonzept legt eine einheitliche Struktur fest und enthält Textbausteine, die als Formulierungshilfe dienen und bei der Erstellung der Gleichstellungskonzepte bei Bedarf angepasst werden können.
 *Es kann auch unabhängig von **reportix** genutzt werden. Für diesen Fall können sie es [hier](TODO: Link einfügen) herunterladen.*

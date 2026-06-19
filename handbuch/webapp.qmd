@@ -1,5 +1,13 @@
 # Arbeit mit der Web-App reportix
 
+::: {.callout-caution}
+## Under Construction
+
+Dieses Handbuch ist noch in Bearbeitung. Bitte mit Vorsicht genießen ;)
+
+Stand: Abwarten bis die Web-App soweit bereit ist (ca. 26.06.)
+:::
+
 ::: {.callout-warning}
 ## Wichtige Hinweise um den sicheren Umgang mit **reportix** zu gewährleisten
 
