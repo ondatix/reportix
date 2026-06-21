@@ -1,132 +1,155 @@
 /**
- * Data-loader module — reads an .xlsx file and validates its structure
- * against the expected sheets and columns from the config.
+ * Data-loader module — parses uploaded files (XLSX workbooks or CSV/single-sheet
+ * files) into tables, and assembles a DataStore by mapping the user's actual
+ * sheets/columns onto the config-defined sheet and column names.
+ *
+ * The DataStore is keyed by **config sheet name**, and downstream consumers
+ * (renderer, preprocessing) reference config sheet/column names — so a mapping
+ * renames each chosen source column to its config column name. Names that the
+ * user leaves unmapped surface as non-blocking warnings.
+ *
  * Usable independently in other projects.
  */
 import * as XLSX from "xlsx";
-import type { DataSourceDef, DataStore, SheetDef } from "../types";
+import { t } from "../i18n";
+import type { DataSourceDef, DataStore } from "../types";
 
 export interface ValidationError {
   source: string;
   message: string;
 }
 
-export interface LoadDataResult {
+/** A single parsed table: its header columns and its rows (keyed by header). */
+export interface SourceTable {
+  columns: string[];
+  rows: Record<string, unknown>[];
+}
+
+/** User's mapping for one config sheet: which source table + per-column choice. */
+export interface SheetMapping {
+  /** The chosen source table (a workbook sheet or an uploaded file). */
+  table?: SourceTable;
+  /** config column name → chosen source column name ("" / absent = unmapped). */
+  columns: Record<string, string>;
+}
+
+/** Mapping for every config sheet, keyed by **config sheet name**. */
+export type DataMapping = Record<string, SheetMapping>;
+
+export interface AssembleResult {
   store: DataStore;
   /**
-   * Non-fatal validation issues: missing files, sheets, or columns. The
-   * pipeline is expected to continue with whatever sheets did load — the
-   * renderer surfaces per-block "TBD" notes for blocks that reference
-   * data that isn't there.
+   * Non-fatal issues: a config sheet with no chosen source table, or a config
+   * column left unmapped. The pipeline proceeds with whatever did map — the
+   * renderer surfaces per-block "TBD" notes for blocks referencing missing data.
    */
   warnings: ValidationError[];
 }
 
+// ── Parsing ──────────────────────────────────────────────────────────
+
+/** Parse every sheet of an `.xlsx` workbook into a `SourceTable` keyed by sheet name. */
+export function parseWorkbook(buffer: ArrayBuffer): Record<string, SourceTable> {
+  const workbook = XLSX.read(buffer, { type: "array" });
+  const out: Record<string, SourceTable> = {};
+  for (const name of workbook.SheetNames) {
+    out[name] = sheetToTable(workbook.Sheets[name]);
+  }
+  return out;
+}
+
 /**
- * Validate and load data from uploaded files against config definitions.
- * Each data source definition declares expected sheets and their columns.
- * Returns whatever sheets did load plus a list of validation warnings.
- * Never throws — callers decide how to surface the warnings.
+ * Parse a single-table file (CSV or single-sheet XLSX) into one `SourceTable`.
+ * CSV is decoded as text; an `.xlsx`/`.xls` uses the sheet named `preferSheet`
+ * (the config sheet name) if present, otherwise the first sheet.
  */
-export function loadDataSources(
-  files: Map<string, ArrayBuffer>,
-  definitions: Record<string, DataSourceDef>
-): LoadDataResult {
+export function parseTable(
+  buffer: ArrayBuffer,
+  filename: string,
+  preferSheet?: string
+): SourceTable {
+  const isCsv = /\.csv$/i.test(filename);
+  const workbook = isCsv
+    ? XLSX.read(new TextDecoder().decode(buffer), { type: "string" })
+    : XLSX.read(buffer, { type: "array" });
+
+  const sheetName =
+    preferSheet && workbook.SheetNames.includes(preferSheet)
+      ? preferSheet
+      : workbook.SheetNames[0];
+
+  if (!sheetName) return { columns: [], rows: [] };
+  return sheetToTable(workbook.Sheets[sheetName]);
+}
+
+function sheetToTable(sheet: XLSX.WorkSheet): SourceTable {
+  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
+  const header = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, blankrows: false })[0] ?? [];
+  const columns = header
+    .map((h) => String(h ?? "").trim())
+    .filter((h) => h.length > 0);
+  return { columns, rows };
+}
+
+// ── Assembly ─────────────────────────────────────────────────────────
+
+/**
+ * Build the DataStore from the user's mapping. For each config sheet, copies
+ * the mapped source rows, renaming each chosen source column to its config
+ * column name (and keeping only the config columns). Never throws.
+ */
+export function assembleStore(
+  definitions: Record<string, DataSourceDef>,
+  mapping: DataMapping
+): AssembleResult {
   const store: DataStore = {};
   const warnings: ValidationError[] = [];
 
-  for (const [name, def] of Object.entries(definitions)) {
-    const buffer = files.get(name);
-    if (!buffer) {
-      warnings.push({ source: name, message: `No file provided for "${name}".` });
-      continue;
-    }
-
-    const workbook = XLSX.read(buffer, { type: "array" });
-
+  for (const [source, def] of Object.entries(definitions)) {
     for (const sheetDef of def.sheets) {
-      const sheetErrors = validateSheet(workbook, name, sheetDef);
-      if (sheetErrors.length > 0) {
-        warnings.push(...sheetErrors);
+      const map = mapping[sheetDef.sheet];
+
+      if (!map?.table) {
+        warnings.push({ source, message: t("data.unmappedSheet", { sheet: sheetDef.sheet }) });
+        continue;
       }
 
-      // Best-effort load: if the sheet is present, store its rows even when
-      // some declared columns are missing. Per-block rendering handles the
-      // downstream consequences.
-      if (workbook.SheetNames.includes(sheetDef.sheet)) {
-        const sheet = workbook.Sheets[sheetDef.sheet];
-        const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
-        store[sheetDef.sheet] = rows;
+      // Per config column, resolve the chosen source column (if any).
+      const pairs: Array<[string, string]> = [];
+      for (const col of sheetDef.columns) {
+        const actual = map.columns[col.name];
+        if (actual) pairs.push([col.name, actual]);
+        else warnings.push({ source, message: t("data.unmappedColumn", { sheet: sheetDef.sheet, column: col.name }) });
       }
+
+      store[sheetDef.sheet] = map.table.rows.map((row) => {
+        const out: Record<string, unknown> = {};
+        for (const [configCol, actualCol] of pairs) out[configCol] = row[actualCol];
+        return out;
+      });
     }
   }
 
   return { store, warnings };
 }
 
-function validateSheet(
-  workbook: XLSX.WorkBook,
-  sourceName: string,
-  sheetDef: SheetDef
-): ValidationError[] {
-  const errors: ValidationError[] = [];
+// ── Name matching (for mapping pre-selection) ────────────────────────
 
-  if (!workbook.SheetNames.includes(sheetDef.sheet)) {
-    errors.push({
-      source: sourceName,
-      message: `Missing sheet "${sheetDef.sheet}". Found: ${workbook.SheetNames.join(", ")}.`,
-    });
-    return errors;
-  }
-
-  const sheet = workbook.Sheets[sheetDef.sheet];
-  const aoa = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, blankrows: false });
-
-  if (aoa.length === 0) {
-    errors.push({
-      source: sourceName,
-      message: `Sheet "${sheetDef.sheet}" is empty.`,
-    });
-    return errors;
-  }
-
-  const headerRow = aoa[0] ?? [];
-  const actualColumns = headerRow.map((h) => normalizeHeader(h));
-  const expectedColumns = sheetDef.columns.map(normalizeHeader);
-  const missing = sheetDef.columns.filter(
-    (_col, i) => !actualColumns.includes(expectedColumns[i])
-  );
-  if (missing.length > 0) {
-    errors.push({
-      source: sourceName,
-      message: `Sheet "${sheetDef.sheet}" is missing columns: ${missing.join(", ")}. Found: ${actualColumns.join(", ")}.`,
-    });
-  }
-
-  return errors;
-}
-
-/** Normalize a column header for comparison: NFC, trimmed, collapse internal whitespace. */
-function normalizeHeader(value: unknown): string {
+/**
+ * Normalize a sheet/column name for forgiving match: NFC, collapse internal
+ * whitespace, trim, lower-case. Used to pre-select the source name that
+ * matches a config name.
+ */
+export function normalizeName(value: unknown): string {
   return String(value ?? "")
     .normalize("NFC")
     .replace(/\s+/g, " ")
-    .trim();
+    .trim()
+    .toLowerCase();
 }
 
-/**
- * Standalone validation without loading — useful for giving user feedback
- * before proceeding.
- */
-export function validateFile(
-  buffer: ArrayBuffer,
-  sourceName: string,
-  def: DataSourceDef
-): ValidationError[] {
-  const workbook = XLSX.read(buffer, { type: "array" });
-  const errors: ValidationError[] = [];
-  for (const sheetDef of def.sheets) {
-    errors.push(...validateSheet(workbook, sourceName, sheetDef));
-  }
-  return errors;
+/** Return the entry of `candidates` whose normalized name matches `target`, if any. */
+export function matchName(target: string, candidates: string[]): string | undefined {
+  const want = normalizeName(target);
+  return candidates.find((c) => normalizeName(c) === want);
 }

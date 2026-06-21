@@ -23,60 +23,147 @@ import {
   groupRowsBy,
   type AggregationOp,
 } from "../aggregation";
+import { getLocale, type Locale } from "../i18n";
+
+/**
+ * Localized phrase tables. The alt-text module keeps its own strings (rather
+ * than going through the shared `t()` dictionary) so it stays self-contained
+ * and reusable, while still honouring the selected language.
+ */
+interface AltPhrases {
+  chartTypes: Record<ChartSpec["type"], string>;
+  /** Aggregation op → "comparing the …" phrase; `default` covers the rest. */
+  comparing: Record<string, string>;
+  by: string;
+  groupedBy: string;
+  splitBy: string;
+  filteredTo: (field: string) => string;
+  dataPoints: string;
+  points: (n: number) => string;
+}
+
+const PHRASES: Record<Locale, AltPhrases> = {
+  de: {
+    chartTypes: {
+      bar: "Balkendiagramm",
+      line: "Liniendiagramm",
+      pie: "Kreisdiagramm",
+      doughnut: "Ringdiagramm",
+      scatter: "Streudiagramm",
+      pyramid: "Bevölkerungspyramide",
+      distance: "Distanzdiagramm",
+    },
+    comparing: {
+      identity: "zeigt",
+      count: "vergleicht die Anzahl von",
+      sum: "vergleicht die Summe von",
+      mean: "vergleicht den Mittelwert von",
+      median: "vergleicht den Median von",
+      min: "vergleicht das Minimum von",
+      max: "vergleicht das Maximum von",
+      share_total: "vergleicht den Anteil (% des Gesamtwerts) von",
+      share_group: "vergleicht den Anteil innerhalb der Gruppe von",
+      share: "vergleicht den Anteil von",
+      default: "zeigt",
+    },
+    by: "nach",
+    groupedBy: "gruppiert nach",
+    splitBy: "aufgeteilt nach",
+    filteredTo: (field) => `(gefiltert auf ${field})`,
+    dataPoints: "Datenpunkte",
+    points: (n) => `${n} Punkte`,
+  },
+  en: {
+    chartTypes: {
+      bar: "Bar chart",
+      line: "Line chart",
+      pie: "Pie chart",
+      doughnut: "Doughnut chart",
+      scatter: "Scatter plot",
+      pyramid: "Pyramid chart",
+      distance: "Distance plot",
+    },
+    comparing: {
+      identity: "showing",
+      count: "comparing the count of",
+      sum: "comparing the sum of",
+      mean: "comparing the mean of",
+      median: "comparing the median of",
+      min: "comparing the minimum of",
+      max: "comparing the maximum of",
+      share_total: "comparing the share (% of total) of",
+      share_group: "comparing the share within group of",
+      share: "comparing the share of",
+      default: "showing",
+    },
+    by: "by",
+    groupedBy: "grouped by",
+    splitBy: "split by",
+    filteredTo: (field) => `(filtered to ${field})`,
+    dataPoints: "Data points",
+    points: (n) => `${n} points`,
+  },
+};
 
 /**
  * Generate an alt text string for a chart.
  *
  * @param spec - The chart YAML spec.
  * @param data - The resolved dataset (used to enumerate aggregated points).
+ * @param locale - Language for the generated text. Defaults to the active locale.
  * @returns A plain-text alt string.
  */
-export function generateAltText(spec: ChartSpec, data?: DataSet): string {
+export function generateAltText(
+  spec: ChartSpec,
+  data?: DataSet,
+  locale: Locale = getLocale()
+): string {
   if (spec.alt) return spec.alt;
-  if (spec.type === "pyramid") return derivePyramidAltText(spec, data);
-  return deriveAltTextFromSpec(spec, data);
+  const p = PHRASES[locale] ?? PHRASES.de;
+  if (spec.type === "pyramid") return derivePyramidAltText(spec, data, p);
+  return deriveAltTextFromSpec(spec, data, p);
 }
 
 // ── Spec-derived generation ─────────────────────────────────────────
 
-function deriveAltTextFromSpec(spec: ChartSpec, data?: DataSet): string {
-  const chartLabel = chartTypeLabel(spec.type);
+function deriveAltTextFromSpec(spec: ChartSpec, data: DataSet | undefined, p: AltPhrases): string {
+  const chartLabel = chartTypeLabel(spec.type, p);
   const yFields = Array.isArray(spec.y) ? spec.y.join(", ") : spec.y;
   const op = spec.aggregation?.y;
 
   const sentences: string[] = [];
 
   // Sentence 1 — what is shown.
-  let s1 = `${chartLabel} ${comparingPhrase(op)} ${yFields}`;
-  if (spec.x) s1 += ` by ${spec.x}`;
-  if (spec.color) s1 += `, grouped by ${spec.color}`;
-  if (hasFilter(spec)) s1 += ` (filtered to ${spec.filter})`;
+  let s1 = `${chartLabel} ${comparingPhrase(op, p)} ${yFields}`;
+  if (spec.x) s1 += ` ${p.by} ${spec.x}`;
+  if (spec.color) s1 += `, ${p.groupedBy} ${spec.color}`;
+  if (hasFilter(spec)) s1 += ` ${p.filteredTo(spec.filter!)}`;
   sentences.push(s1);
 
   // Sentence 2 — data point enumeration (only when data is available).
   if (data && data.length > 0) {
-    const enumeration = enumeratePoints(spec, data);
-    if (enumeration) sentences.push(`Data points: ${enumeration}`);
+    const enumeration = enumeratePoints(spec, data, p);
+    if (enumeration) sentences.push(`${p.dataPoints}: ${enumeration}`);
   }
 
   return assemble(spec, sentences);
 }
 
-function derivePyramidAltText(spec: ChartSpec, data?: DataSet): string {
+function derivePyramidAltText(spec: ChartSpec, data: DataSet | undefined, p: AltPhrases): string {
   const yField = Array.isArray(spec.y) ? spec.y[0] : spec.y;
   const splitField = spec.split ?? spec.color;
   const op = spec.aggregation?.y;
 
   const sentences: string[] = [];
 
-  let s1 = `Pyramid chart ${comparingPhrase(op)} ${yField}`;
-  if (splitField) s1 += ` split by ${splitField}`;
-  if (hasFilter(spec)) s1 += ` (filtered to ${spec.filter})`;
+  let s1 = `${p.chartTypes.pyramid} ${comparingPhrase(op, p)} ${yField}`;
+  if (splitField) s1 += ` ${p.splitBy} ${splitField}`;
+  if (hasFilter(spec)) s1 += ` ${p.filteredTo(spec.filter!)}`;
   sentences.push(s1);
 
   if (data && data.length > 0) {
-    const enumeration = enumeratePoints(spec, data);
-    if (enumeration) sentences.push(`Data points: ${enumeration}`);
+    const enumeration = enumeratePoints(spec, data, p);
+    if (enumeration) sentences.push(`${p.dataPoints}: ${enumeration}`);
   }
 
   return assemble(spec, sentences);
@@ -95,31 +182,12 @@ function hasFilter(spec: ChartSpec): boolean {
   return Boolean(spec.filter && spec.filter !== "Alle" && spec.filter !== "-");
 }
 
-function comparingPhrase(op?: AggregationOp): string {
-  switch (op) {
-    case "count": return "comparing the count of";
-    case "sum": return "comparing the sum of";
-    case "mean": return "comparing the mean of";
-    case "median": return "comparing the median of";
-    case "min": return "comparing the minimum of";
-    case "max": return "comparing the maximum of";
-    case "share_total": return "comparing the share (% of total) of";
-    case "share_group": return "comparing the share within group of";
-    default: return "showing";
-  }
+function comparingPhrase(op: AggregationOp | undefined, p: AltPhrases): string {
+  return (op && p.comparing[op]) || p.comparing.default;
 }
 
-function chartTypeLabel(type: ChartSpec["type"]): string {
-  const labels: Record<ChartSpec["type"], string> = {
-    bar: "Bar chart",
-    line: "Line chart",
-    pie: "Pie chart",
-    doughnut: "Doughnut chart",
-    scatter: "Scatter plot",
-    pyramid: "Pyramid chart",
-    distance: "Distance plot",
-  };
-  return labels[type] ?? "Chart";
+function chartTypeLabel(type: ChartSpec["type"], p: AltPhrases): string {
+  return p.chartTypes[type] ?? p.chartTypes.bar;
 }
 
 // ── Data-point enumeration ─────────────────────────────────────────
@@ -130,14 +198,14 @@ function chartTypeLabel(type: ChartSpec["type"]): string {
  * where per-point enumeration would be impractical (e.g. unaggregated raw
  * rows, scatter with hundreds of points).
  */
-function enumeratePoints(spec: ChartSpec, data: DataSet): string {
+function enumeratePoints(spec: ChartSpec, data: DataSet, p: AltPhrases): string {
   const filtered = applyFilter(data, spec.filter);
   if (filtered.length === 0) return "";
 
   try {
     if (spec.type === "pyramid") return enumeratePyramid(spec, filtered);
     if (spec.type === "pie" || spec.type === "doughnut") return enumeratePie(spec, filtered);
-    if (spec.type === "scatter") return enumerateScatter(spec, filtered);
+    if (spec.type === "scatter") return enumerateScatter(spec, filtered, p);
     if (spec.color) return enumerateGrouped(spec, filtered);
     return enumerateUngrouped(spec, filtered);
   } catch {
@@ -172,9 +240,9 @@ function enumeratePie(spec: ChartSpec, data: DataSet): string {
   return agg.labels.map((label, i) => `${label}: ${fmt(agg.values[i], isShare)}`).join("; ");
 }
 
-function enumerateScatter(_spec: ChartSpec, data: DataSet): string {
+function enumerateScatter(_spec: ChartSpec, data: DataSet, p: AltPhrases): string {
   // Per-point enumeration is impractical for scatter; fall back to count.
-  return `${data.length} points`;
+  return p.points(data.length);
 }
 
 function enumerateGrouped(spec: ChartSpec, data: DataSet): string {

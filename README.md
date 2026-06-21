@@ -1,8 +1,8 @@
-<img src="img/ondatix_Logo_dunkel.png" alt="Reportix Logo" class="logo" height="80" align="right"/><br><br>
+<img src="img/ondatix_Logo_V1_dunkler_Hintergrund_SVG.svg" alt="ondatix Logo" class="logo" height="80" align="right"/><br><br>
 
 # reportix
 
-Fully client-side web app for automated report generation. Upload an Excel workbook and a Markdown template, fill in a parameter form, and export a styled `.docx` — all in the browser, no server, no network at runtime.
+Fully client-side web app for automated report generation. Upload an Excel workbook or CSV files, map their sheets/columns to the report's data, fill in a parameter form, and export a styled `.docx` — all in the browser, no server, no network at runtime.
 
 ## Why
 
@@ -14,10 +14,12 @@ Many reporting workflows (HR equality reports, internal KPIs, compliance summari
 - **Markdown templates** with embedded chart / table YAML blocks and Pandoc-style callouts.
 - **Six chart types**: `bar`, `line`, `pie`, `doughnut`, `scatter`, `pyramid`, `distance` (dumbbell plot).
 - **Long-form data support**: `color: <column>` pivots a single dataset into one series per distinct value.
+- **Data preprocessing**: `config.yaml` can define **mutations** (derive a new column with a simple if-else rule, e.g. classify `Oberstufe` from the year level) and **joins** (enrich one sheet with columns looked up from another by a shared key, e.g. attach `Schueler` master-data onto each `Zeitraum_*` event by `SchuelerID`) — applied before rendering.
 - **Aggregation**: `count`, `sum`, `mean`, `min`, `max`, `median`, `share_total`, `share_group`, `identity` — for both charts and tables.
 - **Row filtering**: `filter: <bool-column>` keeps only matching rows before aggregation.
 - **Data protection**: aggregated values below a configurable threshold are masked (`<5` in tables, clamped + masked tooltip in charts) for count-like operations.
 - **Accessible by default**: WCAG-AA colour palettes, colorblind-safe defaults, semantic HTML, auto-generated alt text for every chart.
+- **Bilingual UI (German / English)**: a language selector switches every program text — labels, buttons, validation warnings, error messages, and auto-generated chart alt text. German is the default; English is the second option.
 - **Configurable export**: fonts, page layout, headers/footers, page numbers, callout colours and backgrounds, all driven by `config.yaml`.
 - **Per-block error isolation**: a malformed chart or table is replaced with a red "TBD" note; the rest of the report still renders.
 
@@ -29,11 +31,11 @@ Many reporting workflows (HR equality reports, internal KPIs, compliance summari
 
 **To use the built app:**
 - A modern evergreen browser (Chrome, Firefox, Safari, Edge — anything supporting ES2022 and the Canvas 2D API)
-- An `.xlsx` workbook matching the sheets and columns declared in `config.yaml`
+- An `.xlsx` workbook or CSV files with the data — sheet/column names need **not** match `config.yaml`; you map them in the UI
 - A Markdown template (see [Template Format](#template-format))
 
 **To deploy:**
-- Any static host (Netlify, Vercel, Cloudflare Pages, GitHub Pages, S3+CloudFront, nginx, …). The build output in `dist/` is fully static — no runtime, no environment variables, no secrets.
+- **Static host** (Netlify, Vercel, Cloudflare Pages, GitHub Pages, S3+CloudFront, nginx, …) — the build output in `dist/` is fully static, no runtime, no environment variables, no secrets.
 
 ## Quick Start
 Open a terminal/shell in the repository root to use these commands, when you need them.
@@ -51,23 +53,25 @@ The dev server reloads on save. The production build under `dist/` is a fully st
 
 The app runs a strict pipeline:
 
-1. **Load config** — `/config.yaml` is bundled at build time and parsed on startup.
-2. **Upload data** — user picks one `.xlsx` per data source declared in the config. Each source is validated against its expected sheet names and column lists; mismatches surface as non-blocking warnings and the pipeline proceeds with whatever sheets did load (blocks referencing missing data render as red "TBD" notes).
-3. **Choose template** — user picks one of the bundled Markdown templates listed under `template.files` in the config (radio chooser with human-readable labels). Templates live in `templates/` and are bundled at build time.
+1. **Load config** — `/config.yaml` is a manifest listing the per-section files under `config/`; all are bundled at build time, merged, and parsed on startup.
+2. **Choose template** — user picks one of the bundled Markdown templates listed under `template.files` in the config (radio chooser with human-readable labels). The `templates/` files are **generated** at build time from a single master (`templates/master.md`) by `scripts/gen-templates.ts` and bundled — see [Templates](#templates).
+3. **Load data** — user picks a format (**XLSX** workbook per source, or **CSV** — one single-table file per sheet, also accepting a single-sheet `.xlsx`) and **maps** their actual sheets/columns onto the config's sheets/columns. The mapping UI shows only the sheets/columns the chosen template needs (those whose `include` lists its `id`). Options pre-select by matching name, so a file that already uses the config names needs no manual mapping. Unmapped names surface as non-blocking warnings on Continue (blocks referencing missing data render as red "TBD" notes).
+3b. **Preprocess** — any `preprocessing` defined in the config runs before rendering: `mutations` derive new columns (if-else rules), then `joins` enrich one sheet with another's columns by a shared key.
 4. **Fill parameters** — a form is generated from the config's `parameters` section.
 5. **Render preview** — Markdown becomes semantic HTML; chart / table YAML blocks become Chart.js canvases and accessible `<table>`s with auto-generated alt text.
 6. **Export DOCX** — the rendered DOM is walked and serialised to a `.docx` file with the configured page layout, fonts, callouts, and chart images.
 
-No step talks to a server. The XLSX is read in-browser via SheetJS; the DOCX is built in-browser via [docx](https://www.npmjs.com/package/docx) and saved via [FileSaver](https://www.npmjs.com/package/file-saver).
+No step talks to a server. The XLSX/CSV is read in-browser via SheetJS; the DOCX is built in-browser via [docx](https://www.npmjs.com/package/docx) and saved via [FileSaver](https://www.npmjs.com/package/file-saver).
 
 ## Configuration (`config.yaml`)
 
 The config is the entry point — a developer edits it, the end user never touches it. It declares:
 
-- **`parameters`** — form fields shown before report generation (`text`, `number`, `date`, `select`, `multiselect`, `boolean`). Each entry is either **standalone** (template variable, prefilled from `default:`) or **bound** to a config leaf via `bind: <dotted.path>` — bound entries prefill from the path's preset and write the user's value back to that path at runtime, letting most styling and metadata keys be overridden per report. The names `palette` and `font` get special UI widgets (illustrated radios).
-- **`data`** — expected data sources, each with sheet names and required columns. Used to validate the uploaded workbook.
-- **`template.files`** — list of bundled Markdown templates shown as a radio chooser in Step 2. Each entry has a `label` (shown to the user) and a `file` (filename within `templates/`). The app hard-fails at startup if any referenced file isn't bundled.
-- **`export`** — DOCX styling: filename, locale, document metadata, fonts, heading sizes/colours, paragraph spacing, page size & margins, page numbers, header/footer text, table borders, **section numbering** (`section_numbering: true` auto-numbers headings as `1.`, `1.1.`, …), **table of contents** (`toc: true` inserts a Word TOC field), **callout box colours and backgrounds** (`definition_box`, `summary_box`).
+- **`parameters`** — form fields shown before report generation (`text`, `number`, `date`, `select`, `multiselect`, `boolean`). Each entry is either **standalone** (template variable, prefilled from `default:`) or **bound** to a config leaf via `bind: <dotted.path>` — bound entries prefill from the path's preset and write the user's value back to that path at runtime, letting most styling and metadata keys be overridden per report. The names `palette`, `font`, `page_orientation`, and `page_numbers` get special UI widgets (illustrated / icon radios — translation-free choices). Each `label` may be a plain string or a per-locale map `{ de: "…", en: "…" }` resolved to the [selected language](#features). **Bind paths target the parsed config (camelCase)** — e.g. `export.pageNumbers.position`, `export.sectionNumbering`, `dataProtection.smallestGroup` — not the snake_case YAML keys.
+- **`data`** — expected data sources, each with sheet names and required columns. These are the **mapping targets**: the user maps their uploaded file's actual sheets/columns onto these names (pre-selected when names match), rather than the upload being hard-validated. Each sheet and column may carry optional `definition` (German-only) or `info` (bilingual) tooltip text, `notes` metadata, and an `include` list of template `id`s — the data step only requests sheets/columns whose `include` contains the selected template's id (omit `include` ⇒ every template). A column is either a plain string or an object (`{ column, definition, info, notes, include }`). The `definition`/`info` text appears as a click-to-open ⓘ tooltip (templates, sheets, columns, and parameters); each workflow step has one too.
+- **`preprocessing`** — optional derived columns and datasets built before rendering. **`mutations`** (run first) add a column via a simple if-else rule: where `when` holds for the `from` value the new `column` gets `then`, else `else` (operators: `equals`, `in`, `contains`, `starts_with`, `ends_with`, `matches`, `gt`/`lt`/`gte`/`lte`, `empty`, `truthy`). **`joins`** then enrich a `left` sheet with columns from a `right` sheet matched on a key (`on`, or `left_on`/`right_on`); `type` is `left` or `inner`; omit `select` to copy all non-overlapping right columns, or list specific ones (`{column, as}` to rename); `indicator` adds a boolean "matched?" column. Setting `name` = `left` enriches the sheet in place. First-match lookup (left rows are never duplicated).
+- **`template.files`** — list of bundled Markdown templates shown as a radio chooser in Step 2. Each entry has a `label` (shown to the user), a `file` (filename within `templates/`), and an optional `id` referenced by the data `include` lists to scope which sheets/columns that template requests. The app hard-fails at startup if any referenced file isn't bundled.
+- **`export`** — DOCX styling: filename, locale, document metadata, fonts, heading sizes/colours, paragraph spacing, page size & margins, **page numbers** (`page_numbers.position`: `left`/`center`/`right`/`none`), header/footer text, table borders, **section numbering** (`section_numbering: true` numbers section headings `1.`, `1.1.`, … in both preview and DOCX), **table of contents** (`toc: true` builds one in the preview and as a Word TOC field), **callout box colours and backgrounds** (`definition_box`, `summary_box`). The first `# {{title}}` is treated as the document title (placed before the TOC, not numbered).
 - **`charts`** — Chart.js defaults: animation, aspect ratio, fonts, title/legend/tooltip placement, axis grid colours, line/bar element styling.
 - **`data_protection.smallest_group`** — privacy threshold for aggregated counts/shares (default 5).
 
@@ -82,24 +86,24 @@ Templates are plain Markdown. Charts and tables are fenced code blocks with a ty
 **Geschlecht:** Im Datensatz wird zwischen männlich und weiblich unterschieden.
 :::
 
-## Headcount by pay grade
+## Pupils per year level
 
 ```chart
-data: Stichtag
+data: Schueler
 type: pyramid
-y: Entgeltgruppe / Besoldungsgruppe
+y: Jahrgangsstufe
 color: Geschlecht
-title: Headcount by pay grade and gender
+title: Pupils per year level and gender
 aggregation:
   y: count
 ```
 
 ```table
-data: Stichtag
-columns: [Entgeltgruppe / Besoldungsgruppe, PersNr]
+data: Schueler
+columns: [Jahrgangsstufe, SchuelerID]
 aggregation:
-  Entgeltgruppe / Besoldungsgruppe: identity
-  PersNr: count
+  Jahrgangsstufe: identity
+  SchuelerID: count
 ```
 ````
 
@@ -111,8 +115,10 @@ Each utility is a self-contained module under `src/modules/` with a clean public
 
 | Module | Responsibility |
 |---|---|
-| `config/` | Parse `/config.yaml` (bundled via `?raw` import) into a typed `AppConfig`. |
-| `data-loader/` | Read `.xlsx` files via SheetJS, validate sheets and columns. |
+| `i18n/` | Central translation layer (German / English) with `t(key, params)` lookup; drives all UI text, error messages, and chart alt text. |
+| `config/` | Load the modular config — `/config.yaml` manifest + `config/*.yaml` sections (bundled via `?raw`), merged and parsed into a typed `AppConfig`. Also exposes `dataForTemplate` for template-scoped data filtering. |
+| `data-loader/` | Parse `.xlsx` workbooks / CSV files via SheetJS; assemble a DataStore from the user's sheet/column mapping (renames to config names). |
+| `preprocessing/` | Derive columns and datasets from the loaded sheets before rendering — mutations (if-else derived columns) and joins (lookup/enrichment), defined in the config's `preprocessing:` section (in `config/data.yaml`). |
 | `parameters/` | Render the form from `AppConfig.parameters`, collect typed values. |
 | `template/` | Parse Markdown into typed blocks (`text` / `chart` / `table`). |
 | `aggregation/` | Aggregation ops, row filtering, data-protection helpers. |
@@ -120,6 +126,7 @@ Each utility is a self-contained module under `src/modules/` with a clean public
 | `fonts/` | Curated accessible system fonts (Verdana, Tahoma, Arial, Georgia). |
 | `renderer/` | Markdown→HTML (`text.ts`), Chart.js (`chart.ts`), HTML tables (`table.ts`), orchestration (`index.ts`). |
 | `alt-text/` | Spec-derived chart alt text generation — fully offline, no LLM. |
+| `info/` | Click-to-open tooltips (ⓘ trigger + popup) for steps, template options, sheets, columns, and parameters, fed by their `definition`/`info` text. |
 | `exporter/` | DOM → docx conversion (paragraphs, headings, lists, tables, callouts, embedded chart images). |
 
 ## Security & Privacy
@@ -198,9 +205,27 @@ src/
     ├── fonts/
     ├── renderer/         # text, chart, table, index
     ├── alt-text/
+    ├── info/             # click-to-open tooltips
     └── exporter/
-config.yaml               # bundled at build time
-templates/                # example Markdown templates
+config.yaml               # manifest: include-list of config/*.yaml sections
+config/                   # per-section config files (parameters, data, …)
+templates/            # master template(s) — source of truth (tracked)
+templates/                # generated Markdown templates (git-ignored, built)
+scripts/gen-templates.ts  # generates templates/ from templates/master.md
 public/_headers           # Netlify / static-host security headers
 vite.config.ts            # Vite + SRI plugin
 ```
+
+## Templates
+
+The bundled report templates in `templates/` are **build artifacts** (git-ignored). They are generated from a single master — `templates/master.md` — by `scripts/gen-templates.ts`, run via `npm run gen:templates` (also wired as a `predev`/`prebuild`/`pretest` hook, so a fresh checkout produces them automatically).
+
+For each entry in `config/template.yaml` that has an `id` + `file`, the generator writes a filtered copy to `templates/<file>`. Section markers in the master — HTML comments reusing the config `include:` vocabulary — decide which template gets which block; unmarked content goes into every template:
+
+```markdown
+<!-- include: full -->
+…only in the template whose id is "full"…
+<!-- /include -->
+```
+
+Edit `templates/master.md`, not the generated files. (Editing the master during `dev` does not hot-reload the output — re-run `npm run gen:templates`.)

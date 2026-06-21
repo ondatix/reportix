@@ -1,0 +1,20 @@
+template:
+  # Step 2 shows a radio chooser of the entries below. `file` is the filename
+  # within the bundled `templates/` directory; `label` is what the user sees.
+  # The app hard-fails at startup if any referenced file isn't bundled.
+  #
+  # `id` is a stable, translation-free identifier referenced by the `include`
+  # lists in data.yaml. When a template is selected, the data-loading step shows
+  # only the sheets/columns whose `include` contains this id (or omit `include`
+  # to include a sheet/column in every template).
+  files:
+    - id: full
+      label:
+        de: "Schuljahresbericht (vollständig)"
+        en: "Annual school report (full)"
+      file: template_full.md
+    - id: mandatory
+      label:
+        de: "Schuljahresbericht (Kurzfassung)"
+        en: "Annual school report (short)"
+      file: template_mandatory.md
