@@ -3,10 +3,17 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
+    "gen:templates": "vite-node scripts/gen-templates.ts",
+    "predev": "npm run gen:templates",
     "dev": "vite",
+    "prebuild": "npm run gen:templates",
     "build": "tsc && vite build",
     "preview": "vite preview",
+    "pretest": "npm run gen:templates",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:bootstrap-alt-text": "vite-node test/alt-text/regenerate.ts"

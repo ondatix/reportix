@@ -1,0 +1,142 @@
+parameters:
+  # — Standalone parameters (template variables, not bound to config leaves) —
+  # `label` may be a plain string (same in every language) or a per-locale
+  # map like `{ de: "Titel", en: "Title" }`. The active language selects the
+  # entry; config is re-parsed when the user switches languages.
+  title:
+    label:
+      de: "Titel"
+      en: "Title"
+    type: text
+    default: "Schuljahresbericht"
+  office:
+    label:
+      de: "Schule"
+      en: "School"
+    type: text
+    default: "Gymnasium Beispielstadt"
+  # palette:
+  #   label: "Chart color palette"
+  #   type: select
+  #   default: okabe-ito
+  #   options:
+  #     - okabe-ito   # Okabe & Ito / Wong (2011) — 8-colour standard
+  #     - tol-bright  # Paul Tol — Bright (7)
+  #     - tol-muted   # Paul Tol — Muted (9)
+  #     - ibm         # IBM Design Language colourblind-safe (5)
+  #     - grayscale   # Print-safe maximum-contrast fallback
+  font:
+    # Curated theme: maps to CSS stack + DOCX family + display name via the
+    # fonts module; not a 1:1 string override, so it stays standalone.
+    label:
+      de: "Schriftart"
+      en: "Font"
+    type: select
+    default: arial
+    options:
+      - verdana   # Screen-optimised sans, broad legibility
+      - tahoma    # Compact accessible sans
+      - arial     # Universal sans
+      - georgia   # Accessible serif option
+
+  # — Bound overrides — `bind:` points at a config leaf. The form prefills
+  #   from that leaf; the user-entered value overrides the preset at runtime.
+  #   Bound entries carry no `default:` (the bound leaf is the source of truth).
+  palette:
+    label:
+      de: "Farbpalette des Diagramms"
+      en: "Chart color palette"
+    type: select
+    bind: charts.palette
+    options:
+      - okabe-ito   # Okabe & Ito / Wong (2011) — 8-colour standard
+      - tol-bright  # Paul Tol — Bright (7)
+      - tol-muted   # Paul Tol — Muted (9)
+      - ibm         # IBM Design Language colourblind-safe (5)
+      - grayscale   # Print-safe maximum-contrast fallback
+  font_size:
+    label:
+      de: "Schriftgröße des Texts (pt)"
+      en: "Body font size (pt)"
+    type: number
+    bind: export.font.size
+  heading_color:
+    label:
+      de: "Überschriftenfarbe (Hex ohne #)"
+      en: "Heading color (hex without #)"
+    type: text
+    bind: export.headings.color
+  page_orientation:
+    label:
+      de: "Seitenausrichtung"
+      en: "Page orientation"
+    type: select
+    bind: export.page.orientation
+    options:
+      - portrait
+      - landscape
+  header_text:
+    label:
+      de: "Kopfzeilentext"
+      en: "Header text"
+    type: text
+    bind: export.header.text
+  footer_text:
+    label:
+      de: "Fußzeilentext"
+      en: "Footer text"
+    type: text
+    bind: export.footer.text
+  page_numbers:
+    # Rendered as page-icon radios (left | center | right | none); "none" hides
+    # the footer page number. Values are translation-free; captions localized.
+    label:
+      de: "Seitenzahlen"
+      en: "Page numbers"
+    type: select
+    bind: export.pageNumbers.position
+    options:
+      - left
+      - center
+      - right
+      - none
+  filename:
+    label:
+      de: "Dateiname der Ausgabe"
+      en: "Output filename"
+    type: text
+    bind: export.filename
+  # locale:
+  #   label: "Locale"
+  #   type: text
+  #   bind: export.locale
+  doc_subject:
+    label:
+      de: "Dokumentbetreff"
+      en: "Document subject"
+    type: text
+    bind: export.document.subject
+  doc_creator:
+    label:
+      de: "Dokumentersteller"
+      en: "Document creator"
+    type: text
+    bind: export.document.creator
+  smallest_group:
+    label:
+      de: "Schwellenwert kleinste Gruppe"
+      en: "Smallest group threshold"
+    type: number
+    bind: dataProtection.smallestGroup
+  section_numbering:
+    label:
+      de: "Überschriften nummerieren (1., 1.1., …)"
+      en: "Number headings (1., 1.1., …)"
+    type: boolean
+    bind: export.sectionNumbering
+  toc:
+    label:
+      de: "Inhaltsverzeichnis einfügen"
+      en: "Include table of contents"
+    type: boolean
+    bind: export.toc

@@ -1,0 +1,42 @@
+charts:
+  palette: okabe-ito           # bound by parameters.palette
+  animation: false             # disable animation (recommended for reports)
+  aspect_ratio: 2.0            # width:height ratio of every chart
+
+  font:
+    family: Arial              # overridden at runtime by the `font` parameter
+    size: 12                   # pt
+    color: "555555"            # hex without #; used for tick labels and legend
+
+  title:
+    position: top              # top | bottom | left | right
+    align: center              # start | center | end
+    color: "1A1A1A"            # hex without #
+
+  legend:
+    display: true
+    position: top              # top | bottom | left | right
+    align: center              # start | center | end
+
+  tooltip:
+    enabled: true
+
+  scales:
+    x:
+      begin_at_zero: false
+      grid_display: true
+      grid_color: "rgba(0,0,0,0.08)"
+      tick_color: "888888"     # hex without #
+    y:
+      begin_at_zero: true
+      grid_display: true
+      grid_color: "rgba(0,0,0,0.08)"
+      tick_color: "888888"     # hex without #
+
+  elements:
+    line:
+      tension: 0.0             # 0 = straight lines, ~0.4 = smooth curves
+      point_radius: 3          # point marker size in px
+    bar:
+      border_radius: 0         # rounded bar corners in px
+      bar_percentage: 0.9      # fraction of category slot used by bars (0–1)

@@ -1,0 +1,215 @@
+data:
+  # Each sheet and each column may carry three optional metadata fields:
+  #   definition   — human-readable definition of the sheet/column
+  #   notes        — optional further notes
+  #   include      — list of template ids (see template.yaml `id:`) this
+  #                  sheet/column belongs to. OMITTED ⇒ included in every
+  #                  template. To restrict, list the ids, e.g.
+  #                    include: [full]            # only the full template
+  #                    include: [full, mandatory] # both
+  #                  The data-loading step shows only the sheets/columns whose
+  #                  `include` matches the selected template.
+  # A column may be written as a plain string (no metadata) or as an object
+  # with `column:` (or `name:`) plus any of the fields above.
+  #
+  # SHOWCASE EXAMPLE — annual report of a (fictional) German public secondary
+  # school ("Gymnasium Beispielstadt"). One snapshot sheet `Schueler` holds the
+  # pupil body at the reporting date; the `Zeitraum_*` sheets hold events during
+  # the school year and are enriched from `Schueler` via joins (see preprocessing
+  # below). Definitions mirror the "Definitionen" callouts in the template.
+  Schuldatensatz:
+    sheets:
+      - sheet: Schueler
+        definition: "Stichtagsbezogener Schülerstand — eine Zeile je Schülerin/Schüler zum Stichtag des Schuljahres."
+        columns:
+          - column: SchuelerID
+            definition: "Eindeutige Schülerkennung; Schlüssel für die Joins mit den Zeitraum-Blättern."
+          - column: Geschlecht
+            definition: "Im Datensatz wird zwischen den Ausprägungen unterschieden, die das Schulverwaltungssystem führt (männlich, weiblich, divers)."
+          - column: Jahrgangsstufe
+            definition: "Jahrgangsstufe der Schülerin/des Schülers (5–12 am bayerischen Gymnasium)."
+          - column: Klasse
+            definition: "Klassenbezeichnung innerhalb der Jahrgangsstufe (z. B. 7a, 7b)."
+          - column: Ausbildungsrichtung
+            definition: "Profil des Gymnasiums, z. B. Naturwissenschaftlich-technologisch, Sprachlich, Musisch, Wirtschaftswissenschaftlich."
+          - column: Erste Fremdsprache
+            definition: "In Jahrgangsstufe 5 begonnene erste Fremdsprache (Englisch, Französisch, Latein)."
+          - column: Religionsunterricht
+            definition: "Besuchter Religions- bzw. Ethikunterricht (katholisch, evangelisch, Ethik, weitere)."
+          - column: Migrationshintergrund
+            definition: "Liegt nach Definition der amtlichen Schulstatistik ein Migrationshintergrund vor (Ja/Nein)."
+          - column: Ganztagsbetreuung
+            definition: "Teilnahme an der offenen oder gebundenen Ganztagsbetreuung (Ja/Nein)."
+          - column: Fahrschüler
+            definition: "Schülerin/Schüler mit anerkanntem Anspruch auf Schülerbeförderung (Ja/Nein)."
+          - column: Inklusion
+            definition: "Festgestellter sonderpädagogischer Förderbedarf bzw. inklusive Beschulung (Ja/Nein)."
+          - column: Wiederholer
+            definition: "Wiederholt die aktuelle Jahrgangsstufe (Ja/Nein)."
+          - column: Notendurchschnitt
+            definition: "Zeugnisnotendurchschnitt im Berichtszeitraum (1,0 = sehr gut … 6,0 = ungenügend)."
+      - sheet: Zeitraum_Anmeldung
+        definition: "Anmeldungen zum kommenden Schuljahr. Eigener Schlüssel (AnmeldeID), daher kein Schueler-Join — die benötigten Merkmale stehen direkt im Blatt."
+        notes: "Aufnahmeempfehlung: Die Grundschule bzw. das Übertrittszeugnis empfiehlt die Eignung für das Gymnasium."
+        columns:
+          - column: AnmeldeID
+            definition: "Eindeutige Anmeldekennung."
+          - column: Geschlecht
+            definition: "Im Datensatz wird zwischen den Ausprägungen unterschieden, die das Schulverwaltungssystem führt."
+          - column: Gewünschte Ausbildungsrichtung
+            definition: "Bei der Anmeldung gewählte Ausbildungsrichtung."
+          - column: Herkunftsschulart
+            definition: "Bisher besuchte Schulart (Grundschule, Mittelschule, Realschule, anderes Gymnasium)."
+          - column: Sprengelzugehörigkeit
+            definition: "Wohnt die Schülerin/der Schüler im Schulsprengel (Sprengel) oder kommt sie/er als Gastschüler (Gastschüler)."
+          - column: Aufnahmeempfehlung
+            definition: "Liegt eine Eignungsempfehlung der abgebenden Schule bzw. ein geeignetes Übertrittszeugnis vor (Ja/Nein)."
+      - sheet: Zeitraum_Eintritt
+        definition: "Eintritte (Neuaufnahmen) im Berichtszeitraum. Stammdaten werden per Join mit Schueler (SchuelerID) ergänzt."
+        notes: "Doppelt vorgehaltene Stammdatenspalten wurden entfernt; sie stammen aus dem Schueler-Join."
+        columns:
+          - column: SchuelerID
+            definition: "Schülerkennung; Join-Schlüssel zu Schueler."
+      - sheet: Zeitraum_Beurlaubung
+        definition: "Schulische Beurlaubungen vom Unterricht im Berichtszeitraum. Stammdaten werden per Join mit Schueler (SchuelerID) ergänzt."
+        notes: >-
+          Spalten, die bereits über den Schueler-Join erreichbar sind, wurden hier bewusst entfernt (keine Doppelerfassung).
+          Beurlaubung: Befreiung vom Unterricht aus einem anerkannten Grund (z. B. familiäre Anlässe, gesundheitliche Kur).
+        columns:
+          - column: SchuelerID
+            definition: "Schülerkennung; Join-Schlüssel zu Schueler."
+          - column: Beurlaubungsgrund
+            definition: "Anerkannter Grund der Beurlaubung."
+          - column: Dauer der Beurlaubung (Tage)
+            definition: "Kalendertage zwischen Beginn und Ende der Beurlaubung."
+      - sheet: Zeitraum_Foerdermassnahme
+        definition: "Fördermaßnahmen im Berichtszeitraum (z. B. Förderkurse, LRS-Förderung, Begabtenförderung). Stammdaten werden per Join mit Schueler (SchuelerID) ergänzt."
+        notes: >-
+          Doppelt vorgehaltene Stammdatenspalten wurden entfernt; sie stammen aus dem Schueler-Join.
+          Bewilligt vs. abgeschlossen: Eine bewilligte Maßnahme kann noch laufen; abgeschlossen heißt erfolgreich beendet.
+        columns:
+          - column: SchuelerID
+            definition: "Schülerkennung; Join-Schlüssel zu Schueler."
+          - column: Förderart
+            definition: "Art der Fördermaßnahme (z. B. LRS-Förderung, Sprachförderung, Begabtenförderung, Förderkurs)."
+          - column: "Fördermaßnahme bewilligt (ja/nein)"
+            definition: "Wurde die Fördermaßnahme bewilligt (Ja/Nein)."
+          - column: "Fördermaßnahme abgeschlossen (ja/nein)"
+            definition: "Wurde die Fördermaßnahme erfolgreich abgeschlossen (Ja/Nein)."
+      - sheet: Zeitraum_Wettbewerb
+        definition: "Teilnahmen an Schülerwettbewerben im Berichtszeitraum (z. B. Jugend forscht, Mathematik-Olympiade, Vorlesewettbewerb). Stammdaten werden per Join mit Schueler (SchuelerID) ergänzt."
+        notes: "Doppelt vorgehaltene Stammdatenspalten wurden entfernt; sie stammen aus dem Schueler-Join."
+        columns:
+          - column: SchuelerID
+            definition: "Schülerkennung; Join-Schlüssel zu Schueler."
+          - column: Wettbewerbsart
+            definition: "Fachliche Ausrichtung des Wettbewerbs (z. B. MINT, Sprachen, Musik, Sport)."
+          - column: "Erfolgreiche Teilnahme (ja/nein)"
+            definition: "Wurde die Teilnahme mit einer Platzierung bzw. Urkunde abgeschlossen (Ja/Nein)."
+      - sheet: Zeitraum_Auszeichnung
+        definition: "Auszeichnungen und Preise im Berichtszeitraum. Stammdaten werden per Join mit Schueler (SchuelerID) ergänzt."
+        notes: "Doppelt vorgehaltene Stammdatenspalten wurden entfernt; sie stammen aus dem Schueler-Join."
+        columns:
+          - column: SchuelerID
+            definition: "Schülerkennung; Join-Schlüssel zu Schueler."
+          - column: Auszeichnungsart
+            definition: "Art der Auszeichnung (z. B. Wettbewerbspreis, Sozialpreis, Sportabzeichen)."
+          - column: Punkte
+            definition: "Erreichte Wertungspunkte bzw. Höhe der Auszeichnung im Berichtszeitraum."
+      - sheet: Zeitraum_Vorrueckung
+        definition: "Vorrückungs- und Wiederholungsentscheidungen am Schuljahresende. Stammdaten (inkl. abgeleiteter Oberstufe/Unterstufe-Klassifikation) werden per Join mit Schueler (SchuelerID) ergänzt."
+        notes: "Doppelt vorgehaltene Stammdatenspalten wurden entfernt; sie stammen aus dem Schueler-Join."
+        columns:
+          - column: SchuelerID
+            definition: "Schülerkennung; Join-Schlüssel zu Schueler."
+          - column: Antrag
+            definition: "Erfolgte die Entscheidung auf Antrag der Eltern (z. B. freiwilliges Wiederholen) oder regulär durch die Klassenkonferenz."
+          - column: Ergebnis
+            definition: "Ergebnis der Jahrgangsstufenentscheidung; Grundlage der abgeleiteten Flags Vorgerückt (ja/nein) und Wiederholung (ja/nein)."
+
+# Derived columns and datasets, built from the sheets above before rendering.
+# Kept in this file because mutations/joins operate directly on the `data`
+# sheets and share their context.
+#   `mutations` (run first) add a column via a simple if-else rule, then
+#   `joins` enrich one sheet with another's columns by a shared key.
+# A mutation may carry an optional `definition` (metadata) describing the
+# derived column, mirroring the column metadata above.
+preprocessing:
+  mutations:
+    # Ober-/Unterstufe aus der Jahrgangsstufe ableiten (numerischer Vergleich):
+    # Jahrgangsstufe ≥ 11 ⇒ Oberstufe; Jahrgangsstufe ≤ 6 ⇒ Unterstufe.
+    # Auf Schueler abgeleitet — der Join unten trägt sie nach Zeitraum_Vorrueckung.
+    - dataset: Schueler
+      column: Oberstufe
+      definition: "Zugehörigkeit zur gymnasialen Oberstufe (separate Auswertung wegen abweichender Leistungsbewertung); Ja ab Jahrgangsstufe 11, abgeleitet aus der Jahrgangsstufe."
+      from: Jahrgangsstufe
+      when:
+        gte: 11
+      then: "Ja"
+      else: "Nein"
+    - dataset: Schueler
+      column: Unterstufe
+      definition: "Zugehörigkeit zur Unterstufe; Ja bis einschließlich Jahrgangsstufe 6, abgeleitet aus der Jahrgangsstufe."
+      from: Jahrgangsstufe
+      when:
+        lte: 6
+      then: "Ja"
+      else: "Nein"
+    # Vorrückungsereignisse klassifizieren (eigene Spalten von Zeitraum_Vorrueckung):
+    - dataset: Zeitraum_Vorrueckung
+      column: "Vorgerückt (ja/nein)"
+      definition: "Vorrückung: regulärer Aufstieg in die nächste Jahrgangsstufe; abgeleitet aus dem Ergebnis."
+      from: Ergebnis
+      when:
+        equals: "Vorrückung"
+      then: "Ja"
+      else: "Nein"
+    - dataset: Zeitraum_Vorrueckung
+      column: "Wiederholung (ja/nein)"
+      definition: "Wiederholung: erneutes Durchlaufen der Jahrgangsstufe (freiwillig oder angeordnet); abgeleitet aus dem Ergebnis."
+      from: Ergebnis
+      when:
+        equals: "Wiederholung"
+      then: "Ja"
+      else: "Nein"
+
+  # ── Joins: look up matching rows in `right` by key (first match wins — left
+  #    rows are never duplicated) and copy its columns onto `left`. Setting
+  #    `name` = `left` enriches the source in place, so the template's existing
+  #    `data:` blocks pick up the added columns automatically. ──
+  joins:
+    # Vorrückungsereignisse mit den Stammdaten der Schülerin/des Schülers aus
+    # `Schueler` anreichern (Schlüssel: SchuelerID). Trägt u. a. die oben
+    # abgeleitete Oberstufe/Unterstufe-Klassifikation in Zeitraum_Vorrueckung,
+    # die die Vorrückungs-Diagramme als `filter:` nutzen. `select` weggelassen →
+    # alle Schueler-Spalten, die in Zeitraum_Vorrueckung noch nicht vorhanden sind.
+    - name: Zeitraum_Vorrueckung   # in-place enrichment of the source sheet
+      left: Zeitraum_Vorrueckung
+      right: Schueler
+      on: SchuelerID
+      type: left
+    - name: Zeitraum_Beurlaubung
+      left: Zeitraum_Beurlaubung
+      right: Schueler
+      on: SchuelerID
+      type: left
+    - name: Zeitraum_Eintritt
+      left: Zeitraum_Eintritt
+      right: Schueler
+      on: SchuelerID
+      type: left
+    - name: Zeitraum_Foerdermassnahme
+      left: Zeitraum_Foerdermassnahme
+      right: Schueler
+      on: SchuelerID
+      type: left
+    - name: Zeitraum_Wettbewerb
+      left: Zeitraum_Wettbewerb
+      right: Schueler
+      on: SchuelerID
+      type: left
+    - name: Zeitraum_Auszeichnung
+      left: Zeitraum_Auszeichnung
+      right: Schueler
+      on: SchuelerID
+      type: left

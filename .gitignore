@@ -14,6 +14,7 @@
 
 # production
 /build
+/dist
 
 # misc
 .DS_Store
@@ -41,7 +42,15 @@ next-env.d.ts
 
 # claude
 .claude/*
-CLAUDE.md
+# CLAUDE.md
 
 # example data
 /example
+
+# generated report templates (built from templates/master.md by scripts/gen-templates.ts)
+/templates/template_*
+
+# Quarto handbuch build artifacts (handbuch/_freeze IS committed — it carries the
+# R output so the deploy build renders without R)
+/handbuch/_site/
+/handbuch/.quarto/

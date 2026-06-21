@@ -24,11 +24,35 @@ export interface ParameterDef {
    * don't map to a config setting, e.g. `title`, `office`).
    */
   bind?: string;
+  /** German-only explanatory text shown as a click-to-open tooltip. */
+  definition?: string;
+  /** Bilingual tooltip text, resolved to the active locale at parse time. Wins over `definition`. */
+  info?: string;
+}
+
+/**
+ * One required column of a config sheet, plus optional metadata.
+ * `include` lists the template ids (see `TemplateOption.id`) this column
+ * belongs to; omitted/empty ⇒ included in every template.
+ */
+export interface ColumnDef {
+  name: string;
+  definition?: string;
+  /** Bilingual tooltip text, resolved to the active locale at parse time. Wins over `definition`. */
+  info?: string;
+  notes?: string;
+  include?: string[];
 }
 
 export interface SheetDef {
   sheet: string;
-  columns: string[];
+  columns: ColumnDef[];
+  definition?: string;
+  /** Bilingual tooltip text, resolved to the active locale at parse time. Wins over `definition`. */
+  info?: string;
+  notes?: string;
+  /** Template ids this sheet belongs to; omitted/empty ⇒ every template. */
+  include?: string[];
 }
 
 export interface DataSourceDef {
@@ -36,10 +60,19 @@ export interface DataSourceDef {
 }
 
 export interface TemplateOption {
+  /**
+   * Stable, translation-free identifier referenced by data `include:` lists to
+   * scope which sheets/columns the data step requests for this template.
+   */
+  id?: string;
   /** Human-readable name shown in the template chooser. */
   label: string;
   /** Filename within the bundled `templates/` directory (e.g. `report_template.md`). */
   file: string;
+  /** German-only explanatory text shown as a click-to-open tooltip. */
+  definition?: string;
+  /** Bilingual tooltip text, resolved to the active locale at parse time. Wins over `definition`. */
+  info?: string;
 }
 
 export interface TemplateDef {
@@ -120,6 +153,13 @@ export interface ExportConfig {
 
   /** Page numbers inserted into the footer. */
   pageNumbers?: {
+    /**
+     * Footer page-number placement: "left" | "center" | "right" align the
+     * number in the footer; "none" hides it. Supersedes the legacy `show`
+     * boolean (kept for back-compat: `show: false` ≡ `position: none`).
+     */
+    position?: string;
+    /** @deprecated Use `position`. `false` ≡ `position: none`. */
     show?: boolean;
     /** Starting page number. */
     start?: number;
@@ -268,10 +308,110 @@ export interface DataProtectionConfig {
   smallestGroup?: number;
 }
 
+// ── Data preprocessing (joins) ──────────────────────────────────────
+
+/** A right-side column to copy onto the left rows, optionally renamed. */
+export interface JoinColumnSelect {
+  /** Column name in the `right` dataset. */
+  column: string;
+  /** Output column name (defaults to `column`). */
+  as?: string;
+}
+
+/**
+ * A single join: look up matching rows in `right` by key and copy its columns
+ * onto each `left` row. The result is stored under `name` (which may equal
+ * `left` to enrich it in place). First-match (lookup) semantics — a left row
+ * is never duplicated, even if several right rows share its key.
+ */
+export interface JoinDef {
+  /** Output dataset name (referenced by template `data:` blocks). */
+  name: string;
+  /** Base dataset — one output row per left row (left join) or per match (inner). */
+  left: string;
+  /** Dataset to look values up in. */
+  right: string;
+  /** Join key present in both datasets (shorthand for equal `leftOn`/`rightOn`). */
+  on?: string;
+  /** Join key in `left` (overrides `on`). */
+  leftOn?: string;
+  /** Join key in `right` (overrides `on`). */
+  rightOn?: string;
+  /** `left` (default — keep unmatched left rows) or `inner` (drop them). */
+  type?: "left" | "inner";
+  /**
+   * Right columns to copy. Omit to copy every right column that isn't the key
+   * and isn't already present on the left (enrichment). Each entry is a plain
+   * column name or `{ column, as }`.
+   */
+  select?: (string | JoinColumnSelect)[];
+  /** Prefix prepended to every copied column name (collision safety). */
+  prefix?: string;
+  /** Optional boolean column set to whether the left row matched any right row. */
+  indicator?: string;
+}
+
+/**
+ * A predicate tested against a single source-column value. All provided keys
+ * are combined with AND. String comparisons are NFC + trimmed; numeric ones
+ * (`gt`/`lt`/…) parse the value as a number. Scalar keys also accept a list,
+ * which matches if any entry matches.
+ */
+export interface MutationCondition {
+  equals?: string | number | (string | number)[];
+  notEquals?: string | number | (string | number)[];
+  /** Alias of `equals` with a list. */
+  in?: (string | number)[];
+  contains?: string | string[];
+  startsWith?: string | string[];
+  endsWith?: string | string[];
+  /** JavaScript regular-expression source tested against the value. */
+  matches?: string;
+  gt?: number;
+  gte?: number;
+  lt?: number;
+  lte?: number;
+  /** `true` matches empty/blank values; `false` matches non-empty. */
+  empty?: boolean;
+  /** `true` matches truthy values (`true`/`Ja`/`Yes`/`1`); `false` the inverse. */
+  truthy?: boolean;
+}
+
+/**
+ * Derive a new column on a dataset with a simple if-else rule: where `when`
+ * holds for the `from` value, the new `column` gets `then`, otherwise `else`.
+ * Omitting `when` means the condition is "value is truthy".
+ */
+export interface MutationDef {
+  /** Dataset to add the column to (modified into a derived copy). */
+  dataset: string;
+  /** New (or overwritten) column name. */
+  column: string;
+  /** Human-readable definition of the derived column (metadata). */
+  definition?: string;
+  /** Source column whose value the condition tests. */
+  from: string;
+  /** Condition on the `from` value (default: truthy). */
+  when?: MutationCondition;
+  /** Value written when the condition holds. */
+  then: string | number | boolean;
+  /** Value written otherwise (default: empty string). */
+  else?: string | number | boolean;
+}
+
+export interface PreprocessingConfig {
+  /** Column derivations (if-else). Applied first, in order, before joins. */
+  mutations?: MutationDef[];
+  /** Joins applied after mutations, in order; a later join can use an earlier output. */
+  joins?: JoinDef[];
+}
+
 export interface AppConfig {
   parameters: Record<string, ParameterDef>;
   data: Record<string, DataSourceDef>;
   template: TemplateDef;
+  /** Derived datasets (joins) built from the loaded sheets before rendering. */
+  preprocessing?: PreprocessingConfig;
   export?: ExportConfig;
   charts?: ChartDefaults;
   dataProtection?: DataProtectionConfig;
