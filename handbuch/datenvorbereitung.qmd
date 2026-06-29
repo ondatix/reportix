@@ -179,7 +179,7 @@ Bei `xlsx`-Dateien gibt es zwei Möglichkeiten:
 
 
 ### Tabellenform: Eine Zeile pro Person / Ereignis  
-Personalverwaltungssysteme (VIVA, PWS, etc.) können Datensätze exportieren, in der jede Zeile eine Person (Stichtagsdaten) oder Ereignis (Zeitraumdaten) repräsentiert und jede Spalte ein Merkmal (z.B. Geschlecht, Arbeitszeitanteil) darstellt. 
+Personalverwaltungssysteme (VIVA, PWS, etc.) können Datensätze exportieren (siehe @sec-export), in der jede Zeile eine Person (Stichtagsdaten) oder Ereignis (Zeitraumdaten) repräsentiert und jede Spalte ein Merkmal (z.B. Geschlecht, Arbeitszeitanteil) darstellt. 
 Jeder Datensatz sollte die Personalnummer als eine weitere Spalte enthalten, damit ggf. Datensätze zusammengefügt werden können. 
 Die Personalnummer selbst wird nie in Grafiken oder Tabellen auftauchen.
 
@@ -238,6 +238,23 @@ Bei Zeitraumsdaten wird pro Ereignistyp eine Tabelle benötigt:
 
 ##### Beförderung
 
+### Exportanleitung {#sec-export}
+
+::: {.panel-tabset}
+
+## Viva
+
+Anleitung...
+
+## PWS
+
+Anleitung...
+
+## Sonstige
+
+Anleitung...
+
+:::
 
 ## Anpassungen
 
