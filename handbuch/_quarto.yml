@@ -3,6 +3,9 @@ project:
   # Match the container plumbing (Dockerfile copies handbuch/_site → nginx
   # /handbuch). Quarto books default to _book/.
   output-dir: _site
+  # Locally-bundled Funnel Sans (referenced by styles.scss via url(fonts/…));
+  resources:
+    - fonts/
 
 # Cache computational (R) output so the deploy build renders with the Quarto
 # CLI alone — no R. Execute locally to (re)populate handbuch/_freeze/, commit
@@ -11,7 +14,7 @@ execute:
   freeze: auto
 
 book:
-  title: "Reportix Handbuch"
+  title: "reportix Handbuch"
   date: last-modified
   chapters:
     - index.qmd

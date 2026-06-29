@@ -6,7 +6,7 @@
 Dieses Handbuch ist noch in Bearbeitung. Bitte mit Vorsicht genießen ;)
 :::
 
-Dies ist das Nutzer:innenhandbuch für die Erstellung von Gleichstellungskonzepten in Bayern mit Reportix.
+Dies ist das Nutzer:innenhandbuch für die Erstellung von Gleichstellungskonzepten in Bayern mit reportix.
 
 ::: {.grid .gap-3 .pb-3 .pt-4}
 ::: {.g-col-12 .g-col-sm-4}
@@ -17,12 +17,12 @@ Dies ist das Nutzer:innenhandbuch für die Erstellung von Gleichstellungskonzept
 ::: 
 ::: 
 
-## Was ist Reportix?
+## Was ist reportix?
 
-Reportix ist ein Tool zur teil-automatisierten Erstellung von Gleichstellungskkonzepten in bayrischen Behörden.
+reportix ist ein Tool zur teil-automatisierten Erstellung von Gleichstellungskkonzepten in bayrischen Behörden.
 
 Ein paar klicks und Sie erhalten ein vorformuliertes, datenschutzkonformes und barrierefreies Gleichstellungskonzept mit Grafiken und Tabellen als Word- oder odt-Dokument.
 
 
-![Screenshot von Reportix: 1. Vorlage wählen (Auswahlmöglichkeiten: Gleichstellungskonzept (vollständig); Gleichstellungskonzept (verpflichtend))](images/Screenshot-vorlage-waehlen.png)
+![Screenshot von reportix: 1. Vorlage wählen (Auswahlmöglichkeiten: Gleichstellungskonzept (vollständig); Gleichstellungskonzept (verpflichtend))](images/Screenshot-vorlage-waehlen.png)
 

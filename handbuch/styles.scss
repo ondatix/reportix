@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Funnel+Sans:wght@300..800&display=swap');
+/* Import local font files */
+@import url(fonts/funnel-sans.scss);
 
 body {
   font-family: "Funnel Sans", sans-serif;
 }
-
 
 /* Chapter number in headings */
 .chapter-number,
@@ -19,4 +19,23 @@ h1, h2, h3, h4, h5, h6 {
 /* Summary text color */
 details > summary {
   color: #5BC4A0;
+}
+
+/* Right "On this page" TOC — active entry (default is primary, which has to little contrast) */
+.sidebar nav[role="doc-toc"] ul > li > a.active,
+.sidebar nav[role="doc-toc"] ul > li > ul > li > a.active {
+  color: #2D1B4E !important;
+  border-left-color: #2D1B4E;
+}
+
+/* Left chapter sidebar — active entry (default is primary, which has to little contrast) */
+div.sidebar-item-container .active,
+div.sidebar-item-container .show > .nav-link,
+div.sidebar-item-container .sidebar-link > code {
+  color: #2D1B4E !important;
+}
+
+/* Breadcrumb "path" above each chapter page (default is primary, which has to little contrast) */
+.quarto-page-breadcrumbs .breadcrumb-item a {
+  color: #2D1B4E;
 }
