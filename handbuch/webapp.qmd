@@ -14,3 +14,49 @@ Stand: Abwarten bis die Web-App soweit bereit ist (ca. 26.06.)
 - Nutzen in **reportix** in einer aktuellen Browserversion.
 - Teilen Sie *keine* Screenshots oder Bildschirmaufnahmen von **reportix** oder den Daten.
 :::
+
+Um die Web-App im vollen Umfang nutzen zu können, bereiten Sie die Daten gemäß @sec-datenvorbereitung vor.
+
+Die Web-App erreichen Sie unter [https://gleichstellung.bayern.ondatix.org/](https://gleichstellung.bayern.ondatix.org/).
+
+
+## Vorlage wählen
+
+Wählen Sie die zu erstellende Vorlage. Die Auswahl bestimmt, welches Musterkonzept (siehe @sec-musterkonzept) zugrunde gelegt wird und welche Daten im nächsten Schritt abgefragt werden.
+
+::: {.grid}
+
+::: {.g-col-6}
+
+::: {.callout-tip icon=false}
+## Gleichstellungskonzept vollständig (*empfohlen*)
+
+Wir empfehlen, das vollständige Gleichstellungskonzept mit allen Inhalten (Pflichtinhalte und optionale Inhalte) zu erstellen.
+
+Sie haben immer die Option, Inhalte im erstellten Dokument wieder zu löschen, da dies editierbar ist.
+:::
+
+:::
+
+::: {.g-col-6}
+
+::: {.callout-note icon=false}
+## Gleichstellungskonzept minimal (nur Pflichtinhalte)
+
+Das minimale Gleichstellungskonzept beschränkt sich ausschließliche auf die Pflichtinhalte.
+
+Wir empfehlen dies nur zu nutzen, wenn Sie sicher sind, dass sie *keine* der optionalen Inhalte einfügen möchten.
+:::
+
+:::
+
+:::
+
+
+## Daten laden
+
+
+
+
+
+

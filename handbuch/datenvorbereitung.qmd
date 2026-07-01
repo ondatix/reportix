@@ -1,4 +1,4 @@
-# Datenvorbereitung
+# Datenvorbereitung {#sec-datenvorbereitung}
 
 ::: {.callout-caution}
 ## Under Construction
@@ -209,15 +209,32 @@ z.B. Einstellungen werden für den gesamten Berichtszeitraum (letzter Stichtag (
 
 Es werden folgende Datensätze benötigt (optionale Inhalte sind als solches gekennzeichnet):
 
+```{r, echo=FALSE, results="asis"}
+library(yaml)
+
+data <- yaml::read_yaml("../config/data.yaml")
+sheets <- data$data$Gleichstellungsdatensatz$sheets
+
+
+render_sheet <- function(sheets, name) {
+
+  sheet <- sheets[[which(sapply(sheets, `[[`, "sheet") == name)]]
+  
+  for (col in sheet$columns) {
+    cat("- **", col$column, "**: ", col$definition, "\n", sep = "")
+  }
+
+}
+```
+
+
 #### Stichtagsdaten {#sec-stichtagsdaten}
 
 Der Stichtagsdatensatz enthält die Spalten:
 
-- PersNr: Personalnummer
-- Geschlecht: ...
-... 
-
-Hier Definitionen-yml einbinden
+```{r, echo=FALSE, results="asis"}
+render_sheet(sheets = sheets, name = "Stichtag")
+```
 
 
 #### Zeitraumsdaten {#sec-zeitraumsdaten}
@@ -226,17 +243,46 @@ Bei Zeitraumsdaten wird pro Ereignistyp eine Tabelle benötigt:
 
 ##### Beurlaubung
 
+```{r, echo=FALSE, results="asis"}
+render_sheet(sheets = sheets, name = "Zeitraum_Beurlaubung")
+```
+
+
 ##### Bewerbung
+
+```{r, echo=FALSE, results="asis"}
+render_sheet(sheets = sheets, name = "Zeitraum_Bewerbung")
+```
 
 ##### Einstellung
 
+```{r, echo=FALSE, results="asis"}
+render_sheet(sheets = sheets, name = "Zeitraum_Einstellung")
+```
+
 ##### Fortbildung
+
+```{r, echo=FALSE, results="asis"}
+render_sheet(sheets = sheets, name = "Zeitraum_Fortbildung")
+```
 
 ##### Qualifikation
 
+```{r, echo=FALSE, results="asis"}
+render_sheet(sheets = sheets, name = "Zeitraum_Qualifikation")
+```
+
 ##### Leistungskomponente
 
+```{r, echo=FALSE, results="asis"}
+render_sheet(sheets = sheets, name = "Zeitraum_Leistungskomponente")
+```
+
 ##### Beförderung
+
+```{r, echo=FALSE, results="asis"}
+render_sheet(sheets = sheets, name = "Zeitraum_Befoerderung")
+```
 
 ### Exportanleitung {#sec-export}
 
