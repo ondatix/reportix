@@ -8,8 +8,8 @@ Dieses Handbuch ist noch in Bearbeitung. Bitte mit Vorsicht genießen ;)
 Stand: 
 
 - Grundlagen vorhanden
-- TODO: Spaltennamen abgleichen
-- TODO: Einfügen der Definitionen 
+- TODO: Definitionen mit Musterkonzept abgleichen und ggf. anpassen
+- TODO: Anzeigen, welche Merkmale optional sind
 - TODO: Anleitung für den Export aus VIVA, PWS und eine generische Anleitung
 :::
 
@@ -262,7 +262,7 @@ render_sheet(sheets = sheets, name = "Zeitraum_Befoerderung")
 
 
 
-### Dateiformate: csv und xlsx
+### Dateiformate: csv und xlsx {#sec-dateiformate}
 **reportix** kann mit Tabellen im Format `csv` oder `xlsx` (Excel) arbeiten.
 
 ::: {.grid}
