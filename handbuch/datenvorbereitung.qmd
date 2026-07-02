@@ -1,4 +1,4 @@
-# Datenvorbereitung
+# Datenvorbereitung {#sec-datenvorbereitung}
 
 ::: {.callout-caution}
 ## Under Construction
@@ -8,8 +8,8 @@ Dieses Handbuch ist noch in Bearbeitung. Bitte mit Vorsicht genießen ;)
 Stand: 
 
 - Grundlagen vorhanden
-- TODO: Spaltennamen abgleichen
-- TODO: Einfügen der Definitionen 
+- TODO: Definitionen mit Musterkonzept abgleichen und ggf. anpassen
+- TODO: Anzeigen, welche Merkmale optional sind
 - TODO: Anleitung für den Export aus VIVA, PWS und eine generische Anleitung
 :::
 
@@ -148,38 +148,11 @@ und ausdrücklich erläutert werden.
 ---
 
 
-## Standards {#sec-standards}
+## Datenstandards {#sec-standards}
 Die Daten für die Nutzung von **reportix** müssen klaren Standards entsprechen. 
 
-### Dateiformate: csv und xlsx
-**reportix** kann mit Tabellen im Format `csv` oder `xlsx` (Excel) arbeiten.
-
-::: {.grid}
-
-::: {.g-col-6}
-::: {.callout-note icon=false}
-## csv
-
-Bei `csv`-Dateien muss jede Tabelle eine einzelne Datei sein (z.B. `Stichtagsdaten.csv`, `Beurlaubung.csv`, ...).
-:::
-:::
-
-::: {.g-col-6}
-::: {.callout-note icon=false}
-## xlsx
-
-Bei `xlsx`-Dateien gibt es zwei Möglichkeiten:
-
-- Eine Datei mit Sheets/Arbeitsblättern (z.B. `Alle-Daten.xlsx`)  
-- Einzelne Dateien für die verschiedenen Tabellen (z. B. `Stichtagsdaten.xlsx`, `Beurlaubung.xlsx`, ...).  
-:::
-:::
-
-:::
-
-
 ### Tabellenform: Eine Zeile pro Person / Ereignis  
-Personalverwaltungssysteme (VIVA, PWS, etc.) können Datensätze exportieren, in der jede Zeile eine Person (Stichtagsdaten) oder Ereignis (Zeitraumdaten) repräsentiert und jede Spalte ein Merkmal (z.B. Geschlecht, Arbeitszeitanteil) darstellt. 
+Personalverwaltungssysteme (VIVA, PWS, etc.) können Datensätze exportieren (siehe @sec-export), in der jede Zeile eine Person (Stichtagsdaten) oder Ereignis (Zeitraumdaten) repräsentiert und jede Spalte ein Merkmal (z.B. Geschlecht, Arbeitszeitanteil) darstellt. 
 Jeder Datensatz sollte die Personalnummer als eine weitere Spalte enthalten, damit ggf. Datensätze zusammengefügt werden können. 
 Die Personalnummer selbst wird nie in Grafiken oder Tabellen auftauchen.
 
@@ -207,17 +180,37 @@ Ist z.B. der Stichtag der 30.06.2026, so wird bei Zeitraumdaten der 01.01.2025-3
 Ausnahmen sind in den Definitionen beschrieben: 
 z.B. Einstellungen werden für den gesamten Berichtszeitraum (letzter Stichtag (ausgeschlossen) bis aktueller Stichtag (eingeschlossen), i.d.R. 5 Jahre) ausgewiesen.
 
+
+### Tabellenform: Merkmale als Spalten {#sec-merkmale}
+
 Es werden folgende Datensätze benötigt (optionale Inhalte sind als solches gekennzeichnet):
+
+```{r, echo=FALSE, results="asis"}
+library(yaml)
+
+data <- yaml::read_yaml("../config/data.yaml")
+sheets <- data$data$Gleichstellungsdatensatz$sheets
+
+
+render_sheet <- function(sheets, name) {
+
+  sheet <- sheets[[which(sapply(sheets, `[[`, "sheet") == name)]]
+  
+  for (col in sheet$columns) {
+    cat("- **", col$column, "**: ", col$definition, "\n", sep = "")
+  }
+
+}
+```
+
 
 #### Stichtagsdaten {#sec-stichtagsdaten}
 
 Der Stichtagsdatensatz enthält die Spalten:
 
-- PersNr: Personalnummer
-- Geschlecht: ...
-... 
-
-Hier Definitionen-yml einbinden
+```{r, echo=FALSE, results="asis"}
+render_sheet(sheets = sheets, name = "Stichtag")
+```
 
 
 #### Zeitraumsdaten {#sec-zeitraumsdaten}
@@ -226,20 +219,114 @@ Bei Zeitraumsdaten wird pro Ereignistyp eine Tabelle benötigt:
 
 ##### Beurlaubung
 
+```{r, echo=FALSE, results="asis"}
+render_sheet(sheets = sheets, name = "Zeitraum_Beurlaubung")
+```
+
+
 ##### Bewerbung
+
+```{r, echo=FALSE, results="asis"}
+render_sheet(sheets = sheets, name = "Zeitraum_Bewerbung")
+```
 
 ##### Einstellung
 
+```{r, echo=FALSE, results="asis"}
+render_sheet(sheets = sheets, name = "Zeitraum_Einstellung")
+```
+
 ##### Fortbildung
+
+```{r, echo=FALSE, results="asis"}
+render_sheet(sheets = sheets, name = "Zeitraum_Fortbildung")
+```
 
 ##### Qualifikation
 
+```{r, echo=FALSE, results="asis"}
+render_sheet(sheets = sheets, name = "Zeitraum_Qualifikation")
+```
+
 ##### Leistungskomponente
+
+```{r, echo=FALSE, results="asis"}
+render_sheet(sheets = sheets, name = "Zeitraum_Leistungskomponente")
+```
 
 ##### Beförderung
 
+```{r, echo=FALSE, results="asis"}
+render_sheet(sheets = sheets, name = "Zeitraum_Befoerderung")
+```
 
-## Anpassungen
+
+
+### Dateiformate: csv und xlsx {#sec-dateiformate}
+**reportix** kann mit Tabellen im Format `csv` oder `xlsx` (Excel) arbeiten.
+
+::: {.grid}
+
+::: {.g-col-6}
+::: {.callout-note icon=false}
+## csv
+
+Bei `csv`-Dateien muss jede Tabelle eine einzelne Datei sein (z.B. `Stichtagsdaten.csv`, `Beurlaubung.csv`, ...).
+:::
+:::
+
+::: {.g-col-6}
+::: {.callout-note icon=false}
+## xlsx
+
+Bei `xlsx`-Dateien gibt es zwei Möglichkeiten:
+
+- Eine Datei mit Sheets/Arbeitsblättern (z.B. `Alle-Daten.xlsx`)* 
+- Einzelne Dateien für die verschiedenen Tabellen (z. B. `Stichtagsdaten.xlsx`, `Beurlaubung.xlsx`, ...).  
+:::
+:::
+
+:::
+
+Optimalerweise sind die Spalten in den Datensätzen gleich benannt wie unter @sec-merkmale beschrieben.
+In reportix können Sie aber auch später auswählen, welche Spalte zu welchem Merkmal gehört.
+
+::: {.callout-note icon=false appearance="simple" collapse=TRUE}
+## *Mehr zur Nutzung einer xlsx-Datei mit Sheets/Arbeitsblättern
+Sollten Sie eine **Datei mit Sheets/Arbeitsblättern** nutzen, empfehlen wir die Sheets folgendermaßen zu benennen:
+
+- Stichtag
+- Zeitraum_Beurlaubung
+- Zeitraum_Bewerbung
+- Zeitraum_Einstellung
+- Zeitraum_Fortbildung
+- Zeitraum_Qualifikation
+- Zeitraum_Leistungskomponente
+- Zeitraum_Befoerderung
+:::
+
+## Exportanleitung aus Personalverwaltungssystemen {#sec-export}
+
+::: {.panel-tabset}
+
+## Viva
+
+Anleitung...
+
+## PWS
+
+Anleitung...
+
+## Sonstige
+
+Anleitung...
+
+:::
+
+
+
+
+## Anpassungen bei Sonderfällen
 
 Es gibt verschiedene Szenarien, in denen Anpassungen nötig sind.
 

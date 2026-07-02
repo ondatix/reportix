@@ -46,6 +46,8 @@ format:
       - cosmo       # 1. Basis Bootstrap theme
       - brand.scss  # 2. Eigene Farben für feste Bestandteile
     css: styles.scss  # 3. Font
+    number-sections: true
+    number-depth: 3
 
 
 
