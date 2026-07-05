@@ -10,11 +10,11 @@ template:
   files:
     - id: full
       label:
-        de: "Gleichstellungskonzept (vollständig)"
-        en: "Equality concept (full)"
+        de: "Gleichstellungskonzept vollständig (empfohlen)"
+        en: "Full equality concept (recommended)"
       file: template_full.md
     - id: mandatory
       label:
-        de: "Gleichstellungskonzept (verpflichtend)"
-        en: "Equality concept (mandatory)"
+        de: "Gleichstellungskonzept minimal (verpflichtend)"
+        en: "Minimal equality concept (mandatory)"
       file: template_mandatory.md

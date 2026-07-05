@@ -310,6 +310,7 @@ button {
   border-radius: 4px;
   font-size: 1rem;
   cursor: pointer;
+  max-width: 15rem;
 }
 
 button:hover {

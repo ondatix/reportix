@@ -89,8 +89,9 @@ export function initApp(root: HTMLElement): void {
     </div>
     <div id="step-preview" class="step" hidden>
       <h2>${t("ui.step.preview")}</h2>
+      <button id="export-btn-start">${t("ui.button.export")}</button><br><br>
       <div id="report-preview" class="report-preview"></div>
-      <button id="export-btn">${t("ui.button.export")}</button>
+      <button id="export-btn-end">${t("ui.button.export")}</button>
     </div>
   `;
 
@@ -528,7 +529,9 @@ export function initApp(root: HTMLElement): void {
     });
 
     // Export button
-    const exportBtn = root.querySelector<HTMLButtonElement>("#export-btn")!;
-    exportBtn.onclick = () => exportToDocx(previewContainer, exportConfig);
+    const exportBtnStart = root.querySelector<HTMLButtonElement>("#export-btn-start")!;
+    const exportBtnEnd = root.querySelector<HTMLButtonElement>("#export-btn-end")!;
+    exportBtnStart.onclick = () => exportToDocx(previewContainer, exportConfig);
+    exportBtnEnd.onclick = () => exportToDocx(previewContainer, exportConfig);
   }
 }

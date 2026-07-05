@@ -44,7 +44,7 @@ parameters:
   #   Bound entries carry no `default:` (the bound leaf is the source of truth).
   palette:
     label:
-      de: "Farbpalette des Diagramms"
+      de: "Farbpalette für Grafiken"
       en: "Chart color palette"
     type: select
     bind: charts.palette
@@ -110,18 +110,18 @@ parameters:
   #   label: "Locale"
   #   type: text
   #   bind: export.locale
-  doc_subject:
-    label:
-      de: "Dokumentbetreff"
-      en: "Document subject"
-    type: text
-    bind: export.document.subject
-  doc_creator:
-    label:
-      de: "Dokumentersteller"
-      en: "Document creator"
-    type: text
-    bind: export.document.creator
+  # doc_subject:
+  #   label:
+  #     de: "Dokumentbetreff"
+  #     en: "Document subject"
+  #   type: text
+  #   bind: export.document.subject
+  # doc_creator:
+  #   label:
+  #     de: "Dokumentersteller"
+  #     en: "Document creator"
+  #   type: text
+  #   bind: export.document.creator
   smallest_group:
     label:
       de: "Schwellenwert kleinste Gruppe"
