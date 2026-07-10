@@ -1,0 +1,237 @@
+[
+  {
+    "index": 0,
+    "title": "Geschlechterverteilung",
+    "alt": "Geschlechterverteilung. Kreisdiagramm vergleicht den Anteil (% des Gesamtwerts) von Geschlecht."
+  },
+  {
+    "index": 1,
+    "title": "Männer und Frauen in den Organisationseinheiten",
+    "alt": "Männer und Frauen in den Organisationseinheiten. Distanzdiagramm vergleicht die Anzahl von Organisationseinheit, aufgeteilt nach Geschlecht."
+  },
+  {
+    "index": 2,
+    "title": "Tarifbeschäftigte vs. Beamte",
+    "alt": "Tarifbeschäftigte vs. Beamte. Balkendiagramm vergleicht die Anzahl von Beamte / Tarifbeschäftigte, gruppiert nach Geschlecht."
+  },
+  {
+    "index": 3,
+    "title": "Befristete vs. unbefristete Arbeitsverhältnisse",
+    "alt": "Befristete vs. unbefristete Arbeitsverhältnisse. Balkendiagramm vergleicht die Anzahl von Befristet / Unbefristet, gruppiert nach Geschlecht (gefiltert auf Tarifbeschäftigte)."
+  },
+  {
+    "index": 4,
+    "title": "Männer und Frauen in den Entgelt- und Besoldungsgruppen",
+    "alt": "Männer und Frauen in den Entgelt- und Besoldungsgruppen. Distanzdiagramm vergleicht die Anzahl von Entgeltgruppe / Besoldungsgruppe, aufgeteilt nach Geschlecht."
+  },
+  {
+    "index": 5,
+    "title": "Qualifikationsebenen nach Geschlecht",
+    "alt": "Qualifikationsebenen nach Geschlecht. Bevölkerungspyramide vergleicht die Anzahl von QE, aufgeteilt nach Geschlecht."
+  },
+  {
+    "index": 6,
+    "title": "QE-Aufstieg im Vergleich zur Einstiegs-QE",
+    "alt": "QE-Aufstieg im Vergleich zur Einstiegs-QE. Bevölkerungspyramide vergleicht die Anzahl von QE-Aufstieg, aufgeteilt nach Geschlecht."
+  },
+  {
+    "index": 7,
+    "title": "Auszubildende in den Ausbildungsbereichen",
+    "alt": "Auszubildende in den Ausbildungsbereichen. Balkendiagramm vergleicht die Anzahl von Ausbildungsbereich, gruppiert nach Geschlecht (gefiltert auf Auszubildende)."
+  },
+  {
+    "index": 8,
+    "title": "Qualifizierte Bewerbungen nach Qualifikationsebene",
+    "alt": "Qualifizierte Bewerbungen nach Qualifikationsebene. Bevölkerungspyramide vergleicht die Anzahl von QE, aufgeteilt nach Geschlecht (gefiltert auf Qualifizierte Bewerbungen)."
+  },
+  {
+    "index": 9,
+    "title": "Qualifizierte Bewerbungen je Führungsebene",
+    "alt": "Qualifizierte Bewerbungen je Führungsebene. Bevölkerungspyramide vergleicht die Anzahl von Führungsebene, aufgeteilt nach Geschlecht (gefiltert auf Qualifizierte Bewerbungen)."
+  },
+  {
+    "index": 10,
+    "title": "Interne vs. externe qualifizierte Bewerbungen",
+    "alt": "Interne vs. externe qualifizierte Bewerbungen. Bevölkerungspyramide vergleicht die Anzahl von Intern / Extern, aufgeteilt nach Geschlecht (gefiltert auf Qualifizierte Bewerbungen)."
+  },
+  {
+    "index": 11,
+    "title": "Bewerbungen je Organisationseinheit",
+    "alt": "Bewerbungen je Organisationseinheit. Distanzdiagramm vergleicht die Anzahl von Organisationseinheit, aufgeteilt nach Geschlecht (gefiltert auf Qualifizierte Bewerbungen)."
+  },
+  {
+    "index": 12,
+    "title": "Neueinstellungen nach Geschlecht",
+    "alt": "Neueinstellungen nach Geschlecht. Balkendiagramm vergleicht die Anzahl von Geschlecht (gefiltert auf Einstellungen)."
+  },
+  {
+    "index": 13,
+    "title": "Neueinstellungen nach Qualifikationsebene",
+    "alt": "Neueinstellungen nach Qualifikationsebene. Balkendiagramm vergleicht die Anzahl von QE, gruppiert nach Geschlecht (gefiltert auf Einstellungen)."
+  },
+  {
+    "index": 14,
+    "title": "Neueinstellungen nach Entgelt-/Besoldungsgruppe",
+    "alt": "Neueinstellungen nach Entgelt-/Besoldungsgruppe. Balkendiagramm vergleicht die Anzahl von Entgeltgruppe / Besoldungsgruppe, gruppiert nach Geschlecht (gefiltert auf Einstellungen)."
+  },
+  {
+    "index": 15,
+    "title": "Beschäftigte in leitenden Funktionen",
+    "alt": "Beschäftigte in leitenden Funktionen. Bevölkerungspyramide vergleicht die Anzahl von Führungskraft (aktiv), aufgeteilt nach Geschlecht."
+  },
+  {
+    "index": 16,
+    "title": "Führungsebenen nach Geschlecht",
+    "alt": "Führungsebenen nach Geschlecht. Bevölkerungspyramide vergleicht die Anzahl von Führungsebene, aufgeteilt nach Geschlecht (gefiltert auf Führungskraft (aktiv))."
+  },
+  {
+    "index": 17,
+    "title": "Führungskräfte in den Organisationseinheiten",
+    "alt": "Führungskräfte in den Organisationseinheiten. Distanzdiagramm vergleicht die Anzahl von Organisationseinheit, aufgeteilt nach Geschlecht (gefiltert auf Führungskraft (aktiv))."
+  },
+  {
+    "index": 18,
+    "title": "Anteil Führung in Tandem (in der Gruppe) je QE",
+    "alt": "Anteil Führung in Tandem (in der Gruppe) je QE. Bevölkerungspyramide vergleicht den Anteil innerhalb der Gruppe von Führungskraft (aktiv) in Tandem nach QE, aufgeteilt nach Geschlecht (gefiltert auf Führungskraft (aktiv))."
+  },
+  {
+    "index": 19,
+    "title": "Anteil Führung in Tandem je Führungsebene",
+    "alt": "Anteil Führung in Tandem je Führungsebene. Bevölkerungspyramide vergleicht den Anteil innerhalb der Gruppe von Führungskraft (aktiv) in Tandem nach Führungsebene, aufgeteilt nach Geschlecht (gefiltert auf Führungskraft (aktiv))."
+  },
+  {
+    "index": 20,
+    "title": "Führung in Teilzeit",
+    "alt": "Führung in Teilzeit. Balkendiagramm vergleicht die Anzahl von Teilzeit / Vollzeit, gruppiert nach Geschlecht (gefiltert auf Führungskraft (aktiv))."
+  },
+  {
+    "index": 21,
+    "title": "Teilzeit vs. Vollzeit",
+    "alt": "Teilzeit vs. Vollzeit. Balkendiagramm vergleicht die Anzahl von Teilzeit / Vollzeit, gruppiert nach Geschlecht."
+  },
+  {
+    "index": 22,
+    "title": "Arbeitszeitanteile nach Geschlecht",
+    "alt": "Arbeitszeitanteile nach Geschlecht. Balkendiagramm vergleicht die Anzahl von Arbeitszeitanteil, gruppiert nach Geschlecht."
+  },
+  {
+    "index": 23,
+    "title": "Beurlaubungen aus familiären Gründen",
+    "alt": "Beurlaubungen aus familiären Gründen. Balkendiagramm vergleicht die Anzahl von Beurlaubung, gruppiert nach Geschlecht."
+  },
+  {
+    "index": 24,
+    "title": "Durchschnittliche Dauer der Elternzeit (Tage) je QE",
+    "alt": "Durchschnittliche Dauer der Elternzeit (Tage) je QE. Bevölkerungspyramide vergleicht den Mittelwert von Dauer der Elternzeit (Tage) nach QE, aufgeteilt nach Geschlecht (gefiltert auf Personen in Elternzeit)."
+  },
+  {
+    "index": 25,
+    "title": "In Elternzeit nach Entgeltgruppe",
+    "alt": "In Elternzeit nach Entgeltgruppe. Distanzdiagramm vergleicht die Anzahl von Entgeltgruppe / Besoldungsgruppe, aufgeteilt nach Geschlecht (gefiltert auf Personen in Elternzeit)."
+  },
+  {
+    "index": 26,
+    "title": "Durchschnittliche Beurteilung Beamte nach QE",
+    "alt": "Durchschnittliche Beurteilung Beamte nach QE. Distanzdiagramm vergleicht den Mittelwert von Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung nach QE, aufgeteilt nach Geschlecht (gefiltert auf Beamte)."
+  },
+  {
+    "index": 27,
+    "title": "Beurteilung Beamte — Teilzeit vs. Vollzeit",
+    "alt": "Beurteilung Beamte — Teilzeit vs. Vollzeit. Balkendiagramm vergleicht den Mittelwert von Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung nach Teilzeit / Vollzeit, gruppiert nach Geschlecht (gefiltert auf Beamte)."
+  },
+  {
+    "index": 28,
+    "title": "Beurteilung Beamte je Organisationseinheit",
+    "alt": "Beurteilung Beamte je Organisationseinheit. Distanzdiagramm vergleicht den Mittelwert von Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung nach Organisationseinheit, aufgeteilt nach Geschlecht (gefiltert auf Beamte)."
+  },
+  {
+    "index": 29,
+    "title": "Durchschnittliche Beurteilung Tarifbeschäftigte nach QE",
+    "alt": "Durchschnittliche Beurteilung Tarifbeschäftigte nach QE. Distanzdiagramm vergleicht den Mittelwert von Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung nach QE, aufgeteilt nach Geschlecht (gefiltert auf Tarifbeschäftigte)."
+  },
+  {
+    "index": 30,
+    "title": "Beurteilung Tarifbeschäftigte — Teilzeit vs. Vollzeit",
+    "alt": "Beurteilung Tarifbeschäftigte — Teilzeit vs. Vollzeit. Balkendiagramm vergleicht den Mittelwert von Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung nach Teilzeit / Vollzeit, gruppiert nach Geschlecht (gefiltert auf Tarifbeschäftigte)."
+  },
+  {
+    "index": 31,
+    "title": "Beurteilung Tarifbeschäftigte je Organisationseinheit",
+    "alt": "Beurteilung Tarifbeschäftigte je Organisationseinheit. Distanzdiagramm vergleicht den Mittelwert von Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung nach Organisationseinheit, aufgeteilt nach Geschlecht (gefiltert auf Tarifbeschäftigte)."
+  },
+  {
+    "index": 32,
+    "title": "Anteil Beförderungen je QE — Beamte",
+    "alt": "Anteil Beförderungen je QE — Beamte. Balkendiagramm vergleicht den Anteil innerhalb der Gruppe von Beförderung (ja/nein) nach QE, gruppiert nach Geschlecht (gefiltert auf Beamte)."
+  },
+  {
+    "index": 33,
+    "title": "Anteil Beförderungen je Besoldungsgruppe — Beamte",
+    "alt": "Anteil Beförderungen je Besoldungsgruppe — Beamte. Balkendiagramm vergleicht den Anteil innerhalb der Gruppe von Beförderung (ja/nein) nach Entgeltgruppe / Besoldungsgruppe, gruppiert nach Geschlecht (gefiltert auf Beamte)."
+  },
+  {
+    "index": 34,
+    "title": "Höhergruppierungen nach Maßnahmenart",
+    "alt": "Höhergruppierungen nach Maßnahmenart. Balkendiagramm vergleicht die Anzahl von Maßnahmenart, gruppiert nach Geschlecht (gefiltert auf Tarifbeschäftigte)."
+  },
+  {
+    "index": 35,
+    "title": "Höhergruppierungen — auf Antrag vs. dienstseitig",
+    "alt": "Höhergruppierungen — auf Antrag vs. dienstseitig. Balkendiagramm vergleicht die Anzahl von Maßnahmenantrag, gruppiert nach Geschlecht (gefiltert auf Höhergruppierung genehmigt)."
+  },
+  {
+    "index": 36,
+    "title": "Anteil abgeschlossener Qualifizierungen je Art",
+    "alt": "Anteil abgeschlossener Qualifizierungen je Art. Distanzdiagramm vergleicht den Anteil innerhalb der Gruppe von Qualifizierungsmaßnahme abgeschlossen (ja / nein) nach Qualifikationsart, aufgeteilt nach Geschlecht."
+  },
+  {
+    "index": 37,
+    "title": "Anteil bewilligter Qualifizierungen je Art",
+    "alt": "Anteil bewilligter Qualifizierungen je Art. Distanzdiagramm vergleicht den Anteil innerhalb der Gruppe von Qualifizierungsmaßnahme bewilligt (ja / nein) nach Qualifikationsart, aufgeteilt nach Geschlecht."
+  },
+  {
+    "index": 38,
+    "title": "Anteil Fortbildungsteilnahme — Teilzeit vs. Vollzeit",
+    "alt": "Anteil Fortbildungsteilnahme — Teilzeit vs. Vollzeit. Balkendiagramm vergleicht den Anteil innerhalb der Gruppe von Teilnahme an Fortbildung (ja / nein) nach Teilzeit / Vollzeit, gruppiert nach Geschlecht."
+  },
+  {
+    "index": 39,
+    "title": "Ø Leistungskomponente je Entgeltgruppe",
+    "alt": "Ø Leistungskomponente je Entgeltgruppe. Distanzdiagramm vergleicht den Mittelwert von Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB) nach Entgeltgruppe / Besoldungsgruppe, aufgeteilt nach Geschlecht."
+  },
+  {
+    "index": 40,
+    "title": "Ø Leistungskomponente je QE",
+    "alt": "Ø Leistungskomponente je QE. Bevölkerungspyramide vergleicht den Mittelwert von Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB) nach QE, aufgeteilt nach Geschlecht."
+  },
+  {
+    "index": 41,
+    "title": "Ø Leistungskomponente — Teilzeit vs. Vollzeit",
+    "alt": "Ø Leistungskomponente — Teilzeit vs. Vollzeit. Balkendiagramm vergleicht den Mittelwert von Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB) nach Teilzeit / Vollzeit, gruppiert nach Geschlecht."
+  },
+  {
+    "index": 42,
+    "title": "Ø Leistungskomponente — Beamte vs. Tarifbeschäftigte",
+    "alt": "Ø Leistungskomponente — Beamte vs. Tarifbeschäftigte. Balkendiagramm vergleicht den Mittelwert von Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB) nach Beamte / Tarifbeschäftigte, gruppiert nach Geschlecht."
+  },
+  {
+    "index": 43,
+    "title": "Personen mit LK nach Geschlecht",
+    "alt": "Personen mit LK nach Geschlecht. Balkendiagramm vergleicht die Anzahl von Geschlecht."
+  },
+  {
+    "index": 44,
+    "title": "Personen mit LK je QE",
+    "alt": "Personen mit LK je QE. Balkendiagramm vergleicht die Anzahl von QE, gruppiert nach Geschlecht."
+  },
+  {
+    "index": 45,
+    "title": "Personen mit LK je Entgelt-/Besoldungsgruppe",
+    "alt": "Personen mit LK je Entgelt-/Besoldungsgruppe. Balkendiagramm vergleicht die Anzahl von Entgeltgruppe / Besoldungsgruppe, gruppiert nach Geschlecht."
+  },
+  {
+    "index": 46,
+    "title": "Personen mit LK — Beamte vs. Tarifbeschäftigte",
+    "alt": "Personen mit LK — Beamte vs. Tarifbeschäftigte. Balkendiagramm vergleicht die Anzahl von Beamte / Tarifbeschäftigte, gruppiert nach Geschlecht."
+  }
+]

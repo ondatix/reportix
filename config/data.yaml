@@ -24,33 +24,33 @@ data:
           - column: PersNr
             definition: "Eindeutige Personalnummer; Schlüssel für die Joins mit den Zeitraum-Blättern."
           - column: Geschlecht
-            definition: "Im Datensatz wird zwischen den Ausprägungen unterschieden, die das Personalverwaltungssystem führt."
+            definition: "Geschlecht der Person."
           - column: "Entgeltgruppe / Besoldungsgruppe"
-            definition: "Eingruppierung im Tarifvertrag bzw. der bayerischen Besoldungsordnung."
+            definition: "Gibt an, welcher Entgeltgruppe (für Tarifbeschäftigte) bzw. Besoldungsgruppe (für Beamtinnen bzw. Beamte) die Tätigkeit bzw. das Amt der Person zum Stichtag zugeordnet ist."
           - column: QE
             definition: "Qualifikationsebene: Laufbahngruppen 1–4 nach Art. 5 LlbG; entspricht im Tarifbereich näherungsweise den E-Gruppen."
           - column: Einstiegs-QE
-            definition: "Qualifikationsebene beim Eintritt."
+            definition: "Qualifikationsebene bei Einstellung."
           - column: "Teilzeit / Vollzeit"
-            definition: "Klassifikation der Arbeitszeit nach Anteil der vereinbarten Wochenarbeitszeit."
+            definition: "Gibt an, ob der festgelegte Arbeitszeitumfang der Person Vollzeit (100 %) oder Teilzeit (weniger als 100 %) beträgt."
           - column: Arbeitszeitanteil
-            definition: "Prozentualer Anteil an der Vollzeitstelle."
+            definition: "Einstufung des Arbeitszeitanteils in folgende Kategorien: bis unter 50 %; 50 % bis unter 90 %; 90 % bis unter 100 %; 100 % (entspricht den Normstunden bei Vollzeit)."
           - column: Führungsebene
             definition: "Hierarchische Einordnung der Führungsfunktion (1 = höchste Ebene)."
           - column: Organisationseinheit
-            definition: "Referat / Sachgebiet / Amt — je nach Verwaltungsebene unterschiedlich tief gegliedert."
+            definition: "Gibt an, in welcher Organisationseinheit (z. B. Abteilung, Referat, Amt) die betreffende Person zum Stichtag tätig ist."
           - column: Ausbildungsbereich
-            definition: "Ausbildungsbereich."
-          - column: Führung in Tandem
-            definition: "Geteilte Führungsverantwortung, häufig in Verbindung mit Teilzeit oder Job-Sharing."
+            definition: "Kategorisierung verschiedener Ausbildungsbereiche der Auszubildenden der Dienststelle."
+          - column: Führungskraft (aktiv) in Tandem
+            definition: "Gibt an, ob die Führungskraft ihre Führungs- bzw. Leitungsfunktion am Stichtag gemeinsam mit mindestens einer weiteren aktiven (d. h. nicht beurlaubten) Person ausübt."
           - column: Führungskraft (aktiv)
-            definition: "Person, die aktuell eine Führungsfunktion mit Personalverantwortung wahrnimmt."
+            definition: "Gibt an, ob die Person am Stichtag eine Führungsposition oder leitende Funktion aktiv ausübt."
           - column: Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung
-            definition: "Punktewert der zuletzt abgeschlossenen periodischen Beurteilung (0–16, dienststellenspezifisch)."
+            definition: "Das Ergebnis der zuletzt für die Person durchgeführten periodischen Beurteilung."
           - column: Ab- oder Anwesenheitsart
             definition: "Art der Ab- oder Anwesenheit."
           - column: "Befristet / Unbefristet"
-            definition: "Befristung des Beschäftigungsverhältnisses."
+            definition: "Gibt an, ob eine Person zum Stichtag befristet oder unbefristet beschäftigt ist."
       - sheet: Zeitraum_Beurlaubung
         definition: "Beurlaubungsereignisse im Berichtszeitraum. Personenstammdaten werden per Join mit Stichtag (PersNr) ergänzt."
         notes: >-
@@ -64,25 +64,24 @@ data:
             definition: "Kalendertage zwischen Antritts- und Endedatum der Elternzeit."
       - sheet: Zeitraum_Bewerbung
         definition: "Bewerbungsereignisse im Berichtszeitraum. Eigener Schlüssel (BewerberID), daher kein Stichtag-Join — die benötigten Personenmerkmale stehen direkt im Blatt."
-        notes: "Qualifizierte Bewerbung: Eine Bewerbung, die die formalen und fachlichen Mindestanforderungen erfüllt."
-        columns:
+        notes: "Qualifizierte Bewerbung: Als qualifizierte Bewerbungen gelten Bewerbungen auf ausgeschriebene Stellen, die die fachlichen Anforderungen erfüllen, sowie Initiativbewerbungen, die die fachlichen Anforderungen für eine aktuell offene Stelle erfüllen."
+        columns:  
           - column: BewerberID
             definition: "Eindeutige Bewerberkennung."
           - column: Geschlecht
             definition: "Im Datensatz wird zwischen den Ausprägungen unterschieden, die das Personalverwaltungssystem führt."
           - column: "Entgeltgruppe / Besoldungsgruppe"
-            definition: "Eingruppierung im Tarifvertrag bzw. der bayerischen Besoldungsordnung."
+            definition: "Gibt an, welcher Entgeltgruppe (für Tarifbeschäftigte) bzw. Besoldungsgruppe (für Beamtinnen bzw. Beamte) die Tätigkeit bzw. das Amt der Person zum Stichtag zugeordnet ist."
           - column: QE
-            definition: "Qualifikationsebene: Laufbahngruppen 1–4 nach Art. 5 LlbG; entspricht im Tarifbereich näherungsweise den E-Gruppen."
+            definition: "Gibt die derzeitige Qualifikationsebene (QE) bei Beamtinnen und Beamten an. Für Tarifbeschäftigte kann ein entsprechendes QE-Äquivalent ausgewiesen werden."
           - column: Führungsebene
-            definition: "Hierarchische Einordnung der Führungsfunktion (1 = höchste Ebene)."
+            definition: "Führungsebenen klassifizieren Führungspositionen und leitende Funktionen nach dem Grad ihrer Entscheidungskompetenz sowie dem Umfang ihrer Verantwortlichkeiten."
           - column: "Intern / Extern"
             definition: "Internbewerbung aus der eigenen Dienststelle bzw. Bewerbung von außerhalb."
           - column: Organisationseinheit
             definition: "Referat / Sachgebiet / Amt — je nach Verwaltungsebene unterschiedlich tief gegliedert."
       - sheet: Zeitraum_Einstellung
-        definition: "Einstellungen im Berichtszeitraum — Begründung eines Beschäftigungs- oder Beamtenverhältnisses. Personenstammdaten werden per Join mit Stichtag (PersNr) ergänzt."
-        notes: "Doppelt vorgehaltene Stammdatenspalten wurden entfernt; sie stammen aus dem Stichtag-Join."
+        definition: " Einstellungen umfassen alle Personen, die neu von extern in die Organisation aufgenommen werden. Dazu zählen auch ehemalige Nachwuchskräfte (z. B. Referendarinnen und Referendare sowie Auszubildende), die nach Abschluss ihrer Ausbildung ein Beschäftigungsverhältnis in der Organisation eingehen. Berücksichtigt werden sowohl befristete als auch unbefristete Beschäftigungsverhältnisse. Abordnungen und Versetzungen aus anderen Ressorts (im Beamtenbereich) zählen nicht als Einstellungen. Saisonarbeitende sowie vergleichbare saisonale Beschäftigte bleiben ebenfalls unberücksichtigt."
         columns:
           - column: PersNr
             definition: "Personalnummer; Join-Schlüssel zu Stichtag."
@@ -109,7 +108,7 @@ data:
           - column: PersNr
             definition: "Personalnummer; Join-Schlüssel zu Stichtag."
           - column: "Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB)"
-            definition: "Auszahlungsbetrag im Berichtszeitraum."
+            definition: "Erfasst wird die Summe aller im vorangegangenen Kalenderjahr zusätzlich zum Grundgehalt gezahlten leistungsabhängigen Zulagen und Prämien."
       - sheet: Zeitraum_Befoerderung
         definition: "Beförderungs-/Höhergruppierungsereignisse im Berichtszeitraum. Personenstammdaten (inkl. abgeleiteter Beamte/Tarifbeschäftigte-Klassifikation) werden per Join mit Stichtag (PersNr) ergänzt."
         notes: "Doppelt vorgehaltene Stammdatenspalten wurden entfernt; sie stammen aus dem Stichtag-Join."
@@ -149,6 +148,16 @@ preprocessing:
         starts_with: [E]
       then: "Ja"
       else: "Nein"
+    # Kategoriale Variante der Statusunterscheidung — als Zeilen-/Spaltenachse
+    # in den Auswertungen nutzbar (die booleschen Spalten oben dienen als Filter).
+    - dataset: Stichtag
+      column: "Beamte / Tarifbeschäftigte"
+      definition: "Kategoriale Statusunterscheidung: „Beamte“ für Besoldungsgruppen (A/B/R/W), sonst „Tarifbeschäftigte“; abgeleitet aus der Entgelt-/Besoldungsgruppe."
+      from: "Entgeltgruppe / Besoldungsgruppe"
+      when:
+        starts_with: [A, B, R, W]
+      then: "Beamte"
+      else: "Tarifbeschäftigte"
     # Beförderungsereignisse klassifizieren (eigene Spalten von Zeitraum_Befoerderung):
     - dataset: Zeitraum_Befoerderung
       column: "Beförderung (ja/nein)"

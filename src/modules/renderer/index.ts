@@ -32,8 +32,9 @@ export function renderBlocks(
 
       case "chart": {
         safeRender(container, t("render.kind.chart"), block.spec.title, () => {
-          const data = dataStore[block.spec.data];
-          if (!data) throw new Error(t("render.dataSourceNotFound", { name: block.spec.data }));
+          const name = block.spec.table.data;
+          const data = dataStore[name];
+          if (!data) throw new Error(t("render.dataSourceNotFound", { name }));
           renderChart(block.spec, data, container, chartDefaults, palette, dataProtection);
         });
         break;

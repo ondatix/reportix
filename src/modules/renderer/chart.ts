@@ -1,9 +1,15 @@
 /**
  * Chart renderer — renders a ChartSpec into a <figure> with an accessible
  * Chart.js canvas, alt text, and optional caption.
+ *
+ * The data shaping is NOT done here: the spec's embedded `table:` is turned
+ * into a shared `WrangledTable` (filter → groupby → aggregate, with per-cell
+ * data-protection flags) by the aggregation module, and this renderer only
+ * maps that crosstab onto Chart.js datasets — rows become the category axis,
+ * cols become the series. Protected cells are clamped to the threshold so a
+ * small bar is still visible; tooltips relabel them as `<threshold`.
+ *
  * Applies ChartDefaults from the bundled config for consistent styling.
- * Supports row filtering, grouping, aggregation, and a privacy threshold
- * (data protection) that suppresses small group values.
  * Usable independently in other projects.
  */
 import { Chart, registerables } from "chart.js";
@@ -12,23 +18,37 @@ import type { ChartSpec, DataSet, ChartDefaults, DataProtectionConfig } from "..
 import { generateAltText } from "../alt-text";
 import { getPalette } from "../palettes";
 import { t } from "../i18n";
-import {
-  aggregateField,
-  applyFilter,
-  applyDataProtection,
-  shouldProtect,
-  groupRowsBy,
-  pivotByGroup,
-  groupScatter,
-  aggregateByGroup,
-  aggregatePyramid,
-  type AggregationOp,
-} from "../aggregation";
+import { wrangleTable, type WrangledTable } from "../aggregation";
 
 Chart.register(...registerables);
 
 /** Per-Chart.js-dataset-index → set of data indices whose values were privacy-suppressed. */
 type ProtectionMap = Map<number, Set<number>>;
+
+/** Clamped values + protected indices for one crosstab column. */
+function columnSeries(w: WrangledTable, col: number): { values: number[]; protectedIdx: Set<number> } {
+  const protectedIdx = new Set<number>();
+  const values = w.rows.map((_, i) => {
+    const cell = w.cells[i][col];
+    if (cell.protected) protectedIdx.add(i);
+    return cell.protected ? w.threshold : cell.value;
+  });
+  return { values, protectedIdx };
+}
+
+/** Pyramid/distance need the column axis to hold exactly two distinct values. */
+function requireBinaryCols(spec: ChartSpec, w: WrangledTable): void {
+  const field = spec.table.groupby.cols;
+  if (!field || w.cols.length !== 2) {
+    throw new Error(
+      t("chart.needsBinaryCols", {
+        type: spec.type,
+        field: field ?? "groupby.cols",
+        count: field ? w.cols.length : 0,
+      })
+    );
+  }
+}
 
 export function renderChart(
   spec: ChartSpec,
@@ -40,13 +60,13 @@ export function renderChart(
 ): HTMLElement {
   const colors = palette ?? getPalette();
   const threshold = dataProtection?.smallestGroup ?? 0; // 0 = disabled
-  const filtered = applyFilter(data, spec.filter);
+  const wrangled = wrangleTable(spec.table, data, threshold);
 
   const figure = document.createElement("figure");
 
   const canvas = document.createElement("canvas");
   canvas.setAttribute("role", "img");
-  canvas.setAttribute("aria-label", generateAltText(spec, filtered));
+  canvas.setAttribute("aria-label", generateAltText(spec, wrangled));
   figure.appendChild(canvas);
 
   if (spec.caption || spec.title) {
@@ -57,101 +77,118 @@ export function renderChart(
 
   container.appendChild(figure);
 
-  if (spec.type === "pyramid") {
-    renderPyramid(canvas, spec, filtered, colors, defaults, threshold);
-    return figure;
+  switch (spec.type) {
+    case "pyramid":
+      renderPyramid(canvas, spec, wrangled, colors, defaults);
+      break;
+    case "distance":
+      renderDistance(canvas, spec, wrangled, colors, defaults);
+      break;
+    case "pie":
+    case "doughnut":
+      renderPie(canvas, spec, wrangled, colors, defaults);
+      break;
+    default:
+      renderBarLine(canvas, spec, wrangled, colors, defaults);
   }
-
-  if (spec.type === "distance") {
-    renderDistance(canvas, spec, filtered, colors, defaults, threshold);
-    return figure;
-  }
-
-  if (spec.color) {
-    renderGrouped(canvas, spec, filtered, colors, defaults, threshold);
-    return figure;
-  }
-
-  if (!spec.x) {
-    throw new Error(t("chart.requiresX", { type: spec.type }));
-  }
-
-  const yFields = Array.isArray(spec.y) ? spec.y : [spec.y];
-  const yOp = spec.aggregation?.y;
-  const total = filtered.length;
-  const protectionMap: ProtectionMap = new Map();
-
-  let labels: string[];
-  let datasets: { label: string; data: number[]; backgroundColor: string; borderColor: string }[];
-  if (yOp && yOp !== "identity") {
-    // Implicit grouping by x.
-    const groups = groupRowsBy(filtered, spec.x);
-    labels = [...groups.keys()];
-    datasets = yFields.map((yKey, i) => {
-      const raw = labels.map((x) => aggregateField(groups.get(x)!, yKey, yOp, total));
-      const protect = shouldProtect(yOp)
-        ? applyDataProtection(raw, threshold)
-        : { values: raw, protectedIdx: new Set<number>() };
-      protectionMap.set(i, protect.protectedIdx);
-      return {
-        label: yKey,
-        data: protect.values,
-        backgroundColor: colors[i % colors.length],
-        borderColor: colors[i % colors.length],
-      };
-    });
-  } else {
-    // No aggregation: rows ARE data points; data protection doesn't apply.
-    labels = filtered.map((row) => String(row[spec.x!] ?? ""));
-    datasets = yFields.map((yKey, i) => ({
-      label: yKey,
-      data: filtered.map((row) => Number(row[yKey] ?? 0)),
-      backgroundColor: colors[i % colors.length],
-      borderColor: colors[i % colors.length],
-    }));
-  }
-
-  new Chart(canvas, {
-    type: spec.type === "scatter" ? "scatter" : spec.type,
-    data: { labels, datasets },
-    options: buildOptions(spec, yFields, defaults, threshold, protectionMap),
-  });
 
   return figure;
 }
 
 /**
+ * bar / line — rows are the category axis, one dataset per crosstab column.
+ * A single synthetic column (no `groupby.cols`) renders as one dataset with
+ * per-category palette colors and no legend.
+ */
+function renderBarLine(
+  canvas: HTMLCanvasElement,
+  spec: ChartSpec,
+  w: WrangledTable,
+  colors: string[],
+  defaults?: ChartDefaults
+): void {
+  const protectionMap: ProtectionMap = new Map();
+  let datasets: object[];
+
+  if (w.colHeader) {
+    datasets = w.cols.map((name, j) => {
+      const series = columnSeries(w, j);
+      protectionMap.set(j, series.protectedIdx);
+      return {
+        label: name,
+        data: series.values,
+        backgroundColor: colors[j % colors.length],
+        borderColor: colors[j % colors.length],
+      };
+    });
+  } else {
+    const series = columnSeries(w, 0);
+    protectionMap.set(0, series.protectedIdx);
+    const perBar = w.rows.map((_, i) => colors[i % colors.length]);
+    datasets = [
+      {
+        label: w.valueLabel,
+        data: series.values,
+        backgroundColor: spec.type === "line" ? colors[0] : perBar,
+        borderColor: spec.type === "line" ? colors[0] : perBar,
+      },
+    ];
+  }
+
+  new Chart(canvas, {
+    type: spec.type as "bar" | "line",
+    data: { labels: w.rows, datasets: datasets as never },
+    options: buildOptions(spec, Boolean(w.colHeader), defaults, w.threshold, protectionMap),
+  });
+}
+
+/** pie / doughnut — one slice per row; a column axis is not supported. */
+function renderPie(
+  canvas: HTMLCanvasElement,
+  spec: ChartSpec,
+  w: WrangledTable,
+  colors: string[],
+  defaults?: ChartDefaults
+): void {
+  if (spec.table.groupby.cols) {
+    throw new Error(t("chart.pieNoCols", { type: spec.type }));
+  }
+  const series = columnSeries(w, 0);
+  const protectionMap: ProtectionMap = new Map([[0, series.protectedIdx]]);
+  const slice = w.rows.map((_, i) => colors[i % colors.length]);
+
+  new Chart(canvas, {
+    type: spec.type as "pie" | "doughnut",
+    data: {
+      labels: w.rows,
+      datasets: [
+        {
+          label: w.valueLabel,
+          data: series.values,
+          backgroundColor: slice,
+          borderColor: slice,
+        },
+      ],
+    },
+    options: buildOptions(spec, true, defaults, w.threshold, protectionMap),
+  });
+}
+
+/**
  * Pyramid chart — horizontal stacked bar with two datasets that extend in
- * opposite directions from the y-axis. Aggregates raw rows by `spec.y` (the
- * category axis) split by `spec.split` or `spec.color` (a binary column).
+ * opposite directions from the y-axis: rows are the category axis, the two
+ * crosstab columns the left/right sides (first-seen order).
  */
 function renderPyramid(
   canvas: HTMLCanvasElement,
   spec: ChartSpec,
-  data: DataSet,
+  w: WrangledTable,
   colors: string[],
-  defaults?: ChartDefaults,
-  threshold: number = 0
+  defaults?: ChartDefaults
 ): void {
-  const splitField = spec.split ?? spec.color;
-  if (!splitField) {
-    throw new Error(t("chart.pyramidRequiresColor"));
-  }
-  const yField = Array.isArray(spec.y) ? spec.y[0] : spec.y;
-  if (!yField) {
-    throw new Error(t("chart.pyramidRequiresY"));
-  }
-
-  const op: AggregationOp = spec.aggregation?.y ?? (spec.value ? "sum" : "count");
-  const agg = aggregatePyramid(data, yField, splitField, spec.value, op, data.length);
-
-  const protect = shouldProtect(op);
-  const left = protect
-    ? applyDataProtection(agg.left, threshold)
-    : { values: agg.left, protectedIdx: new Set<number>() };
-  const right = protect
-    ? applyDataProtection(agg.right, threshold)
-    : { values: agg.right, protectedIdx: new Set<number>() };
+  requireBinaryCols(spec, w);
+  const left = columnSeries(w, 0);
+  const right = columnSeries(w, 1);
   const protectionMap: ProtectionMap = new Map([
     [0, left.protectedIdx],
     [1, right.protectedIdx],
@@ -162,31 +199,31 @@ function renderPyramid(
   new Chart(canvas, {
     type: "bar",
     data: {
-      labels: agg.categories,
+      labels: w.rows,
       datasets: [
         {
-          label: agg.leftKey,
+          label: w.cols[0],
           data: left.values.map((v) => -v),
           backgroundColor: colors[0],
           borderColor: colors[0],
         },
         {
-          label: agg.rightKey,
+          label: w.cols[1],
           data: right.values,
           backgroundColor: colors[1 % colors.length],
           borderColor: colors[1 % colors.length],
         },
       ],
     },
-    options: buildPyramidOptions(spec, maxAbs, defaults, threshold, protectionMap),
+    options: buildPyramidOptions(spec, maxAbs, defaults, w.threshold, protectionMap),
   });
 }
 
 /**
- * Distance plot — for each category on the y-axis, draws two markers
- * (one per `color` value, with distinct shapes) and a thin connecting
+ * Distance plot — for each category (row) on the y-axis, draws two markers
+ * (one per crosstab column, with distinct shapes) and a thin connecting
  * line between them. The line is coloured according to the winning
- * class (the group with the higher value at that category).
+ * class (the column with the higher value at that category).
  *
  * Implemented as a mixed Chart.js chart: a floating bar dataset (thin)
  * provides the connecting line, and two line datasets with
@@ -195,65 +232,37 @@ function renderPyramid(
 function renderDistance(
   canvas: HTMLCanvasElement,
   spec: ChartSpec,
-  data: DataSet,
+  w: WrangledTable,
   colors: string[],
-  defaults?: ChartDefaults,
-  threshold: number = 0
+  defaults?: ChartDefaults
 ): void {
-  if (!spec.color) {
-    throw new Error(t("chart.distanceRequiresColor"));
-  }
-  if (!spec.x) {
-    throw new Error(t("chart.distanceRequiresX"));
-  }
-  const yField = Array.isArray(spec.y) ? spec.y[0] : spec.y;
-  if (!yField) {
-    throw new Error(t("chart.distanceRequiresY"));
-  }
-
-  const yOp: AggregationOp = spec.aggregation?.y ?? "count";
-  const total = data.length;
-  const pivot = pivotByGroup(data, spec.x, yField, spec.color, yOp, total);
-
-  if (pivot.series.length !== 2) {
-    throw new Error(
-      t("chart.distanceNeeds2", { field: spec.color, count: pivot.series.length })
-    );
-  }
-
-  const [seriesA, seriesB] = pivot.series;
-  const labels = pivot.labels;
-  const protect = shouldProtect(yOp);
-  const protA = protect
-    ? applyDataProtection(seriesA.data, threshold)
-    : { values: seriesA.data, protectedIdx: new Set<number>() };
-  const protB = protect
-    ? applyDataProtection(seriesB.data, threshold)
-    : { values: seriesB.data, protectedIdx: new Set<number>() };
+  requireBinaryCols(spec, w);
+  const seriesA = columnSeries(w, 0);
+  const seriesB = columnSeries(w, 1);
 
   const colorA = colors[0];
   const colorB = colors[1 % colors.length];
 
   // Floating-bar "line": [min, max] per category, coloured by who's winning.
-  const ranges = labels.map((_, i) => [
-    Math.min(protA.values[i], protB.values[i]),
-    Math.max(protA.values[i], protB.values[i]),
+  const ranges = w.rows.map((_, i) => [
+    Math.min(seriesA.values[i], seriesB.values[i]),
+    Math.max(seriesA.values[i], seriesB.values[i]),
   ]);
-  const winners = labels.map((_, i) =>
-    protA.values[i] >= protB.values[i] ? colorA : colorB
+  const winners = w.rows.map((_, i) =>
+    seriesA.values[i] >= seriesB.values[i] ? colorA : colorB
   );
 
   // Chart.js dataset index → protected set, used by the tooltip callback.
   // 0 = bar (range, hidden), 1 = seriesA markers, 2 = seriesB markers.
   const protectionMap: ProtectionMap = new Map([
-    [1, protA.protectedIdx],
-    [2, protB.protectedIdx],
+    [1, seriesA.protectedIdx],
+    [2, seriesB.protectedIdx],
   ]);
 
   new Chart(canvas, {
     type: "bar",
     data: {
-      labels,
+      labels: w.rows,
       datasets: [
         {
           type: "bar",
@@ -265,8 +274,8 @@ function renderDistance(
         },
         {
           type: "line",
-          label: seriesA.name,
-          data: protA.values,
+          label: w.cols[0],
+          data: seriesA.values,
           showLine: false,
           pointRadius: 7,
           pointHoverRadius: 8,
@@ -276,8 +285,8 @@ function renderDistance(
         },
         {
           type: "line",
-          label: seriesB.name,
-          data: protB.values,
+          label: w.cols[1],
+          data: seriesB.values,
           showLine: false,
           pointRadius: 7,
           pointHoverRadius: 8,
@@ -287,100 +296,7 @@ function renderDistance(
         },
       ],
     },
-    options: buildDistanceOptions(spec, defaults, threshold, protectionMap),
-  });
-}
-
-/**
- * Render a grouped chart (color-pivoted). Behaviour by chart type:
- *   - bar / line: long-form data → wide-form, aggregated per (x, group)
- *   - scatter:    one dataset of {x, y} points per group, no aggregation
- *   - pie / doughnut: one slice per group, value aggregated (count by default)
- */
-function renderGrouped(
-  canvas: HTMLCanvasElement,
-  spec: ChartSpec,
-  data: DataSet,
-  colors: string[],
-  defaults?: ChartDefaults,
-  threshold: number = 0
-): void {
-  const colorField = spec.color;
-  const yField = Array.isArray(spec.y) ? spec.y[0] : spec.y;
-  const yOp: AggregationOp = spec.aggregation?.y ?? "sum";
-  const total = data.length;
-
-  if (spec.type === "pie" || spec.type === "doughnut") {
-    if (!colorField) throw new Error(t("chart.requiresColor", { type: spec.type }));
-    const agg = aggregateByGroup(data, yField, colorField, yOp, total);
-    const protect = shouldProtect(yOp)
-      ? applyDataProtection(agg.values, threshold)
-      : { values: agg.values, protectedIdx: new Set<number>() };
-    const protectionMap: ProtectionMap = new Map([[0, protect.protectedIdx]]);
-    const slice = agg.labels.map((_, i) => colors[i % colors.length]);
-    new Chart(canvas, {
-      type: spec.type,
-      data: {
-        labels: agg.labels,
-        datasets: [
-          {
-            label: yField || colorField,
-            data: protect.values,
-            backgroundColor: slice,
-            borderColor: slice,
-          },
-        ],
-      },
-      options: buildOptions(spec, [yField || colorField], defaults, threshold, protectionMap),
-    });
-    return;
-  }
-
-  if (!spec.x) {
-    throw new Error(t("chart.groupingRequiresX", { type: spec.type }));
-  }
-  if (!yField) {
-    throw new Error(t("chart.groupingRequiresY", { type: spec.type }));
-  }
-
-  if (spec.type === "scatter") {
-    if (!colorField) throw new Error(t("chart.groupedScatterRequiresColor"));
-    const groups = groupScatter(data, spec.x, yField, colorField);
-    const datasets = groups.map((g, i) => ({
-      label: g.name,
-      data: g.points,
-      backgroundColor: colors[i % colors.length],
-      borderColor: colors[i % colors.length],
-    }));
-    new Chart(canvas, {
-      type: "scatter",
-      data: { datasets },
-      options: buildOptions(spec, [yField], defaults, threshold, new Map()),
-    });
-    return;
-  }
-
-  // bar / line — pivot long-form rows to wide-form.
-  const pivot = pivotByGroup(data, spec.x, yField, colorField!, yOp, total);
-  const protectionMap: ProtectionMap = new Map();
-  const protectGroup = shouldProtect(yOp);
-  const datasets = pivot.series.map((s, i) => {
-    const protect = protectGroup
-      ? applyDataProtection(s.data, threshold)
-      : { values: s.data, protectedIdx: new Set<number>() };
-    protectionMap.set(i, protect.protectedIdx);
-    return {
-      label: s.name,
-      data: protect.values,
-      backgroundColor: colors[i % colors.length],
-      borderColor: colors[i % colors.length],
-    };
-  });
-
-  new Chart(canvas, {
-    type: spec.type as "bar" | "line",
-    data: { labels: pivot.labels, datasets },
-    options: buildOptions(spec, [yField], defaults, threshold, protectionMap),
+    options: buildDistanceOptions(spec, defaults, w.threshold, protectionMap),
   });
 }
 
@@ -396,11 +312,9 @@ function buildTitlePlugin(
   spec: ChartSpec,
   d?: ChartDefaults
 ): NonNullable<NonNullable<ChartOptions["plugins"]>["title"]> {
-  // Comment this out to get chart titles.
   if (!spec.title) return { display: false };
   const fontColor = d?.font?.color ? `#${d.font.color}` : undefined;
   const fontSpec = d?.font ? { family: d.font.family, size: d.font.size } : undefined;
-  // return { display: false };
   return {
     display: true,
     text: spec.title,
@@ -413,7 +327,7 @@ function buildTitlePlugin(
 
 /** Build a tooltip label callback that masks privacy-suppressed values as `<{threshold}`. */
 function tooltipLabel(threshold: number, protection: ProtectionMap, abs = false) {
-  return (ctx: TooltipItem<"bar" | "line" | "pie" | "doughnut" | "scatter">) => {
+  return (ctx: TooltipItem<"bar" | "line" | "pie" | "doughnut">) => {
     const set = protection.get(ctx.datasetIndex);
     const label = ctx.dataset.label ? `${ctx.dataset.label}: ` : "";
     if (set?.has(ctx.dataIndex)) return `${label}<${threshold}`;
@@ -568,7 +482,7 @@ function buildDistanceOptions(
 
 function buildOptions(
   spec: ChartSpec,
-  yFields: string[],
+  multiSeries: boolean,
   d?: ChartDefaults,
   threshold: number = 0,
   protection: ProtectionMap = new Map()
@@ -586,7 +500,7 @@ function buildOptions(
       title: buildTitlePlugin(spec, d),
 
       legend: {
-        display: d?.legend?.display ?? yFields.length > 1,
+        display: d?.legend?.display ?? multiSeries,
         position: (d?.legend?.position ?? "top") as "top" | "bottom" | "left" | "right",
         align: (d?.legend?.align ?? "center") as "start" | "center" | "end",
         labels: { color: fontColor, font: fontSpec },

@@ -1,28 +1,23 @@
 /**
  * Alt-text module — generates descriptive alt texts for charts purely from
- * the YAML spec and (optionally) the resolved data. Fully offline.
+ * the YAML spec and (optionally) the already-wrangled crosstab. Fully offline.
  *
  * If an explicit `alt` field is set in the spec, it is returned verbatim.
  * Otherwise the auto-generated text covers four facets:
  *   1. Optional `altIntro` — an introductory sentence supplied by the
  *      template author, e.g. to describe the chart's role in the document.
- *   2. What is being measured (chart type, y-axis field, aggregation op).
- *   3. How it is broken down (x-axis, color grouping, filter).
- *   4. When data is provided, an explicit enumeration of every aggregated
- *      data point shown in the chart (per category, per series).
+ *   2. What is being measured (chart type, aggregation op, value column).
+ *   3. How it is broken down (groupby rows/cols, filter).
+ *   4. When a wrangled table is provided, an explicit enumeration of every
+ *      cell shown in the chart. Privacy-protected cells enumerate as
+ *      `<threshold`, matching what tables and tooltips display.
  *
- * Usable independently in other projects.
+ * The enumeration consumes the same `WrangledTable` the renderers draw
+ * from (see the aggregation module), so alt text can never disagree with
+ * the visible chart. Usable independently in other projects.
  */
-import type { ChartSpec, DataSet } from "../types";
-import {
-  aggregateField,
-  applyFilter,
-  pivotByGroup,
-  aggregateByGroup,
-  aggregatePyramid,
-  groupRowsBy,
-  type AggregationOp,
-} from "../aggregation";
+import type { ChartSpec } from "../types";
+import type { AggregationOp, WrangledTable } from "../aggregation";
 import { getLocale, type Locale } from "../i18n";
 
 /**
@@ -39,7 +34,6 @@ interface AltPhrases {
   splitBy: string;
   filteredTo: (field: string) => string;
   dataPoints: string;
-  points: (n: number) => string;
 }
 
 const PHRASES: Record<Locale, AltPhrases> = {
@@ -49,7 +43,6 @@ const PHRASES: Record<Locale, AltPhrases> = {
       line: "Liniendiagramm",
       pie: "Kreisdiagramm",
       doughnut: "Ringdiagramm",
-      scatter: "Streudiagramm",
       pyramid: "Bevölkerungspyramide",
       distance: "Distanzdiagramm",
     },
@@ -71,7 +64,6 @@ const PHRASES: Record<Locale, AltPhrases> = {
     splitBy: "aufgeteilt nach",
     filteredTo: (field) => `(gefiltert auf ${field})`,
     dataPoints: "Datenpunkte",
-    points: (n) => `${n} Punkte`,
   },
   en: {
     chartTypes: {
@@ -79,7 +71,6 @@ const PHRASES: Record<Locale, AltPhrases> = {
       line: "Line chart",
       pie: "Pie chart",
       doughnut: "Doughnut chart",
-      scatter: "Scatter plot",
       pyramid: "Pyramid chart",
       distance: "Distance plot",
     },
@@ -101,69 +92,44 @@ const PHRASES: Record<Locale, AltPhrases> = {
     splitBy: "split by",
     filteredTo: (field) => `(filtered to ${field})`,
     dataPoints: "Data points",
-    points: (n) => `${n} points`,
   },
 };
 
 /**
  * Generate an alt text string for a chart.
  *
- * @param spec - The chart YAML spec.
- * @param data - The resolved dataset (used to enumerate aggregated points).
+ * @param spec - The chart YAML spec (with its embedded `table:` sub-spec).
+ * @param wrangled - The wrangled crosstab (used to enumerate the shown cells).
  * @param locale - Language for the generated text. Defaults to the active locale.
  * @returns A plain-text alt string.
  */
 export function generateAltText(
   spec: ChartSpec,
-  data?: DataSet,
+  wrangled?: WrangledTable,
   locale: Locale = getLocale()
 ): string {
   if (spec.alt) return spec.alt;
   const p = PHRASES[locale] ?? PHRASES.de;
-  if (spec.type === "pyramid") return derivePyramidAltText(spec, data, p);
-  return deriveAltTextFromSpec(spec, data, p);
-}
-
-// ── Spec-derived generation ─────────────────────────────────────────
-
-function deriveAltTextFromSpec(spec: ChartSpec, data: DataSet | undefined, p: AltPhrases): string {
-  const chartLabel = chartTypeLabel(spec.type, p);
-  const yFields = Array.isArray(spec.y) ? spec.y.join(", ") : spec.y;
-  const op = spec.aggregation?.y;
+  const table = spec.table;
 
   const sentences: string[] = [];
 
-  // Sentence 1 — what is shown.
-  let s1 = `${chartLabel} ${comparingPhrase(op, p)} ${yFields}`;
-  if (spec.x) s1 += ` ${p.by} ${spec.x}`;
-  if (spec.color) s1 += `, ${p.groupedBy} ${spec.color}`;
-  if (hasFilter(spec)) s1 += ` ${p.filteredTo(spec.filter!)}`;
-  sentences.push(s1);
-
-  // Sentence 2 — data point enumeration (only when data is available).
-  if (data && data.length > 0) {
-    const enumeration = enumeratePoints(spec, data, p);
-    if (enumeration) sentences.push(`${p.dataPoints}: ${enumeration}`);
+  // Sentence 1 — what is shown: the measured field (the aggregated value
+  // column, or the row axis itself for plain counts/shares), broken down by
+  // the groupby axes.
+  const measured = table.value ?? table.groupby.rows;
+  let s1 = `${chartTypeLabel(spec.type, p)} ${comparingPhrase(table.aggregation, p)} ${measured}`;
+  if (table.value) s1 += ` ${p.by} ${table.groupby.rows}`;
+  if (table.groupby.cols) {
+    const phrase = spec.type === "pyramid" || spec.type === "distance" ? p.splitBy : p.groupedBy;
+    s1 += `, ${phrase} ${table.groupby.cols}`;
   }
-
-  return assemble(spec, sentences);
-}
-
-function derivePyramidAltText(spec: ChartSpec, data: DataSet | undefined, p: AltPhrases): string {
-  const yField = Array.isArray(spec.y) ? spec.y[0] : spec.y;
-  const splitField = spec.split ?? spec.color;
-  const op = spec.aggregation?.y;
-
-  const sentences: string[] = [];
-
-  let s1 = `${p.chartTypes.pyramid} ${comparingPhrase(op, p)} ${yField}`;
-  if (splitField) s1 += ` ${p.splitBy} ${splitField}`;
-  if (hasFilter(spec)) s1 += ` ${p.filteredTo(spec.filter!)}`;
+  if (hasFilter(spec)) s1 += ` ${p.filteredTo(table.filter!)}`;
   sentences.push(s1);
 
-  if (data && data.length > 0) {
-    const enumeration = enumeratePoints(spec, data, p);
-    if (enumeration) sentences.push(`${p.dataPoints}: ${enumeration}`);
+  // Sentence 2 — cell enumeration (only when the wrangled table is available).
+  if (wrangled && wrangled.rows.length > 0) {
+    sentences.push(`${p.dataPoints}: ${enumerateCells(wrangled)}`);
   }
 
   return assemble(spec, sentences);
@@ -179,7 +145,8 @@ function assemble(spec: ChartSpec, sentences: string[]): string {
 }
 
 function hasFilter(spec: ChartSpec): boolean {
-  return Boolean(spec.filter && spec.filter !== "Alle" && spec.filter !== "-");
+  const filter = spec.table.filter;
+  return Boolean(filter && filter !== "Alle" && filter !== "-");
 }
 
 function comparingPhrase(op: AggregationOp | undefined, p: AltPhrases): string {
@@ -190,94 +157,25 @@ function chartTypeLabel(type: ChartSpec["type"], p: AltPhrases): string {
   return p.chartTypes[type] ?? p.chartTypes.bar;
 }
 
-// ── Data-point enumeration ─────────────────────────────────────────
+// ── Cell enumeration ───────────────────────────────────────────────
 
 /**
- * Compute the aggregated data points shown by the chart and render them
- * as a single readable string. Returns "" for chart types/configurations
- * where per-point enumeration would be impractical (e.g. unaggregated raw
- * rows, scatter with hundreds of points).
+ * Enumerate every crosstab cell as a single readable string, e.g.
+ * `QE 3, w: 12; QE 3, m: <5; …`. Values match the rendered chart/table:
+ * privacy-protected cells are masked as `<threshold`.
  */
-function enumeratePoints(spec: ChartSpec, data: DataSet, p: AltPhrases): string {
-  const filtered = applyFilter(data, spec.filter);
-  if (filtered.length === 0) return "";
-
-  try {
-    if (spec.type === "pyramid") return enumeratePyramid(spec, filtered);
-    if (spec.type === "pie" || spec.type === "doughnut") return enumeratePie(spec, filtered);
-    if (spec.type === "scatter") return enumerateScatter(spec, filtered, p);
-    if (spec.color) return enumerateGrouped(spec, filtered);
-    return enumerateUngrouped(spec, filtered);
-  } catch {
-    // Pyramid validation can throw if the split field has != 2 values.
-    // Don't break alt text — fall back to a summary count.
-    return "";
-  }
-}
-
-function enumeratePyramid(spec: ChartSpec, data: DataSet): string {
-  const splitField = spec.split ?? spec.color;
-  const yField = Array.isArray(spec.y) ? spec.y[0] : spec.y;
-  if (!splitField || !yField) return "";
-  const op: AggregationOp = spec.aggregation?.y ?? (spec.value ? "sum" : "count");
-
-  const agg = aggregatePyramid(data, yField, splitField, spec.value, op, data.length);
-  const isShare = op === "share_total" || op === "share_group";
-  return agg.categories
-    .map(
-      (cat, i) =>
-        `${yField} ${cat}: ${agg.leftKey} ${fmt(agg.left[i], isShare)}, ${agg.rightKey} ${fmt(agg.right[i], isShare)}`
-    )
-    .join("; ");
-}
-
-function enumeratePie(spec: ChartSpec, data: DataSet): string {
-  if (!spec.color) return "";
-  const yField = Array.isArray(spec.y) ? spec.y[0] : spec.y;
-  const op: AggregationOp = spec.aggregation?.y ?? "sum";
-  const agg = aggregateByGroup(data, yField, spec.color, op, data.length);
-  const isShare = op === "share_total" || op === "share_group";
-  return agg.labels.map((label, i) => `${label}: ${fmt(agg.values[i], isShare)}`).join("; ");
-}
-
-function enumerateScatter(_spec: ChartSpec, data: DataSet, p: AltPhrases): string {
-  // Per-point enumeration is impractical for scatter; fall back to count.
-  return p.points(data.length);
-}
-
-function enumerateGrouped(spec: ChartSpec, data: DataSet): string {
-  if (!spec.x || !spec.color) return "";
-  const yField = Array.isArray(spec.y) ? spec.y[0] : spec.y;
-  if (!yField) return "";
-  const op: AggregationOp = spec.aggregation?.y ?? "sum";
-
-  const pivot = pivotByGroup(data, spec.x, yField, spec.color, op, data.length);
-  const isShare = op === "share_total" || op === "share_group";
+function enumerateCells(w: WrangledTable): string {
   const parts: string[] = [];
-  for (let i = 0; i < pivot.labels.length; i++) {
-    for (const s of pivot.series) {
-      parts.push(`${spec.x} ${pivot.labels[i]}, ${s.name}: ${fmt(s.data[i], isShare)}`);
-    }
-  }
+  w.rows.forEach((rowLabel, i) => {
+    w.cells[i].forEach((cell, j) => {
+      const value = cell.protected ? `<${w.threshold}` : fmt(cell.value, w.isShare);
+      const label = w.colHeader
+        ? `${w.rowHeader} ${rowLabel}, ${w.cols[j]}`
+        : `${w.rowHeader} ${rowLabel}`;
+      parts.push(`${label}: ${value}`);
+    });
+  });
   return parts.join("; ");
-}
-
-function enumerateUngrouped(spec: ChartSpec, data: DataSet): string {
-  const op = spec.aggregation?.y;
-  // Without aggregation rows ARE the data points — too many to enumerate.
-  if (!op || op === "identity") return "";
-  if (!spec.x) return "";
-  const yField = Array.isArray(spec.y) ? spec.y[0] : spec.y;
-  if (!yField) return "";
-
-  const groups = groupRowsBy(data, spec.x);
-  const isShare = op === "share_total" || op === "share_group";
-  return [...groups.entries()]
-    .map(
-      ([label, rows]) =>
-        `${spec.x} ${label}: ${fmt(aggregateField(rows, yField, op, data.length), isShare)}`
-    )
-    .join("; ");
 }
 
 /** Format a numeric data point. Shares get a percent sign; whole numbers

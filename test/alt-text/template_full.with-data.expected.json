@@ -1,0 +1,237 @@
+[
+  {
+    "index": 0,
+    "title": "Geschlechterverteilung",
+    "alt": "Geschlechterverteilung. Kreisdiagramm vergleicht den Anteil (% des Gesamtwerts) von Geschlecht. Datenpunkte: Geschlecht weiblich: 51.3%; Geschlecht männlich: 48.7%."
+  },
+  {
+    "index": 1,
+    "title": "Männer und Frauen in den Organisationseinheiten",
+    "alt": "Männer und Frauen in den Organisationseinheiten. Distanzdiagramm vergleicht die Anzahl von Organisationseinheit, aufgeteilt nach Geschlecht. Datenpunkte: Organisationseinheit Finanzen, weiblich: 161; Organisationseinheit Finanzen, männlich: 139; Organisationseinheit Bauamt, weiblich: 153; Organisationseinheit Bauamt, männlich: 156; Organisationseinheit IT, weiblich: 147; Organisationseinheit IT, männlich: 153; Organisationseinheit Ordnungsamt, weiblich: 160; Organisationseinheit Ordnungsamt, männlich: 150; Organisationseinheit Personal, weiblich: 149; Organisationseinheit Personal, männlich: 132."
+  },
+  {
+    "index": 2,
+    "title": "Tarifbeschäftigte vs. Beamte",
+    "alt": "Tarifbeschäftigte vs. Beamte. Balkendiagramm vergleicht die Anzahl von Beamte / Tarifbeschäftigte, gruppiert nach Geschlecht. Datenpunkte: Beamte / Tarifbeschäftigte Tarifbeschäftigte, weiblich: 523; Beamte / Tarifbeschäftigte Tarifbeschäftigte, männlich: 486; Beamte / Tarifbeschäftigte Beamte, weiblich: 247; Beamte / Tarifbeschäftigte Beamte, männlich: 244."
+  },
+  {
+    "index": 3,
+    "title": "Befristete vs. unbefristete Arbeitsverhältnisse",
+    "alt": "Befristete vs. unbefristete Arbeitsverhältnisse. Balkendiagramm vergleicht die Anzahl von Befristet / Unbefristet, gruppiert nach Geschlecht (gefiltert auf Tarifbeschäftigte). Datenpunkte: Befristet / Unbefristet Befristet, weiblich: 212; Befristet / Unbefristet Befristet, männlich: 205; Befristet / Unbefristet Unbefristet, weiblich: 311; Befristet / Unbefristet Unbefristet, männlich: 281."
+  },
+  {
+    "index": 4,
+    "title": "Männer und Frauen in den Entgelt- und Besoldungsgruppen",
+    "alt": "Männer und Frauen in den Entgelt- und Besoldungsgruppen. Distanzdiagramm vergleicht die Anzahl von Entgeltgruppe / Besoldungsgruppe, aufgeteilt nach Geschlecht. Datenpunkte: Entgeltgruppe / Besoldungsgruppe E8, weiblich: 133; Entgeltgruppe / Besoldungsgruppe E8, männlich: 127; Entgeltgruppe / Besoldungsgruppe E10, weiblich: 122; Entgeltgruppe / Besoldungsgruppe E10, männlich: 120; Entgeltgruppe / Besoldungsgruppe E6, weiblich: 130; Entgeltgruppe / Besoldungsgruppe E6, männlich: 118; Entgeltgruppe / Besoldungsgruppe E12, weiblich: 138; Entgeltgruppe / Besoldungsgruppe E12, männlich: 121; Entgeltgruppe / Besoldungsgruppe A9, weiblich: 122; Entgeltgruppe / Besoldungsgruppe A9, männlich: 127; Entgeltgruppe / Besoldungsgruppe A11, weiblich: 125; Entgeltgruppe / Besoldungsgruppe A11, männlich: 117."
+  },
+  {
+    "index": 5,
+    "title": "Qualifikationsebenen nach Geschlecht",
+    "alt": "Qualifikationsebenen nach Geschlecht. Bevölkerungspyramide vergleicht die Anzahl von QE, aufgeteilt nach Geschlecht. Datenpunkte: QE 1, weiblich: 154; QE 1, männlich: 162; QE 3, weiblich: 314; QE 3, männlich: 282; QE 2, weiblich: 170; QE 2, männlich: 133; QE 4, weiblich: 132; QE 4, männlich: 153."
+  },
+  {
+    "index": 6,
+    "title": "QE-Aufstieg im Vergleich zur Einstiegs-QE",
+    "alt": "QE-Aufstieg im Vergleich zur Einstiegs-QE. Bevölkerungspyramide vergleicht die Anzahl von QE-Aufstieg, aufgeteilt nach Geschlecht."
+  },
+  {
+    "index": 7,
+    "title": "Auszubildende in den Ausbildungsbereichen",
+    "alt": "Auszubildende in den Ausbildungsbereichen. Balkendiagramm vergleicht die Anzahl von Ausbildungsbereich, gruppiert nach Geschlecht (gefiltert auf Auszubildende). Datenpunkte: Ausbildungsbereich Technik, weiblich: 217; Ausbildungsbereich Technik, männlich: 181; Ausbildungsbereich Soziales, weiblich: 183; Ausbildungsbereich Soziales, männlich: 170; Ausbildungsbereich IT, weiblich: 190; Ausbildungsbereich IT, männlich: 206; Ausbildungsbereich Verwaltung, weiblich: 180; Ausbildungsbereich Verwaltung, männlich: 173."
+  },
+  {
+    "index": 8,
+    "title": "Qualifizierte Bewerbungen nach Qualifikationsebene",
+    "alt": "Qualifizierte Bewerbungen nach Qualifikationsebene. Bevölkerungspyramide vergleicht die Anzahl von QE, aufgeteilt nach Geschlecht (gefiltert auf Qualifizierte Bewerbungen). Datenpunkte: QE 3, männlich: 209; QE 3, weiblich: 182; QE 4, männlich: 103; QE 4, weiblich: 102; QE 2, männlich: 103; QE 2, weiblich: 106; QE 1, männlich: 92; QE 1, weiblich: 103."
+  },
+  {
+    "index": 9,
+    "title": "Qualifizierte Bewerbungen je Führungsebene",
+    "alt": "Qualifizierte Bewerbungen je Führungsebene. Bevölkerungspyramide vergleicht die Anzahl von Führungsebene, aufgeteilt nach Geschlecht (gefiltert auf Qualifizierte Bewerbungen). Datenpunkte: Führungsebene 2, weiblich: 55; Führungsebene 2, männlich: 65; Führungsebene 3, weiblich: 35; Führungsebene 3, männlich: 37; Führungsebene 1, weiblich: 82; Führungsebene 1, männlich: 107."
+  },
+  {
+    "index": 10,
+    "title": "Interne vs. externe qualifizierte Bewerbungen",
+    "alt": "Interne vs. externe qualifizierte Bewerbungen. Bevölkerungspyramide vergleicht die Anzahl von Intern / Extern, aufgeteilt nach Geschlecht (gefiltert auf Qualifizierte Bewerbungen). Datenpunkte: Intern / Extern Intern, männlich: 343; Intern / Extern Intern, weiblich: 350; Intern / Extern Extern, männlich: 164; Intern / Extern Extern, weiblich: 143."
+  },
+  {
+    "index": 11,
+    "title": "Bewerbungen je Organisationseinheit",
+    "alt": "Bewerbungen je Organisationseinheit. Distanzdiagramm vergleicht die Anzahl von Organisationseinheit, aufgeteilt nach Geschlecht (gefiltert auf Qualifizierte Bewerbungen). Datenpunkte: Organisationseinheit Finanzen, männlich: 100; Organisationseinheit Finanzen, weiblich: 104; Organisationseinheit Bauamt, männlich: 106; Organisationseinheit Bauamt, weiblich: 89; Organisationseinheit IT, männlich: 101; Organisationseinheit IT, weiblich: 102; Organisationseinheit Ordnungsamt, männlich: 100; Organisationseinheit Ordnungsamt, weiblich: 104; Organisationseinheit Personal, männlich: 100; Organisationseinheit Personal, weiblich: 94."
+  },
+  {
+    "index": 12,
+    "title": "Neueinstellungen nach Geschlecht",
+    "alt": "Neueinstellungen nach Geschlecht. Balkendiagramm vergleicht die Anzahl von Geschlecht (gefiltert auf Einstellungen). Datenpunkte: Geschlecht weiblich: 51; Geschlecht männlich: 49."
+  },
+  {
+    "index": 13,
+    "title": "Neueinstellungen nach Qualifikationsebene",
+    "alt": "Neueinstellungen nach Qualifikationsebene. Balkendiagramm vergleicht die Anzahl von QE, gruppiert nach Geschlecht (gefiltert auf Einstellungen). Datenpunkte: QE 1, weiblich: 12; QE 1, männlich: 13; QE 3, weiblich: 24; QE 3, männlich: 13; QE 2, weiblich: 8; QE 2, männlich: 12; QE 4, weiblich: 7; QE 4, männlich: 11."
+  },
+  {
+    "index": 14,
+    "title": "Neueinstellungen nach Entgelt-/Besoldungsgruppe",
+    "alt": "Neueinstellungen nach Entgelt-/Besoldungsgruppe. Balkendiagramm vergleicht die Anzahl von Entgeltgruppe / Besoldungsgruppe, gruppiert nach Geschlecht (gefiltert auf Einstellungen). Datenpunkte: Entgeltgruppe / Besoldungsgruppe E8, weiblich: 12; Entgeltgruppe / Besoldungsgruppe E8, männlich: 10; Entgeltgruppe / Besoldungsgruppe E10, weiblich: 7; Entgeltgruppe / Besoldungsgruppe E10, männlich: 10; Entgeltgruppe / Besoldungsgruppe E6, weiblich: 8; Entgeltgruppe / Besoldungsgruppe E6, männlich: 7; Entgeltgruppe / Besoldungsgruppe E12, weiblich: 6; Entgeltgruppe / Besoldungsgruppe E12, männlich: 8; Entgeltgruppe / Besoldungsgruppe A9, weiblich: 11; Entgeltgruppe / Besoldungsgruppe A9, männlich: 5; Entgeltgruppe / Besoldungsgruppe A11, weiblich: 7; Entgeltgruppe / Besoldungsgruppe A11, männlich: 9."
+  },
+  {
+    "index": 15,
+    "title": "Beschäftigte in leitenden Funktionen",
+    "alt": "Beschäftigte in leitenden Funktionen. Bevölkerungspyramide vergleicht die Anzahl von Führungskraft (aktiv), aufgeteilt nach Geschlecht. Datenpunkte: Führungskraft (aktiv) Nein, weiblich: 488; Führungskraft (aktiv) Nein, männlich: 457; Führungskraft (aktiv) Ja, weiblich: 282; Führungskraft (aktiv) Ja, männlich: 273."
+  },
+  {
+    "index": 16,
+    "title": "Führungsebenen nach Geschlecht",
+    "alt": "Führungsebenen nach Geschlecht. Bevölkerungspyramide vergleicht die Anzahl von Führungsebene, aufgeteilt nach Geschlecht (gefiltert auf Führungskraft (aktiv)). Datenpunkte: Führungsebene 1, weiblich: 142; Führungsebene 1, männlich: 135; Führungsebene 2, weiblich: 91; Führungsebene 2, männlich: 91; Führungsebene 3, weiblich: 49; Führungsebene 3, männlich: 47."
+  },
+  {
+    "index": 17,
+    "title": "Führungskräfte in den Organisationseinheiten",
+    "alt": "Führungskräfte in den Organisationseinheiten. Distanzdiagramm vergleicht die Anzahl von Organisationseinheit, aufgeteilt nach Geschlecht (gefiltert auf Führungskraft (aktiv)). Datenpunkte: Organisationseinheit Bauamt, weiblich: 62; Organisationseinheit Bauamt, männlich: 66; Organisationseinheit IT, weiblich: 56; Organisationseinheit IT, männlich: 51; Organisationseinheit Finanzen, weiblich: 55; Organisationseinheit Finanzen, männlich: 49; Organisationseinheit Personal, weiblich: 58; Organisationseinheit Personal, männlich: 55; Organisationseinheit Ordnungsamt, weiblich: 51; Organisationseinheit Ordnungsamt, männlich: 52."
+  },
+  {
+    "index": 18,
+    "title": "Anteil Führung in Tandem (in der Gruppe) je QE",
+    "alt": "Anteil Führung in Tandem (in der Gruppe) je QE. Bevölkerungspyramide vergleicht den Anteil innerhalb der Gruppe von Führungskraft (aktiv) in Tandem nach QE, aufgeteilt nach Geschlecht (gefiltert auf Führungskraft (aktiv)). Datenpunkte: QE 3, weiblich: 0.0%; QE 3, männlich: 0.0%; QE 1, weiblich: 0.0%; QE 1, männlich: 0.0%; QE 2, weiblich: 0.0%; QE 2, männlich: 0.0%; QE 4, weiblich: 0.0%; QE 4, männlich: 0.0%."
+  },
+  {
+    "index": 19,
+    "title": "Anteil Führung in Tandem je Führungsebene",
+    "alt": "Anteil Führung in Tandem je Führungsebene. Bevölkerungspyramide vergleicht den Anteil innerhalb der Gruppe von Führungskraft (aktiv) in Tandem nach Führungsebene, aufgeteilt nach Geschlecht (gefiltert auf Führungskraft (aktiv)). Datenpunkte: Führungsebene 1, weiblich: 0.0%; Führungsebene 1, männlich: 0.0%; Führungsebene 2, weiblich: 0.0%; Führungsebene 2, männlich: 0.0%; Führungsebene 3, weiblich: 0.0%; Führungsebene 3, männlich: 0.0%."
+  },
+  {
+    "index": 20,
+    "title": "Führung in Teilzeit",
+    "alt": "Führung in Teilzeit. Balkendiagramm vergleicht die Anzahl von Teilzeit / Vollzeit, gruppiert nach Geschlecht (gefiltert auf Führungskraft (aktiv)). Datenpunkte: Teilzeit / Vollzeit Vollzeit, weiblich: 108; Teilzeit / Vollzeit Vollzeit, männlich: 104; Teilzeit / Vollzeit Teilzeit, weiblich: 174; Teilzeit / Vollzeit Teilzeit, männlich: 169."
+  },
+  {
+    "index": 21,
+    "title": "Teilzeit vs. Vollzeit",
+    "alt": "Teilzeit vs. Vollzeit. Balkendiagramm vergleicht die Anzahl von Teilzeit / Vollzeit, gruppiert nach Geschlecht. Datenpunkte: Teilzeit / Vollzeit Teilzeit, weiblich: 484; Teilzeit / Vollzeit Teilzeit, männlich: 467; Teilzeit / Vollzeit Vollzeit, weiblich: 286; Teilzeit / Vollzeit Vollzeit, männlich: 263."
+  },
+  {
+    "index": 22,
+    "title": "Arbeitszeitanteile nach Geschlecht",
+    "alt": "Arbeitszeitanteile nach Geschlecht. Balkendiagramm vergleicht die Anzahl von Arbeitszeitanteil, gruppiert nach Geschlecht. Datenpunkte: Arbeitszeitanteil 50, weiblich: 52; Arbeitszeitanteil 50, männlich: 61; Arbeitszeitanteil 100, weiblich: 286; Arbeitszeitanteil 100, männlich: 263; Arbeitszeitanteil 80, weiblich: 118; Arbeitszeitanteil 80, männlich: 125; Arbeitszeitanteil 60, weiblich: 57; Arbeitszeitanteil 60, männlich: 62; Arbeitszeitanteil 40, weiblich: 64; Arbeitszeitanteil 40, männlich: 46; Arbeitszeitanteil 70, weiblich: 124; Arbeitszeitanteil 70, männlich: 115; Arbeitszeitanteil 90, weiblich: 69; Arbeitszeitanteil 90, männlich: 58."
+  },
+  {
+    "index": 23,
+    "title": "Beurlaubungen aus familiären Gründen",
+    "alt": "Beurlaubungen aus familiären Gründen. Balkendiagramm vergleicht die Anzahl von Beurlaubung, gruppiert nach Geschlecht."
+  },
+  {
+    "index": 24,
+    "title": "Durchschnittliche Dauer der Elternzeit (Tage) je QE",
+    "alt": "Durchschnittliche Dauer der Elternzeit (Tage) je QE. Bevölkerungspyramide vergleicht den Mittelwert von Dauer der Elternzeit (Tage) nach QE, aufgeteilt nach Geschlecht (gefiltert auf Personen in Elternzeit). Datenpunkte: QE 1, weiblich: 214.67; QE 1, männlich: 203.54; QE 3, weiblich: 152.54; QE 3, männlich: 216.46; QE 2, weiblich: 234.50; QE 2, männlich: 182.58; QE 4, weiblich: 224; QE 4, männlich: 206.18."
+  },
+  {
+    "index": 25,
+    "title": "In Elternzeit nach Entgeltgruppe",
+    "alt": "In Elternzeit nach Entgeltgruppe. Distanzdiagramm vergleicht die Anzahl von Entgeltgruppe / Besoldungsgruppe, aufgeteilt nach Geschlecht (gefiltert auf Personen in Elternzeit). Datenpunkte: Entgeltgruppe / Besoldungsgruppe E8, weiblich: 133; Entgeltgruppe / Besoldungsgruppe E8, männlich: 127; Entgeltgruppe / Besoldungsgruppe E10, weiblich: 122; Entgeltgruppe / Besoldungsgruppe E10, männlich: 120; Entgeltgruppe / Besoldungsgruppe E6, weiblich: 130; Entgeltgruppe / Besoldungsgruppe E6, männlich: 118; Entgeltgruppe / Besoldungsgruppe E12, weiblich: 138; Entgeltgruppe / Besoldungsgruppe E12, männlich: 121; Entgeltgruppe / Besoldungsgruppe A9, weiblich: 122; Entgeltgruppe / Besoldungsgruppe A9, männlich: 127; Entgeltgruppe / Besoldungsgruppe A11, weiblich: 125; Entgeltgruppe / Besoldungsgruppe A11, männlich: 117."
+  },
+  {
+    "index": 26,
+    "title": "Durchschnittliche Beurteilung Beamte nach QE",
+    "alt": "Durchschnittliche Beurteilung Beamte nach QE. Distanzdiagramm vergleicht den Mittelwert von Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung nach QE, aufgeteilt nach Geschlecht (gefiltert auf Beamte). Datenpunkte: QE 3, weiblich: 10.77; QE 3, männlich: 10.71; QE 4, weiblich: 10.64; QE 4, männlich: 11.02; QE 1, weiblich: 11.66; QE 1, männlich: 11.47; QE 2, weiblich: 11.71; QE 2, männlich: 10.72."
+  },
+  {
+    "index": 27,
+    "title": "Beurteilung Beamte — Teilzeit vs. Vollzeit",
+    "alt": "Beurteilung Beamte — Teilzeit vs. Vollzeit. Balkendiagramm vergleicht den Mittelwert von Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung nach Teilzeit / Vollzeit, gruppiert nach Geschlecht (gefiltert auf Beamte). Datenpunkte: Teilzeit / Vollzeit Vollzeit, weiblich: 11.19; Teilzeit / Vollzeit Vollzeit, männlich: 11.29; Teilzeit / Vollzeit Teilzeit, weiblich: 11.11; Teilzeit / Vollzeit Teilzeit, männlich: 10.78."
+  },
+  {
+    "index": 28,
+    "title": "Beurteilung Beamte je Organisationseinheit",
+    "alt": "Beurteilung Beamte je Organisationseinheit. Distanzdiagramm vergleicht den Mittelwert von Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung nach Organisationseinheit, aufgeteilt nach Geschlecht (gefiltert auf Beamte). Datenpunkte: Organisationseinheit IT, weiblich: 11.27; Organisationseinheit IT, männlich: 11.01; Organisationseinheit Ordnungsamt, weiblich: 11.02; Organisationseinheit Ordnungsamt, männlich: 10.68; Organisationseinheit Bauamt, weiblich: 11.34; Organisationseinheit Bauamt, männlich: 10.85; Organisationseinheit Finanzen, weiblich: 11.28; Organisationseinheit Finanzen, männlich: 10.99; Organisationseinheit Personal, weiblich: 10.84; Organisationseinheit Personal, männlich: 11.26."
+  },
+  {
+    "index": 29,
+    "title": "Durchschnittliche Beurteilung Tarifbeschäftigte nach QE",
+    "alt": "Durchschnittliche Beurteilung Tarifbeschäftigte nach QE. Distanzdiagramm vergleicht den Mittelwert von Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung nach QE, aufgeteilt nach Geschlecht (gefiltert auf Tarifbeschäftigte). Datenpunkte: QE 1, weiblich: 11.30; QE 1, männlich: 11.18; QE 3, weiblich: 11.19; QE 3, männlich: 10.95; QE 2, weiblich: 10.73; QE 2, männlich: 11.54; QE 4, weiblich: 11.83; QE 4, männlich: 10.85."
+  },
+  {
+    "index": 30,
+    "title": "Beurteilung Tarifbeschäftigte — Teilzeit vs. Vollzeit",
+    "alt": "Beurteilung Tarifbeschäftigte — Teilzeit vs. Vollzeit. Balkendiagramm vergleicht den Mittelwert von Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung nach Teilzeit / Vollzeit, gruppiert nach Geschlecht (gefiltert auf Tarifbeschäftigte). Datenpunkte: Teilzeit / Vollzeit Teilzeit, weiblich: 11.15; Teilzeit / Vollzeit Teilzeit, männlich: 11.02; Teilzeit / Vollzeit Vollzeit, weiblich: 11.34; Teilzeit / Vollzeit Vollzeit, männlich: 11.21."
+  },
+  {
+    "index": 31,
+    "title": "Beurteilung Tarifbeschäftigte je Organisationseinheit",
+    "alt": "Beurteilung Tarifbeschäftigte je Organisationseinheit. Distanzdiagramm vergleicht den Mittelwert von Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung nach Organisationseinheit, aufgeteilt nach Geschlecht (gefiltert auf Tarifbeschäftigte). Datenpunkte: Organisationseinheit Finanzen, weiblich: 11.03; Organisationseinheit Finanzen, männlich: 11.04; Organisationseinheit Bauamt, weiblich: 11.36; Organisationseinheit Bauamt, männlich: 11.17; Organisationseinheit IT, weiblich: 11.16; Organisationseinheit IT, männlich: 11; Organisationseinheit Personal, weiblich: 11.43; Organisationseinheit Personal, männlich: 11.14; Organisationseinheit Ordnungsamt, weiblich: 11.14; Organisationseinheit Ordnungsamt, männlich: 11.13."
+  },
+  {
+    "index": 32,
+    "title": "Anteil Beförderungen je QE — Beamte",
+    "alt": "Anteil Beförderungen je QE — Beamte. Balkendiagramm vergleicht den Anteil innerhalb der Gruppe von Beförderung (ja/nein) nach QE, gruppiert nach Geschlecht (gefiltert auf Beamte). Datenpunkte: QE 3, weiblich: 58.3%; QE 3, männlich: 25.0%; QE 4, weiblich: 0.0%; QE 4, männlich: 0.0%; QE 1, weiblich: 50.0%; QE 1, männlich: 75.0%; QE 2, weiblich: 100.0%; QE 2, männlich: 100.0%."
+  },
+  {
+    "index": 33,
+    "title": "Anteil Beförderungen je Besoldungsgruppe — Beamte",
+    "alt": "Anteil Beförderungen je Besoldungsgruppe — Beamte. Balkendiagramm vergleicht den Anteil innerhalb der Gruppe von Beförderung (ja/nein) nach Entgeltgruppe / Besoldungsgruppe, gruppiert nach Geschlecht (gefiltert auf Beamte). Datenpunkte: Entgeltgruppe / Besoldungsgruppe A9, weiblich: 63.6%; Entgeltgruppe / Besoldungsgruppe A9, männlich: 40.0%; Entgeltgruppe / Besoldungsgruppe A11, weiblich: 28.6%; Entgeltgruppe / Besoldungsgruppe A11, männlich: 66.7%."
+  },
+  {
+    "index": 34,
+    "title": "Höhergruppierungen nach Maßnahmenart",
+    "alt": "Höhergruppierungen nach Maßnahmenart. Balkendiagramm vergleicht die Anzahl von Maßnahmenart, gruppiert nach Geschlecht (gefiltert auf Tarifbeschäftigte). Datenpunkte: Maßnahmenart Höhergruppierung, weiblich: 21; Maßnahmenart Höhergruppierung, männlich: 15; Maßnahmenart Beförderung, weiblich: 12; Maßnahmenart Beförderung, männlich: 20."
+  },
+  {
+    "index": 35,
+    "title": "Höhergruppierungen — auf Antrag vs. dienstseitig",
+    "alt": "Höhergruppierungen — auf Antrag vs. dienstseitig. Balkendiagramm vergleicht die Anzahl von Maßnahmenantrag, gruppiert nach Geschlecht (gefiltert auf Höhergruppierung genehmigt). Datenpunkte: Maßnahmenantrag Nein, weiblich: 13; Maßnahmenantrag Nein, männlich: 10; Maßnahmenantrag Ja, weiblich: 17; Maßnahmenantrag Ja, männlich: 11."
+  },
+  {
+    "index": 36,
+    "title": "Anteil abgeschlossener Qualifizierungen je Art",
+    "alt": "Anteil abgeschlossener Qualifizierungen je Art. Distanzdiagramm vergleicht den Anteil innerhalb der Gruppe von Qualifizierungsmaßnahme abgeschlossen (ja / nein) nach Qualifikationsart, aufgeteilt nach Geschlecht. Datenpunkte: Qualifikationsart EQ, weiblich: 0.0%; Qualifikationsart EQ, männlich: 0.0%; Qualifikationsart BQ, weiblich: 0.0%; Qualifikationsart BQ, männlich: 0.0%; Qualifikationsart AQ, weiblich: 0.0%; Qualifikationsart AQ, männlich: 0.0%."
+  },
+  {
+    "index": 37,
+    "title": "Anteil bewilligter Qualifizierungen je Art",
+    "alt": "Anteil bewilligter Qualifizierungen je Art. Distanzdiagramm vergleicht den Anteil innerhalb der Gruppe von Qualifizierungsmaßnahme bewilligt (ja / nein) nach Qualifikationsart, aufgeteilt nach Geschlecht. Datenpunkte: Qualifikationsart EQ, weiblich: 0.0%; Qualifikationsart EQ, männlich: 0.0%; Qualifikationsart BQ, weiblich: 0.0%; Qualifikationsart BQ, männlich: 0.0%; Qualifikationsart AQ, weiblich: 0.0%; Qualifikationsart AQ, männlich: 0.0%."
+  },
+  {
+    "index": 38,
+    "title": "Anteil Fortbildungsteilnahme — Teilzeit vs. Vollzeit",
+    "alt": "Anteil Fortbildungsteilnahme — Teilzeit vs. Vollzeit. Balkendiagramm vergleicht den Anteil innerhalb der Gruppe von Teilnahme an Fortbildung (ja / nein) nach Teilzeit / Vollzeit, gruppiert nach Geschlecht. Datenpunkte: Teilzeit / Vollzeit Teilzeit, weiblich: 0.0%; Teilzeit / Vollzeit Teilzeit, männlich: 0.0%; Teilzeit / Vollzeit Vollzeit, weiblich: 0.0%; Teilzeit / Vollzeit Vollzeit, männlich: 0.0%."
+  },
+  {
+    "index": 39,
+    "title": "Ø Leistungskomponente je Entgeltgruppe",
+    "alt": "Ø Leistungskomponente je Entgeltgruppe. Distanzdiagramm vergleicht den Mittelwert von Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB) nach Entgeltgruppe / Besoldungsgruppe, aufgeteilt nach Geschlecht. Datenpunkte: Entgeltgruppe / Besoldungsgruppe E8, weiblich: 0; Entgeltgruppe / Besoldungsgruppe E8, männlich: 0; Entgeltgruppe / Besoldungsgruppe E10, weiblich: 0; Entgeltgruppe / Besoldungsgruppe E10, männlich: 0; Entgeltgruppe / Besoldungsgruppe E6, weiblich: 0; Entgeltgruppe / Besoldungsgruppe E6, männlich: 0; Entgeltgruppe / Besoldungsgruppe E12, weiblich: 0; Entgeltgruppe / Besoldungsgruppe E12, männlich: 0; Entgeltgruppe / Besoldungsgruppe A9, weiblich: 0; Entgeltgruppe / Besoldungsgruppe A9, männlich: 0; Entgeltgruppe / Besoldungsgruppe A11, weiblich: 0; Entgeltgruppe / Besoldungsgruppe A11, männlich: 0."
+  },
+  {
+    "index": 40,
+    "title": "Ø Leistungskomponente je QE",
+    "alt": "Ø Leistungskomponente je QE. Bevölkerungspyramide vergleicht den Mittelwert von Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB) nach QE, aufgeteilt nach Geschlecht. Datenpunkte: QE 1, weiblich: 0; QE 1, männlich: 0; QE 3, weiblich: 0; QE 3, männlich: 0; QE 2, weiblich: 0; QE 2, männlich: 0; QE 4, weiblich: 0; QE 4, männlich: 0."
+  },
+  {
+    "index": 41,
+    "title": "Ø Leistungskomponente — Teilzeit vs. Vollzeit",
+    "alt": "Ø Leistungskomponente — Teilzeit vs. Vollzeit. Balkendiagramm vergleicht den Mittelwert von Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB) nach Teilzeit / Vollzeit, gruppiert nach Geschlecht. Datenpunkte: Teilzeit / Vollzeit Teilzeit, weiblich: 0; Teilzeit / Vollzeit Teilzeit, männlich: 0; Teilzeit / Vollzeit Vollzeit, weiblich: 0; Teilzeit / Vollzeit Vollzeit, männlich: 0."
+  },
+  {
+    "index": 42,
+    "title": "Ø Leistungskomponente — Beamte vs. Tarifbeschäftigte",
+    "alt": "Ø Leistungskomponente — Beamte vs. Tarifbeschäftigte. Balkendiagramm vergleicht den Mittelwert von Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB) nach Beamte / Tarifbeschäftigte, gruppiert nach Geschlecht. Datenpunkte: Beamte / Tarifbeschäftigte Tarifbeschäftigte, weiblich: 0; Beamte / Tarifbeschäftigte Tarifbeschäftigte, männlich: 0; Beamte / Tarifbeschäftigte Beamte, weiblich: 0; Beamte / Tarifbeschäftigte Beamte, männlich: 0."
+  },
+  {
+    "index": 43,
+    "title": "Personen mit LK nach Geschlecht",
+    "alt": "Personen mit LK nach Geschlecht. Balkendiagramm vergleicht die Anzahl von Geschlecht. Datenpunkte: Geschlecht weiblich: 51; Geschlecht männlich: 49."
+  },
+  {
+    "index": 44,
+    "title": "Personen mit LK je QE",
+    "alt": "Personen mit LK je QE. Balkendiagramm vergleicht die Anzahl von QE, gruppiert nach Geschlecht. Datenpunkte: QE 1, weiblich: 12; QE 1, männlich: 13; QE 3, weiblich: 24; QE 3, männlich: 13; QE 2, weiblich: 8; QE 2, männlich: 12; QE 4, weiblich: 7; QE 4, männlich: 11."
+  },
+  {
+    "index": 45,
+    "title": "Personen mit LK je Entgelt-/Besoldungsgruppe",
+    "alt": "Personen mit LK je Entgelt-/Besoldungsgruppe. Balkendiagramm vergleicht die Anzahl von Entgeltgruppe / Besoldungsgruppe, gruppiert nach Geschlecht. Datenpunkte: Entgeltgruppe / Besoldungsgruppe E8, weiblich: 12; Entgeltgruppe / Besoldungsgruppe E8, männlich: 10; Entgeltgruppe / Besoldungsgruppe E10, weiblich: 7; Entgeltgruppe / Besoldungsgruppe E10, männlich: 10; Entgeltgruppe / Besoldungsgruppe E6, weiblich: 8; Entgeltgruppe / Besoldungsgruppe E6, männlich: 7; Entgeltgruppe / Besoldungsgruppe E12, weiblich: 6; Entgeltgruppe / Besoldungsgruppe E12, männlich: 8; Entgeltgruppe / Besoldungsgruppe A9, weiblich: 11; Entgeltgruppe / Besoldungsgruppe A9, männlich: 5; Entgeltgruppe / Besoldungsgruppe A11, weiblich: 7; Entgeltgruppe / Besoldungsgruppe A11, männlich: 9."
+  },
+  {
+    "index": 46,
+    "title": "Personen mit LK — Beamte vs. Tarifbeschäftigte",
+    "alt": "Personen mit LK — Beamte vs. Tarifbeschäftigte. Balkendiagramm vergleicht die Anzahl von Beamte / Tarifbeschäftigte, gruppiert nach Geschlecht. Datenpunkte: Beamte / Tarifbeschäftigte Tarifbeschäftigte, weiblich: 33; Beamte / Tarifbeschäftigte Tarifbeschäftigte, männlich: 35; Beamte / Tarifbeschäftigte Beamte, weiblich: 18; Beamte / Tarifbeschäftigte Beamte, männlich: 14."
+  }
+]

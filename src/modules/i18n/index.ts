@@ -104,32 +104,15 @@ const STRINGS: Record<Locale, Dict> = {
     "render.dataSourceNotFound": "Datenquelle „{name}“ nicht gefunden.",
 
     // — Chart validation —
-    "chart.requiresX": "Diagrammtyp „{type}“ benötigt ein „x“-Feld.",
-    "chart.pyramidRequiresColor":
-      "Pyramidendiagramm benötigt ein „color“- (oder „split“-)Feld — die binäre Spalte zum Aufteilen.",
-    "chart.pyramidRequiresY":
-      "Pyramidendiagramm benötigt ein „y“-Feld (die Kategorieachse).",
-    "chart.distanceRequiresColor":
-      "Distanzdiagramm benötigt ein „color“-Feld (die binäre Vergleichsspalte).",
-    "chart.distanceRequiresX":
-      "Distanzdiagramm benötigt ein „x“-Feld (die Kategorieachse).",
-    "chart.distanceRequiresY":
-      "Distanzdiagramm benötigt ein „y“-Feld (den numerischen Wert).",
-    "chart.distanceNeeds2":
-      "Distanzdiagramm benötigt genau 2 verschiedene Werte in „{field}“, gefunden: {count}.",
-    "chart.requiresColor": "„{type}“-Diagramm benötigt ein „color“-Feld.",
-    "chart.groupingRequiresX":
-      "Diagrammtyp „{type}“ mit Gruppierung benötigt ein „x“-Feld.",
-    "chart.groupingRequiresY":
-      "Diagrammtyp „{type}“ mit Gruppierung benötigt ein „y“-Feld.",
-    "chart.groupedScatterRequiresColor":
-      "Gruppiertes Streudiagramm benötigt ein „color“-Feld.",
+    "chart.needsBinaryCols":
+      "Diagrammtyp „{type}“ benötigt genau 2 verschiedene Werte in der Spaltenachse („{field}“), gefunden: {count}.",
+    "chart.pieNoCols":
+      "„{type}“-Diagramm unterstützt keine „groupby.cols“-Aufteilung — die Zeilen werden als Segmente dargestellt.",
 
-    // — Aggregation (pyramid split validation) —
-    "agg.pyramidNeeds2":
-      "Pyramidendiagramm benötigt genau 2 verschiedene Werte in „{field}“, gefunden: {count}.",
-    "agg.pyramidExtra":
-      "Pyramidendiagramm benötigt genau 2 verschiedene Werte in „{field}“. Zusätzliche Werte gefunden: {extras}.",
+    // — Wrangled-table value-column headers —
+    "agg.valueLabel.count": "Anzahl",
+    "agg.valueLabel.share_total": "Anteil (%)",
+    "agg.valueLabel.share_group": "Anteil (%)",
 
     // — Exporter —
     "export.toc": "Inhaltsverzeichnis",
@@ -200,26 +183,15 @@ const STRINGS: Record<Locale, Dict> = {
     "render.dataSourceNotFound": 'Data source "{name}" not found.',
 
     // — Chart validation —
-    "chart.requiresX": 'Chart type "{type}" requires an "x" field.',
-    "chart.pyramidRequiresColor":
-      'Pyramid chart requires a "color" (or "split") field — the binary column to split on.',
-    "chart.pyramidRequiresY": 'Pyramid chart requires a "y" field (the category axis).',
-    "chart.distanceRequiresColor":
-      'Distance chart requires a "color" field (the binary column to compare).',
-    "chart.distanceRequiresX": 'Distance chart requires an "x" field (the category axis).',
-    "chart.distanceRequiresY": 'Distance chart requires a "y" field (the numeric value).',
-    "chart.distanceNeeds2":
-      'Distance chart needs exactly 2 distinct values in "{field}", found {count}.',
-    "chart.requiresColor": '"{type}" chart requires a "color" field.',
-    "chart.groupingRequiresX": 'Chart type "{type}" with grouping requires an "x" field.',
-    "chart.groupingRequiresY": 'Chart type "{type}" with grouping requires a "y" field.',
-    "chart.groupedScatterRequiresColor": 'Grouped scatter requires a "color" field.',
+    "chart.needsBinaryCols":
+      'Chart type "{type}" needs exactly 2 distinct values in the column axis ("{field}"), found {count}.',
+    "chart.pieNoCols":
+      '"{type}" chart does not support a "groupby.cols" split — the rows render as its segments.',
 
-    // — Aggregation (pyramid split validation) —
-    "agg.pyramidNeeds2":
-      'Pyramid chart needs exactly 2 distinct values in "{field}", found {count}.',
-    "agg.pyramidExtra":
-      'Pyramid chart needs exactly 2 distinct values in "{field}". Extra values found: {extras}.',
+    // — Wrangled-table value-column headers —
+    "agg.valueLabel.count": "Count",
+    "agg.valueLabel.share_total": "Share (%)",
+    "agg.valueLabel.share_group": "Share (%)",
 
     // — Exporter —
     "export.toc": "Table of Contents",
