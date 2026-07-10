@@ -12,12 +12,13 @@ Many reporting workflows (HR equality reports, internal KPIs, compliance summari
 
 - **Fully offline** — no backend, no fetch, no third-party CDN at runtime. Browser CSP enforces this.
 - **Markdown templates** with embedded chart / table YAML blocks and Pandoc-style callouts.
-- **Six chart types**: `bar`, `line`, `pie`, `doughnut`, `scatter`, `pyramid`, `distance` (dumbbell plot).
-- **Long-form data support**: `color: <column>` pivots a single dataset into one series per distinct value.
+- **Six chart types**: `bar`, `line`, `pie`, `doughnut`, `pyramid`, `distance` (dumbbell plot).
+- **Table-first pipeline**: every chart and table block describes one **wrangled crosstab** — `filter` → `groupby` (rows × optional cols) → a single aggregation op — computed once and shared by the table renderer, the chart renderer (rows → categories, cols → series), and the alt-text generator.
+- **Question catalog**: the repeated report sections (question, source line, chart, appendix table) are authored as a YAML list in `config/template.yaml` and generated into the templates — see [Templates](#templates).
 - **Data preprocessing**: `config.yaml` can define **mutations** (derive a new column with a simple if-else rule, e.g. classify `Beamte`/`Tarifbeschäftigte` from the pay grade) and **joins** (enrich one sheet with columns looked up from another by a shared key, e.g. attach `Stichtag` master-data onto each `Zeitraum_*` event by `PersNr`) — applied before rendering.
-- **Aggregation**: `count`, `sum`, `mean`, `min`, `max`, `median`, `share_total`, `share_group`, `identity` — for both charts and tables.
+- **Aggregation ops**: `count`, `sum`, `mean`, `min`, `max`, `median`, `share_total`, `share_group`.
 - **Row filtering**: `filter: <bool-column>` keeps only matching rows before aggregation.
-- **Data protection**: aggregated values below a configurable threshold are masked (`<5` in tables, clamped + masked tooltip in charts) for count-like operations.
+- **Data protection**: aggregated values below a configurable threshold are masked (`<5` in tables and alt texts, clamped + masked tooltip in charts) for count-like operations.
 - **Accessible by default**: WCAG-AA colour palettes, colorblind-safe defaults, semantic HTML, auto-generated alt text for every chart.
 - **Bilingual UI (German / English)**: a language selector switches every program text — labels, buttons, validation warnings, error messages, and auto-generated chart alt text. German is the default; English is the second option.
 - **Configurable export**: fonts, page layout, headers/footers, page numbers, callout colours and backgrounds, all driven by `config.yaml`.
@@ -78,7 +79,7 @@ The config is the entry point — a developer edits it, the end user never touch
 
 ## Template Format
 
-Templates are plain Markdown. Charts and tables are fenced code blocks with a typed language tag and a YAML body.
+Templates are plain Markdown. Charts and tables are fenced code blocks with a typed language tag and a YAML body. Both share the same **crosstab spec** (`data`, optional `filter`, `groupby.rows` × optional `groupby.cols`, one `aggregation` op, `value` column for value-ops); a chart block embeds it under `table:` and adds presentation keys (`type`, `stacked`, `title`, `alt`, `alt-intro`, `caption`).
 
 ````markdown
 # {{title}}
@@ -90,23 +91,27 @@ Templates are plain Markdown. Charts and tables are fenced code blocks with a ty
 ## Headcount by pay grade
 
 ```chart
-data: Stichtag
 type: pyramid
-y: Entgeltgruppe / Besoldungsgruppe
-color: Geschlecht
 title: Headcount by pay grade and gender
-aggregation:
-  y: count
+table:
+  data: Stichtag
+  groupby:
+    rows: Entgeltgruppe / Besoldungsgruppe
+    cols: Geschlecht
+  aggregation: count
 ```
 
 ```table
 data: Stichtag
-columns: [Entgeltgruppe / Besoldungsgruppe, PersNr]
-aggregation:
-  Entgeltgruppe / Besoldungsgruppe: identity
-  PersNr: count
+groupby:
+  rows: Entgeltgruppe / Besoldungsgruppe
+  cols: Geschlecht
+aggregation: count
+caption: Beschäftigte je Entgelt-/Besoldungsgruppe und Geschlecht.
 ```
 ````
+
+Tables render as a crosstab: one row per `groupby.rows` value, one column per `groupby.cols` value (or a single value column when `cols` is omitted). Charts map the same crosstab onto Chart.js: rows become the category axis, cols the series; `pie`/`doughnut` take rows as slices (no `cols`), `pyramid`/`distance` require exactly two `cols` values.
 
 Parameters from the form are interpolated as `{{paramName}}` anywhere in the text.
 
@@ -122,7 +127,7 @@ Each utility is a self-contained module under `src/modules/` with a clean public
 | `preprocessing/` | Derive columns and datasets from the loaded sheets before rendering — mutations (if-else derived columns) and joins (lookup/enrichment), defined in the config's `preprocessing:` section (in `config/data.yaml`). |
 | `parameters/` | Render the form from `AppConfig.parameters`, collect typed values. |
 | `template/` | Parse Markdown into typed blocks (`text` / `chart` / `table`). |
-| `aggregation/` | Aggregation ops, row filtering, data-protection helpers. |
+| `aggregation/` | Aggregation ops, row filtering, and the shared **wrangle** step (`wrangleTable`: filter → groupby → aggregate crosstab with per-cell data-protection flags). |
 | `palettes/` | Curated accessible colour palettes (Okabe-Ito, Tol Bright/Muted, IBM, grayscale). |
 | `fonts/` | Curated accessible system fonts (Verdana, Tahoma, Arial, Georgia). |
 | `renderer/` | Markdown→HTML (`text.ts`), Chart.js (`chart.ts`), HTML tables (`table.ts`), orchestration (`index.ts`). |
@@ -180,7 +185,7 @@ The generated report output is built to be accessible:
 
 - **Semantic HTML** — `<h1>`–`<h6>`, `<p>`, `<table>`, `<figure>`/`<figcaption>`. DOM reading order matches visual order.
 - **Colorblind-safe palettes** — the default Okabe-Ito (Wong 2011) palette and all bundled alternatives are tested against deuteranopia, protanopia, and tritanopia simulations. Colour is never the sole encoding — chart shapes (e.g. distance plot uses circle + square markers) and labels reinforce it.
-- **Alt text on every chart** — auto-derived from the chart spec and the resolved data: chart type, axes, aggregation op, filter, plus an explicit enumeration of every aggregated data point. No network call required. Overridable via `alt:` (full replacement) or `alt-intro:` (introductory sentence prepended to the auto text).
+- **Alt text on every chart** — auto-derived from the chart spec and the wrangled crosstab the chart is drawn from: chart type, measured field, groupby axes, filter, plus an explicit enumeration of every shown cell (privacy-protected cells enumerate as `<threshold`, matching the visible chart). No network call required. Overridable via `alt:` (full replacement) or `alt-intro:` (introductory sentence prepended to the auto text).
 - **Accessible tables** — `<th scope="col">`, `<caption>`, no layout tables. Complex tables get a caption.
 - **Curated fonts** — the bundled font picker offers system fonts on accessibility shortlists (Verdana, Tahoma, Arial, Georgia).
 - **DOCX exports** preserve alt text, heading structure, and table semantics.
@@ -237,9 +242,12 @@ nginx.conf                # serves / (webapp) and /handbuch/ (book)
 
 ## Templates
 
-The bundled report templates in `templates/` are **build artifacts** (git-ignored). They are generated from a single master — `templates/master.md` — by `scripts/gen-templates.ts`, run via `npm run gen:templates` (also wired as a `predev`/`prebuild`/`pretest` hook, so a fresh checkout produces them automatically).
+The bundled report templates in `templates/` are **build artifacts** (git-ignored). They are generated from two sources — the prose skeleton `templates/master.md` and the **question catalog** `template.questions` in `config/template.yaml` — by `scripts/gen-templates.ts`, run via `npm run gen:templates` (also wired as a `predev`/`prebuild`/`pretest` hook, so a fresh checkout produces them automatically).
 
-For each entry in `config/template.yaml` that has an `id` + `file`, the generator writes a filtered copy to `templates/<file>`. Section markers in the master — HTML comments reusing the config `include:` vocabulary — decide which template gets which block; unmarked content goes into every template:
+For each entry in `config/template.yaml` that has an `id` + `file`, the generator writes an assembled template to `templates/<file>`:
+
+- The catalog is a flat, ordered YAML list of **section entries** (`section:` heading + `definitions:` callout body) and **question entries** (`title`, optional `include`/`comment`, `datenquelle`/`personenkreis` source fields, `caption`, optional `text`, the shared `table:` crosstab spec, and `chart:` presentation keys). It is rendered into the master's `{{questions}}` placeholder; the `{{tables}}` placeholder (in the `Anhang → Tabellen` appendix) receives one matching `table` block per question. A question's `include:` lists the template ids it belongs to (omit ⇒ every template); sections whose questions are all excluded are skipped, and a Fazit callout is appended to each section automatically.
+- Prose can still be scoped with section markers — HTML comments reusing the config `include:` vocabulary; unmarked content goes into every template:
 
 ```markdown
 <!-- include: full -->
@@ -247,4 +255,4 @@ For each entry in `config/template.yaml` that has an `id` + `file`, the generato
 <!-- /include -->
 ```
 
-Edit `templates/master.md`, not the generated files. (Editing the master during `dev` does not hot-reload the output — re-run `npm run gen:templates`.)
+Edit `templates/master.md` and `config/template.yaml`, not the generated files. (Edits during `dev` do not hot-reload the output — re-run `npm run gen:templates`.)

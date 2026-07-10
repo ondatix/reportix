@@ -35,6 +35,7 @@ Dieser Abschnitt ist die maßgebliche Referenz für jeden Schlüssel. Jeder Unte
 - [`data:`](#de-data)
 - [`preprocessing:`](#de-preprocessing)
 - [`template:`](#de-template)
+  - [Fragenkatalog (`template.questions`)](#de-template-questions)
 - [`data_protection:`](#de-data-protection)
 - [`export:`](#de-export)
 - [`charts:`](#de-charts)
@@ -337,11 +338,61 @@ template:
 
 **Bündelung.** Jede `.md`-Datei unter `/templates/` wird zur Build-Zeit über `import.meta.glob` in das JS-Bundle aufgenommen. Es gibt keinen Laufzeit-Abruf (die CSP verbietet `connect-src`), daher muss die Datei zur Build-Zeit existieren.
 
-**Generiert, nicht von Hand gepflegt.** Die Dateien unter `templates/` sind **Build-Artefakte** (git-ignoriert). Sie werden aus einer einzigen Master-Datei `templates/master.md` von `scripts/gen-templates.ts` erzeugt (`npm run gen:templates`, als `predev`/`prebuild`/`pretest`-Hook verdrahtet): Für jeden Eintrag mit `id` **und** `file` wird eine gefilterte Kopie nach `templates/<file>` geschrieben. Abschnittsmarker im Master (`<!-- include: <id> -->` … `<!-- /include -->`, unmarkierter Inhalt landet in jeder Vorlage) steuern, welche Vorlage welchen Block erhält. Bearbeiten Sie `templates/master.md`, nicht die generierten Dateien.
+**Generiert, nicht von Hand gepflegt.** Die Dateien unter `templates/` sind **Build-Artefakte** (git-ignoriert). Sie werden von `scripts/gen-templates.ts` (`npm run gen:templates`, als `predev`/`prebuild`/`pretest`-Hook verdrahtet) aus zwei Quellen zusammengesetzt: dem Prosa-Gerüst `templates/master.md` (mit den Generierungs-Platzhaltern `{{questions}}` und `{{tables}}`) und dem [Fragenkatalog](#de-template-questions) `template.questions`. Für jeden Eintrag mit `id` **und** `file` wird die zusammengesetzte Vorlage nach `templates/<file>` geschrieben. Prosa kann weiterhin mit Abschnittsmarkern (`<!-- include: <id> -->` … `<!-- /include -->`, unmarkierter Inhalt landet in jeder Vorlage) auf einzelne Vorlagen begrenzt werden. Bearbeiten Sie `templates/master.md` und `config/template.yaml`, nicht die generierten Dateien.
 
 **Hard-Fail-Verhalten.** Ist eine hier referenzierte `file:` nicht im Bundle vorhanden, bricht die App beim Start ab und listet Fehlendes und Verfügbares auf. Das fängt Tippfehler und vergessene Dateien früh ab.
 
 **Minimum: ein Eintrag.** Eine leere `files:`-Liste führt ebenfalls zum Hard-Fail.
+
+<a id="de-template-questions"></a>
+
+### Fragenkatalog (`template.questions`)
+
+Eine flache, **geordnete** Liste, die ausschließlich vom Generator gelesen wird — der Laufzeit-Config-Parser ignoriert den Schlüssel. Sie wird in den Platzhalter `{{questions}}` des Masters gerendert; `{{tables}}` (im Anhang → Tabellen) erhält je Frage einen `table`-Block mit derselben Spezifikation und derselben `caption`. Zwei Eintragstypen, unterschieden am ersten Schlüssel:
+
+```yaml
+template:
+  questions:
+    - section: Leistungskomponenten     # "### …"-Überschrift + Definitionen-Callout;
+      definitions: |                    # ein Fazit-Callout wird automatisch nach der
+        **LK erhalten**: Gibt an, ob …  # letzten Frage des Abschnitts angehängt
+
+    - title: "Wie viele Frauen und Männer erhalten LK?"
+      include: full                     # Vorlagen-id(s); weglassen ⇒ jede Vorlage
+      comment: Optional                 # kursive Statuszeile unter der Überschrift
+      datenquelle: "PVS, Eigene Liste"
+      personenkreis: Alle
+      caption: "Anzahl der Frauen und Männer, die LK erhalten haben."
+      text:                             # weglassen ⇒ Standard-Freitext-Platzhalter
+      table:                            # gemeinsame Kreuztabellen-Spezifikation
+        data: Zeitraum_Leistungskomponente
+        filter: Alle                    # optionaler Zeilenfilter (truthy-Spalte)
+        groupby:
+          rows: Geschlecht              # Tabellenzeilen / Diagramm-Kategorien
+          # cols: Geschlecht            # optional: Tabellenspalten / Diagramm-Serien
+        aggregation: count              # Standard: count
+        # value: <Spalte>               # Pflicht bei sum/mean/min/max/median/share_group
+        # format: currency              # optionales Zellformat (integer|decimal|percent|currency)
+      chart:                            # nur Darstellung
+        type: bar                       # bar | line | pie | doughnut | pyramid | distance
+        # stacked: true                 # bar/line: Serien stapeln
+        title: Personen mit LK nach Geschlecht
+```
+
+| Feld | Typ | Anmerkungen |
+|---|---|---|
+| `section` | String | Abschnittseintrag: emittiert `### <section>`; Abschnitte ohne enthaltene Frage werden komplett übersprungen. |
+| `definitions` | String (Markdown) | Inhalt des `Definitionen`-Callouts unter der Abschnittsüberschrift. |
+| `title` | String | Frageeintrag: emittiert `#### <title>` (im Dokument und im Tabellen-Anhang). |
+| `include` | String \| Liste | Vorlagen-id(s) aus `template.files[].id`; weglassen ⇒ jede Vorlage. |
+| `comment` | String | Kursive Statuszeile (z. B. `Optional`, `Verpflichtend für …`). |
+| `datenquelle`, `personenkreis` | String | Quellzeile `> Datenquelle: … · Personenkreis: … · Datensatz: <table.data>`. |
+| `caption` | String | Bildunterschrift des Diagramms **und** Überschrift der Anhang-Tabelle. |
+| `text` | String | Freitextabsatz; weglassen ⇒ Standard-Platzhalter. |
+| `table` | Objekt | Kreuztabellen-Spezifikation (`data`, `filter`, `groupby.rows`/`cols`, `aggregation`, `value`, `format`) — identisch zum `table`-Blockformat der Vorlagen, siehe CLAUDE.md → Template Format. |
+| `chart` | Objekt | Darstellungsschlüssel: `type`, `stacked`, `title`, `alt`, `alt-intro`, `caption` (überschreibt die Frage-`caption`). |
+
+Der Generator validiert den Katalog (genau einer von `section`/`title`; `table.data` und `groupby.rows` Pflicht; Wert-Operationen benötigen `value:`; `include`-ids gegen `template.files[].id` geprüft) und bricht bei strukturellen Fehlern ab.
 
 ---
 
@@ -362,6 +413,7 @@ data_protection:
 
 - **Tabellen:** betroffene Zellen werden als `<5` (bzw. der konfigurierte Schwellenwert) dargestellt.
 - **Diagramme:** betroffene Balken/Segmente werden auf den Schwellenwert geklemmt, sodass ein kleiner Balken weiterhin gezeichnet wird, und der Tooltip zeigt `<5`.
+- **Alt-Texte:** betroffene Zellen werden in der Datenpunkt-Aufzählung ebenfalls als `<5` ausgegeben.
 
 ---
 
@@ -734,6 +786,7 @@ This section is the authoritative reference for every key. Each subsection opens
 - [`data:`](#en-data)
 - [`preprocessing:`](#en-preprocessing)
 - [`template:`](#en-template)
+  - [Question catalog (`template.questions`)](#en-template-questions)
 - [`data_protection:`](#en-data-protection)
 - [`export:`](#en-export)
 - [`charts:`](#en-charts)
@@ -1036,11 +1089,61 @@ template:
 
 **Bundling.** Every `.md` file under `/templates/` is included in the JS bundle at build time via `import.meta.glob`. There is no runtime fetch (the CSP forbids `connect-src`), so the file must exist at build time.
 
-**Generated, not hand-edited.** The files under `templates/` are **build artifacts** (git-ignored). They are generated from a single master, `templates/master.md`, by `scripts/gen-templates.ts` (`npm run gen:templates`, wired as a `predev`/`prebuild`/`pretest` hook): for every entry with an `id` **and** `file`, a filtered copy is written to `templates/<file>`. Section markers in the master (`<!-- include: <id> -->` … `<!-- /include -->`; unmarked content goes into every template) decide which template gets which block. Edit `templates/master.md`, not the generated files.
+**Generated, not hand-edited.** The files under `templates/` are **build artifacts** (git-ignored). They are assembled by `scripts/gen-templates.ts` (`npm run gen:templates`, wired as a `predev`/`prebuild`/`pretest` hook) from two sources: the prose skeleton `templates/master.md` (with the generation-time placeholders `{{questions}}` and `{{tables}}`) and the [question catalog](#en-template-questions) `template.questions`. For every entry with an `id` **and** `file`, the assembled template is written to `templates/<file>`. Prose can still be scoped to individual templates with section markers (`<!-- include: <id> -->` … `<!-- /include -->`; unmarked content goes into every template). Edit `templates/master.md` and `config/template.yaml`, not the generated files.
 
 **Hard-fail behavior.** If any `file:` referenced here isn't present in the bundle, the app throws at startup listing what's missing and what's available. This catches typos and forgotten files early.
 
 **Minimum: one entry.** An empty `files:` list also hard-fails.
+
+<a id="en-template-questions"></a>
+
+### Question catalog (`template.questions`)
+
+A flat, **ordered** list read only by the generator — the runtime config parser ignores the key. It is rendered into the master's `{{questions}}` placeholder; `{{tables}}` (in the Anhang → Tabellen appendix) receives one `table` block per question with the same spec and the same `caption`. Two entry types, discriminated by their first key:
+
+```yaml
+template:
+  questions:
+    - section: Leistungskomponenten     # "### …" heading + Definitionen callout;
+      definitions: |                    # a Fazit callout is appended automatically
+        **LK erhalten**: Gibt an, ob …  # after the section's last question
+
+    - title: "Wie viele Frauen und Männer erhalten LK?"
+      include: full                     # template id(s); omit ⇒ every template
+      comment: Optional                 # italic status line under the heading
+      datenquelle: "PVS, Eigene Liste"
+      personenkreis: Alle
+      caption: "Anzahl der Frauen und Männer, die LK erhalten haben."
+      text:                             # omit ⇒ default freetext placeholder
+      table:                            # shared crosstab spec
+        data: Zeitraum_Leistungskomponente
+        filter: Alle                    # optional truthy-column row filter
+        groupby:
+          rows: Geschlecht              # table rows / chart categories
+          # cols: Geschlecht            # optional: table columns / chart series
+        aggregation: count              # default: count
+        # value: <column>               # required by sum/mean/min/max/median/share_group
+        # format: currency              # optional cell format (integer|decimal|percent|currency)
+      chart:                            # presentation only
+        type: bar                       # bar | line | pie | doughnut | pyramid | distance
+        # stacked: true                 # bar/line: stack the series
+        title: Personen mit LK nach Geschlecht
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| `section` | string | Section entry: emits `### <section>`; sections with no included question are skipped entirely. |
+| `definitions` | string (Markdown) | Body of the `Definitionen` callout under the section heading. |
+| `title` | string | Question entry: emits `#### <title>` (in the document and in the table appendix). |
+| `include` | string \| list | Template id(s) from `template.files[].id`; omit ⇒ every template. |
+| `comment` | string | Italic status line (e.g. `Optional`, `Verpflichtend für …`). |
+| `datenquelle`, `personenkreis` | string | Source line `> Datenquelle: … · Personenkreis: … · Datensatz: <table.data>`. |
+| `caption` | string | Figure caption of the chart **and** caption of the appendix table. |
+| `text` | string | Freetext paragraph; omit ⇒ default placeholder. |
+| `table` | object | Crosstab spec (`data`, `filter`, `groupby.rows`/`cols`, `aggregation`, `value`, `format`) — identical to the template `table` block format, see CLAUDE.md → Template Format. |
+| `chart` | object | Presentation keys: `type`, `stacked`, `title`, `alt`, `alt-intro`, `caption` (overrides the question `caption`). |
+
+The generator validates the catalog (exactly one of `section`/`title`; `table.data` and `groupby.rows` required; value ops require `value:`; `include` ids checked against `template.files[].id`) and aborts on structural errors.
 
 ---
 
@@ -1061,6 +1164,7 @@ data_protection:
 
 - **Tables:** affected cells render as `<5` (or the configured threshold).
 - **Charts:** affected bars/slices are clamped to the threshold so a small bar is still drawn, and the tooltip displays `<5`.
+- **Alt texts:** affected cells also enumerate as `<5` in the data-point listing.
 
 ---
 

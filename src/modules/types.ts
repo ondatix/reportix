@@ -432,47 +432,48 @@ export interface TextBlock {
   markdown: string;
 }
 
-export interface ChartSpec {
+/**
+ * The wrangled-crosstab spec — the single data-shaping description shared
+ * by table blocks and (embedded as `table:`) chart blocks. It is turned
+ * into a `WrangledTable` by `wrangleTable()` in the aggregation module:
+ * filter → group by `groupby.rows` (× `groupby.cols`) → aggregate per cell.
+ */
+export interface TableSpec {
+  /** DataStore key (a config sheet name or preprocessing join output). */
   data: string;
-  /** Categorical axis for non-pyramid charts; not used by pyramid. */
-  x?: string;
-  /** Series key(s); for pyramid: the category axis (e.g. age group, pay grade). */
-  y: string | string[];
-  type: "bar" | "line" | "pie" | "doughnut" | "scatter" | "pyramid" | "distance";
-  /** Pyramid only — column whose two distinct values split the chart left/right. */
-  split?: string;
-  /** Pyramid only — column to sum per bucket; if omitted, rows are counted. */
-  value?: string;
-  /**
-   * Categorical column used as the grouping (a.k.a. "hue") axis: rows are
-   * pivoted into one series per distinct value, each coloured from the
-   * active palette. Works across bar, line, scatter, pie, doughnut, and
-   * pyramid (where it acts as the binary split, equivalent to `split`).
-   */
-  color?: string;
-  /**
-   * For multi-series bar (and line) charts: stack groups along the value
-   * axis instead of placing them side-by-side. Defaults to `false`
-   * (dodged). Ignored by pyramid, which is always stacked.
-   */
-  stacked?: boolean;
-  /**
-   * How to combine rows that share the same group key. Setting `y` to any
-   * non-identity op enables grouping by `x` (and `color` if present).
-   * Defaults: ungrouped charts → `identity` (rows are data points);
-   * `color`-grouped or pyramid charts → `sum`.
-   * Supported ops: identity, count, sum, mean, min, max, median.
-   */
-  aggregation?: {
-    x?: import("./aggregation").AggregationOp;
-    y?: import("./aggregation").AggregationOp;
-  };
   /**
    * Boolean column whose truthy rows are kept before aggregation. Useful
-   * for restricting a chart to a sub-group ("Personenkreis"). Values
+   * for restricting a block to a sub-group ("Personenkreis"). Values
    * `Alle`, `-`, or empty disable the filter.
    */
   filter?: string;
+  /** Crosstab axes: `rows` labels the table rows (chart categories), the
+   *  optional `cols` the table columns (chart series). */
+  groupby: { rows: string; cols?: string };
+  /**
+   * Single aggregation op applied per cell (defaulted to `count` by the
+   * template parser). Supported: count, sum, mean, min, max, median,
+   * share_total, share_group.
+   */
+  aggregation: import("./aggregation").AggregationOp;
+  /** Column the op aggregates — required by sum/mean/min/max/median/share_group. */
+  value?: string;
+  caption?: string;
+  /** Explicit cell format, overriding the op-derived default. */
+  format?: "integer" | "decimal" | "percent" | "currency";
+}
+
+export interface ChartSpec {
+  type: "bar" | "line" | "pie" | "doughnut" | "pyramid" | "distance";
+  /** The wrangled-crosstab spec the chart visualises (rows → categories,
+   *  cols → series; pyramid/distance require exactly two `cols` values). */
+  table: TableSpec;
+  /**
+   * For multi-series bar (and line) charts: stack the series along the
+   * value axis instead of placing them side-by-side. Defaults to `false`
+   * (dodged). Ignored by pyramid, which is always stacked.
+   */
+  stacked?: boolean;
   title?: string;
   /**
    * Explicit alt text. When set, bypasses auto-generation entirely.
@@ -490,22 +491,6 @@ export interface ChartSpec {
 export interface ChartBlock {
   type: "chart";
   spec: ChartSpec;
-}
-
-export interface TableSpec {
-  data: string;
-  columns: string[];
-  format?: Record<string, string>;
-  /**
-   * Per-column aggregation. Setting any column to a non-identity op enables
-   * GROUP BY semantics: rows are grouped by the columns whose op is
-   * `identity` (or unspecified), and the others are aggregated. Omitting
-   * the field entirely renders rows verbatim.
-   */
-  aggregation?: Record<string, import("./aggregation").AggregationOp>;
-  /** Boolean column whose truthy rows are kept before aggregation. */
-  filter?: string;
-  caption?: string;
 }
 
 export interface TableBlock {

@@ -18,3 +18,918 @@ template:
         de: "Gleichstellungskonzept (verpflichtend)"
         en: "Equality concept (mandatory)"
       file: template_mandatory.md
+
+  # ── Question catalog ────────────────────────────────────────────────
+  # Consumed ONLY by scripts/gen-templates.ts (the runtime config parser
+  # ignores this key). A flat, ordered list rendered into the master's
+  # `{{questions}}` placeholder; the `{{tables}}` placeholder in the appendix
+  # receives one crosstab table per question, built from the same `table:`
+  # spec and the same `caption:`.
+  #
+  # Two entry types, discriminated by their first key:
+  #   - section: <heading>          # emits "### <heading>" + a Definitionen
+  #     definitions: <markdown>     #   callout; a Fazit callout is appended
+  #                                 #   automatically after the section's last
+  #                                 #   question. Sections with no included
+  #                                 #   question are skipped entirely.
+  #   - title: <question>           # emits "#### <question>" + the parts below
+  #     include: full               # template id(s); omit ⇒ every template
+  #     comment: Optional           # italic status line under the heading
+  #     datenquelle: PVS            # source line: "> Datenquelle: … ·
+  #     personenkreis: Alle         #   Personenkreis: … · Datensatz: <table.data>"
+  #     caption: "…"                # figure caption + appendix-table caption
+  #     text: "…"                   # omit/null ⇒ default freetext placeholder
+  #     table:                      # the wrangled crosstab both blocks share
+  #       data: <dataset>           #   DataStore key (sheet or join output)
+  #       filter: <column>          #   truthy-row filter; omit ⇒ all rows
+  #       groupby:
+  #         rows: <column>          #   table rows / chart categories
+  #         cols: <column>          #   optional: table columns / chart series
+  #       aggregation: count        #   count | sum | mean | min | max | median
+  #                                 #   | share_total | share_group
+  #       value: <column>           #   required by sum/mean/min/max/median/share_group
+  #       format: currency          #   optional cell format (integer|decimal|percent|currency)
+  #     chart:                      # presentation only
+  #       type: bar                 #   bar | line | pie | doughnut | pyramid | distance
+  #       stacked: true             #   bar/line: stack the series
+  #       title: "…"
+  questions:
+    # ═══ Gesamtübersicht ═══
+    - section: Gesamtübersicht
+      definitions: |
+        **Ausbildungsbereich**: Kategorisierung verschiedener Ausbildungsbereiche der Auszubildenden der Dienststelle
+
+        **Beamte / Tarifbeschäftigte**: Gibt an, ob eine Person zum Stichtag verbeamtet ist (Beamtinnen und Beamte) oder als Tarifbeschäftigte bzw. Tarifbeschäftigter nach TVöD bzw. TV-L beschäftigt wird.
+
+        **Befristet / Unbefristet**: Gibt an, ob eine Person zum Stichtag befristet oder unbefristet beschäftigt ist.
+
+        **Einstiegs-QE**: Qualifikationsebene bei Einstellung
+
+        **Entgeltgruppe / Besoldungsgruppe**: Gibt an, welcher Entgeltgruppe (für Tarifbeschäftigte) bzw. Besoldungsgruppe (für Beamtinnen bzw. Beamte) die Tätigkeit bzw. das Amt der Person zum Stichtag zugeordnet ist.
+
+        **Geschlecht**: Geschlecht der Person
+
+        **Organisationseinheit**: Gibt an, in welcher Organisationseinheit (z. B. Abteilung, Referat, Amt) die betreffende Person zum Stichtag tätig ist.
+
+        **QE**: Gibt die derzeitige Qualifikationsebene (QE) bei Beamtinnen und Beamten an. Für Tarifbeschäftigte kann ein entsprechendes QE-Äquivalent ausgewiesen werden.
+
+    - title: "Wie viele Männer und Frauen arbeiten bei uns?"
+      datenquelle: PVS
+      personenkreis: Alle
+      caption: "Verteilung der Beschäftigten nach Geschlecht (Anteile in Prozent)."
+      table:
+        data: Stichtag
+        groupby:
+          rows: Geschlecht
+        aggregation: share_total
+      chart:
+        type: pie
+        title: Geschlechterverteilung
+
+    - title: "Wie viele Männer und Frauen arbeiten in den Organisationseinheiten?"
+      comment: "Verpflichtend für Kommunen ab 1.000 Beschäftigten"
+      datenquelle: PVS
+      personenkreis: Alle
+      caption: "Anzahl der Frauen und Männer je Organisationseinheit."
+      table:
+        data: Stichtag
+        groupby:
+          rows: Organisationseinheit
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: distance
+        title: Männer und Frauen in den Organisationseinheiten
+
+    - title: "Wie viele Männer und Frauen sind Tarifbeschäftigte bzw. Beamte?"
+      datenquelle: PVS
+      personenkreis: Alle
+      caption: "Anzahl der Frauen und Männer nach Beamten- bzw. Tarifstatus."
+      table:
+        data: Stichtag
+        groupby:
+          rows: "Beamte / Tarifbeschäftigte"
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        stacked: true
+        title: Tarifbeschäftigte vs. Beamte
+
+    - title: "Wie viele Männer und Frauen haben befristete (Zeitverträge) bzw. unbefristete Arbeitsverhältnisse?"
+      include: full
+      comment: Optional
+      datenquelle: PVS
+      personenkreis: Tarifbeschäftigte
+      caption: "Anzahl befristeter und unbefristeter Arbeitsverhältnisse nach Geschlecht (Tarifbeschäftigte)."
+      table:
+        data: Stichtag
+        filter: Tarifbeschäftigte
+        groupby:
+          rows: "Befristet / Unbefristet"
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        stacked: true
+        title: Befristete vs. unbefristete Arbeitsverhältnisse
+
+    - title: "Wie viele Männer und Frauen sind in den Entgelt-/Besoldungsgruppen?"
+      datenquelle: PVS
+      personenkreis: Alle
+      caption: "Anzahl der Frauen und Männer je Entgelt- bzw. Besoldungsgruppe."
+      table:
+        data: Stichtag
+        groupby:
+          rows: "Entgeltgruppe / Besoldungsgruppe"
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: distance
+        title: Männer und Frauen in den Entgelt- und Besoldungsgruppen
+
+    - title: "Wie viele Männer und Frauen sind in welcher Qualifikationsebene (bzw. QE-Äquivalent)?"
+      datenquelle: PVS
+      personenkreis: Alle
+      caption: "Anzahl der Frauen und Männer je Qualifikationsebene."
+      table:
+        data: Stichtag
+        groupby:
+          rows: QE
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: pyramid
+        title: Qualifikationsebenen nach Geschlecht
+
+    # TODO(data): Spalte "QE-Aufstieg" existiert nicht und ist mit den aktuellen
+    # Mutations-Operatoren (einspaltige if-else-Regel) nicht ableitbar — sie
+    # bräuchte den Vergleich QE vs. Einstiegs-QE.
+    - title: "Wie viele Männer und Frauen sind in welcher QE verglichen zur Einstiegs-QE?"
+      include: full
+      comment: Optional
+      datenquelle: PVS
+      personenkreis: Alle
+      caption: "Anzahl der Frauen und Männer nach QE-Aufstieg im Vergleich zur Einstiegs-QE."
+      table:
+        data: Stichtag
+        groupby:
+          rows: QE-Aufstieg
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: pyramid
+        title: QE-Aufstieg im Vergleich zur Einstiegs-QE
+
+    # TODO(data): Filterspalte "Auszubildende" existiert in keinem Blatt —
+    # Filter ist derzeit ein stiller No-op.
+    - title: "Wie viele Männer und Frauen sind Auszubildende?"
+      comment: "Verpflichtend für Dienststellen ab 40 Auszubildenden"
+      datenquelle: PVS
+      personenkreis: Auszubildende
+      caption: "Anzahl der Auszubildenden nach Ausbildungsbereich und Geschlecht."
+      table:
+        data: Stichtag
+        filter: Auszubildende
+        groupby:
+          rows: Ausbildungsbereich
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        title: Auszubildende in den Ausbildungsbereichen
+
+    # ═══ Bewerbungen und Einstellungen ═══
+    - section: Bewerbungen und Einstellungen
+      definitions: |
+        **Einstellungen**: Einstellungen umfassen alle Personen, die neu von extern in die Organisation aufgenommen werden. Dazu zählen auch ehemalige Nachwuchskräfte (z. B. Referendarinnen und Referendare sowie Auszubildende), die nach Abschluss ihrer Ausbildung ein Beschäftigungsverhältnis in der Organisation eingehen. Berücksichtigt werden sowohl befristete als auch unbefristete Beschäftigungsverhältnisse. Abordnungen und Versetzungen aus anderen Ressorts (im Beamtenbereich) zählen nicht als Einstellungen. Saisonarbeitende sowie vergleichbare saisonale Beschäftigte bleiben ebenfalls unberücksichtigt.
+
+        **Qualifizierte Bewerbung**: Als qualifizierte Bewerbungen gelten Bewerbungen auf ausgeschriebene Stellen, die die fachlichen Anforderungen erfüllen, sowie Initiativbewerbungen, die die fachlichen Anforderungen für eine aktuell offene Stelle erfüllen.
+
+    # TODO(data): Filterspalte "Qualifizierte Bewerbungen" existiert nicht in
+    # Zeitraum_Bewerbung — Filter ist derzeit ein stiller No-op (gilt für die
+    # vier Bewerbungs-Fragen).
+    - title: "Wie viele qualifizierte Bewerbungen gehen je QE ein?"
+      include: full
+      comment: Optional
+      datenquelle: "Bewerbungsmanagement-Software, Eigene Liste"
+      personenkreis: Qualifizierte Bewerbungen
+      caption: "Anzahl qualifizierter Bewerbungen je Qualifikationsebene und Geschlecht."
+      table:
+        data: Zeitraum_Bewerbung
+        filter: Qualifizierte Bewerbungen
+        groupby:
+          rows: QE
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: pyramid
+        title: Qualifizierte Bewerbungen nach Qualifikationsebene
+
+    - title: "Wie viele qualifizierte Bewerbungen gehen je Führungsebene ein?"
+      include: full
+      comment: Optional
+      datenquelle: "Bewerbungsmanagement-Software, Eigene Liste"
+      personenkreis: Qualifizierte Bewerbungen
+      caption: "Anzahl qualifizierter Bewerbungen je Führungsebene und Geschlecht."
+      table:
+        data: Zeitraum_Bewerbung
+        filter: Qualifizierte Bewerbungen
+        groupby:
+          rows: Führungsebene
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: pyramid
+        title: Qualifizierte Bewerbungen je Führungsebene
+
+    - title: "Wie viele interne und externe qualifizierte Bewerbungen gehen von Frauen und Männern ein?"
+      include: full
+      comment: Optional
+      datenquelle: "Bewerbungsmanagement-Software, Eigene Liste"
+      personenkreis: Qualifizierte Bewerbungen
+      caption: "Anzahl interner und externer qualifizierter Bewerbungen nach Geschlecht."
+      table:
+        data: Zeitraum_Bewerbung
+        filter: Qualifizierte Bewerbungen
+        groupby:
+          rows: "Intern / Extern"
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: pyramid
+        title: Interne vs. externe qualifizierte Bewerbungen
+
+    - title: "Wie viele qualifizierte Bewerbungen gehen von Frauen und Männern bei den Organisationseinheit ein?"
+      include: full
+      comment: Optional
+      datenquelle: "Bewerbungsmanagement-Software, Eigene Liste"
+      personenkreis: Qualifizierte Bewerbungen
+      caption: "Anzahl qualifizierter Bewerbungen je Organisationseinheit und Geschlecht."
+      table:
+        data: Zeitraum_Bewerbung
+        filter: Qualifizierte Bewerbungen
+        groupby:
+          rows: Organisationseinheit
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: distance
+        title: Bewerbungen je Organisationseinheit
+
+    # TODO(data): Filterspalte "Einstellungen" existiert nicht in
+    # Zeitraum_Einstellung — Filter ist derzeit ein stiller No-op (gilt für die
+    # drei Einstellungs-Fragen).
+    - title: "Wie viele Männer und Frauen werden neu (und unbefristet) eingestellt?"
+      datenquelle: "Bewerbungsmanagement-Software, Eigene Liste"
+      personenkreis: Einstellungen
+      caption: "Anzahl der Neueinstellungen nach Geschlecht."
+      table:
+        data: Zeitraum_Einstellung
+        filter: Einstellungen
+        groupby:
+          rows: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        title: Neueinstellungen nach Geschlecht
+
+    - title: "Wie viele Männer und Frauen werden neu (und unbefristet) in den QEs eingestellt?"
+      include: full
+      comment: Optional
+      datenquelle: "Bewerbungsmanagement-Software, Eigene Liste"
+      personenkreis: Einstellungen
+      caption: "Anzahl der Neueinstellungen je Qualifikationsebene und Geschlecht."
+      table:
+        data: Zeitraum_Einstellung
+        filter: Einstellungen
+        groupby:
+          rows: QE
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        title: Neueinstellungen nach Qualifikationsebene
+
+    - title: "Wie viele Männer und Frauen werden neu (und unbefristet) in den Entgelt-/Besoldungsgruppen eingestellt?"
+      include: full
+      comment: Optional
+      datenquelle: "Bewerbungsmanagement-Software, Eigene Liste"
+      personenkreis: Einstellungen
+      caption: "Anzahl der Neueinstellungen je Entgelt- bzw. Besoldungsgruppe und Geschlecht."
+      table:
+        data: Zeitraum_Einstellung
+        filter: Einstellungen
+        groupby:
+          rows: "Entgeltgruppe / Besoldungsgruppe"
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        title: Neueinstellungen nach Entgelt-/Besoldungsgruppe
+
+    # ═══ Führung ═══
+    - section: Führung
+      definitions: |
+        **Führungsebene**: Führungsebenen klassifizieren Führungspositionen und leitende Funktionen nach dem Grad ihrer Entscheidungskompetenz sowie dem Umfang ihrer Verantwortlichkeiten.
+
+        **Führungskraft (aktiv)**: Gibt an, ob die Person am Stichtag eine Führungsposition oder leitende Funktion aktiv ausübt.
+
+        **Führungskraft (aktiv) in Tandem**: Gibt an, ob die Führungskraft ihre Führungs- bzw. Leitungsfunktion am Stichtag gemeinsam mit mindestens einer weiteren aktiven (d. h. nicht beurlaubten) Person ausübt.
+
+    - title: "Wie viele Männer und Frauen sind in leitenden Funktionen tätig?"
+      datenquelle: PVS
+      personenkreis: Alle
+      caption: "Anzahl der Frauen und Männer in leitenden Funktionen."
+      table:
+        data: Stichtag
+        groupby:
+          rows: Führungskraft (aktiv)
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: pyramid
+        title: Beschäftigte in leitenden Funktionen
+
+    - title: "Wie viele Männer und Frauen sind in den Führungsebenen?"
+      datenquelle: PVS
+      personenkreis: Führungskräfte
+      caption: "Anzahl der Führungskräfte je Führungsebene und Geschlecht."
+      table:
+        data: Stichtag
+        filter: Führungskraft (aktiv)
+        groupby:
+          rows: Führungsebene
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: pyramid
+        title: Führungsebenen nach Geschlecht
+
+    - title: "Wie viele Frauen und Männer sind in leitenden Funktionen in den Organisationseinheiten?"
+      include: full
+      comment: Optional
+      datenquelle: PVS
+      personenkreis: Führungskräfte
+      caption: "Anzahl der Führungskräfte je Organisationseinheit und Geschlecht."
+      table:
+        data: Stichtag
+        filter: Führungskraft (aktiv)
+        groupby:
+          rows: Organisationseinheit
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: distance
+        title: Führungskräfte in den Organisationseinheiten
+
+    - title: "Wie viele Frauen und Männer in leitenden Funktionen arbeiten in Tandems in den QE?"
+      include: full
+      comment: Optional
+      datenquelle: PVS
+      personenkreis: Führungskräfte
+      caption: "Anteil der Führungskräfte in Tandems je Qualifikationsebene und Geschlecht."
+      table:
+        data: Stichtag
+        filter: Führungskraft (aktiv)
+        groupby:
+          rows: QE
+          cols: Geschlecht
+        aggregation: share_group
+        value: Führungskraft (aktiv) in Tandem
+      chart:
+        type: pyramid
+        title: Anteil Führung in Tandem (in der Gruppe) je QE
+
+    - title: "Wie viele Frauen und Männer in leitenden Funktionen arbeiten in Tandems in den Führungsebenen?"
+      include: full
+      comment: Optional
+      datenquelle: PVS
+      personenkreis: Führungskräfte
+      caption: "Anteil der Führungskräfte in Tandems je Führungsebene und Geschlecht."
+      table:
+        data: Stichtag
+        filter: Führungskraft (aktiv)
+        groupby:
+          rows: Führungsebene
+          cols: Geschlecht
+        aggregation: share_group
+        value: Führungskraft (aktiv) in Tandem
+      chart:
+        type: pyramid
+        title: Anteil Führung in Tandem je Führungsebene
+
+    - title: "Wie viele Männer und Frauen führen in Teilzeit?"
+      datenquelle: PVS
+      personenkreis: Führungskräfte
+      caption: "Anzahl der Führungskräfte in Teil- und Vollzeit nach Geschlecht."
+      table:
+        data: Stichtag
+        filter: Führungskraft (aktiv)
+        groupby:
+          rows: "Teilzeit / Vollzeit"
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        title: Führung in Teilzeit
+
+    # ═══ Teilzeit ═══
+    - section: Teilzeit
+      definitions: |
+        **Arbeitszeitanteile**: Einstufung des Arbeitszeitanteils in folgende Kategorien: bis unter 50 %; 50 % bis unter 90 %; 90 % bis unter 100 %; 100 % (entspricht den Normstunden bei Vollzeit)
+
+        **Teilzeit / Vollzeit**: Gibt an, ob der festgelegte Arbeitszeitumfang der Person Vollzeit (100 %) oder Teilzeit (weniger als 100 %) beträgt.
+
+    - title: "Wie viele Männer und Frauen arbeiten in Teil- bzw. Vollzeit?"
+      datenquelle: PVS
+      personenkreis: Alle
+      caption: "Anzahl der Frauen und Männer in Teil- und Vollzeit."
+      table:
+        data: Stichtag
+        groupby:
+          rows: "Teilzeit / Vollzeit"
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        title: Teilzeit vs. Vollzeit
+
+    - title: "Wie viele Frauen und Männer arbeiten in welchen Arbeitszeitanteilen?"
+      datenquelle: PVS
+      personenkreis: Alle
+      caption: "Anzahl der Frauen und Männer je Arbeitszeitanteil."
+      table:
+        data: Stichtag
+        groupby:
+          rows: Arbeitszeitanteil
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        stacked: true
+        title: Arbeitszeitanteile nach Geschlecht
+
+    # ═══ Beurlaubung ═══
+    - section: Beurlaubung
+      definitions: |
+        **Beginn der Elternzeit im Zeitraum 01.01. - 31.12. des vorangegangenen Kalenderjahres**: Erfasst wird das Beginndatum jeder Elternzeit, die für eine Person im Kalenderjahr X besteht. Hat die Elternzeit bereits am 01.01._X_ oder früher begonnen, wird als Beginn der 01.01._X_ angegeben.
+        Für Personen, die im Jahr _X_ mehrere Elternzeiten angetreten haben, wird für jede Elternzeit ein separater Dateneintrag erstellt.
+
+        **Beurlaubung aus familiären Gründen**: Gibt an, ob sich die Person zum Stichtag entweder in Elternzeit (ohne Elternteilzeit) oder in familienpolitischer Beurlaubung befindet.
+
+        **Ende der Elternzeit im Zeitraum 01.01. - 31.12. des vorangegangenen Kalenderjahres**: Erfasst wird das Enddatum jeder Elternzeit, die für eine Person im Kalenderjahr _X_ besteht. Endet die Elternzeit erst am 31.12._X_ oder später, wird als Ende der 31.12._X_ angegeben.
+
+        Für Personen, die im Jahr _X_ mehrere Elternzeiten hatten, wird für jede Elternzeit ein separater Dateneintrag erstellt.
+
+    # TODO(data): Spalte "Beurlaubung" existiert nicht auf Stichtag — sie müsste
+    # z. B. per Mutation aus "Ab- oder Anwesenheitsart" abgeleitet werden (die
+    # dafür nötigen Ausprägungen sind noch zu klären).
+    - title: "Wie viele Männer und Frauen sind aus familiären Gründen beurlaubt?"
+      datenquelle: PVS
+      personenkreis: Alle
+      caption: "Anzahl der aus familiären Gründen beurlaubten Frauen und Männer."
+      table:
+        data: Stichtag
+        groupby:
+          rows: Beurlaubung
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        stacked: true
+        title: Beurlaubungen aus familiären Gründen
+
+    # TODO(data): Filterspalte "Personen in Elternzeit" existiert nicht —
+    # Filter ist derzeit ein stiller No-op (gilt auch für die nächste Frage).
+    - title: "Wie lange sind Männer und Frauen in Elternzeit?"
+      include: full
+      comment: Optional
+      datenquelle: PVS
+      personenkreis: Personen in Elternzeit
+      caption: "Durchschnittliche Dauer der Elternzeit (Tage) je Qualifikationsebene und Geschlecht."
+      table:
+        data: Zeitraum_Beurlaubung
+        filter: Personen in Elternzeit
+        groupby:
+          rows: QE
+          cols: Geschlecht
+        aggregation: mean
+        value: Dauer der Elternzeit (Tage)
+      chart:
+        type: pyramid
+        title: Durchschnittliche Dauer der Elternzeit (Tage) je QE
+
+    - title: "Wie viele Frauen und Männer befinden sich in Elternzeit in den Entgelt-/Besoldungsgruppen?"
+      include: full
+      comment: Optional
+      datenquelle: PVS
+      personenkreis: Personen in Elternzeit
+      caption: "Anzahl der Frauen und Männer in Elternzeit je Entgelt- bzw. Besoldungsgruppe."
+      table:
+        data: Stichtag
+        filter: Personen in Elternzeit
+        groupby:
+          rows: "Entgeltgruppe / Besoldungsgruppe"
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: distance
+        title: In Elternzeit nach Entgeltgruppe
+
+    # ═══ Beurteilungen ═══
+    - section: Beurteilungen
+      definitions: |
+        **Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung:** Das Ergebnis der zuletzt für die Person durchgeführten periodischen Beurteilung.
+
+    - title: "Wie werden verbeamtete Frauen und Männer in den QEs beurteilt?"
+      include: full
+      comment: Optional
+      datenquelle: "PVS, Eigene Liste"
+      personenkreis: Beamte
+      caption: "Durchschnittliche Beurteilung verbeamteter Frauen und Männer je Qualifikationsebene."
+      table:
+        data: Stichtag
+        filter: Beamte
+        groupby:
+          rows: QE
+          cols: Geschlecht
+        aggregation: mean
+        value: Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung
+      chart:
+        type: distance
+        title: Durchschnittliche Beurteilung Beamte nach QE
+
+    - title: "Wie werden verbeamtete Frauen und Männer in Teil- und Vollzeit beurteilt?"
+      include: full
+      comment: Optional
+      datenquelle: "PVS, Eigene Liste"
+      personenkreis: Beamte
+      caption: "Durchschnittliche Beurteilung verbeamteter Frauen und Männer in Teil- und Vollzeit."
+      table:
+        data: Stichtag
+        filter: Beamte
+        groupby:
+          rows: "Teilzeit / Vollzeit"
+          cols: Geschlecht
+        aggregation: mean
+        value: Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung
+      chart:
+        type: bar
+        title: Beurteilung Beamte — Teilzeit vs. Vollzeit
+
+    - title: "Wie werden verbeamtete Frauen und Männer in den Organisationseinheiten beurteilt?"
+      include: full
+      comment: Optional
+      datenquelle: "PVS, Eigene Liste"
+      personenkreis: Beamte
+      caption: "Durchschnittliche Beurteilung verbeamteter Frauen und Männer je Organisationseinheit."
+      table:
+        data: Stichtag
+        filter: Beamte
+        groupby:
+          rows: Organisationseinheit
+          cols: Geschlecht
+        aggregation: mean
+        value: Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung
+      chart:
+        type: distance
+        title: Beurteilung Beamte je Organisationseinheit
+
+    - title: "Wie werden tarifbeschäftigte Frauen und Männer in den QEs beurteilt?"
+      include: full
+      comment: Optional
+      datenquelle: "PVS, Eigene Liste"
+      personenkreis: Tarifbeschäftigte
+      caption: "Durchschnittliche Beurteilung tarifbeschäftigter Frauen und Männer je Qualifikationsebene."
+      table:
+        data: Stichtag
+        filter: Tarifbeschäftigte
+        groupby:
+          rows: QE
+          cols: Geschlecht
+        aggregation: mean
+        value: Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung
+      chart:
+        type: distance
+        title: Durchschnittliche Beurteilung Tarifbeschäftigte nach QE
+
+    - title: "Wie werden tarifbeschäftigte Frauen und Männer in Teil- und Vollzeit beurteilt?"
+      include: full
+      comment: Optional
+      datenquelle: "PVS, Eigene Liste"
+      personenkreis: Tarifbeschäftigte
+      caption: "Durchschnittliche Beurteilung tarifbeschäftigter Frauen und Männer in Teil- und Vollzeit."
+      table:
+        data: Stichtag
+        filter: Tarifbeschäftigte
+        groupby:
+          rows: "Teilzeit / Vollzeit"
+          cols: Geschlecht
+        aggregation: mean
+        value: Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung
+      chart:
+        type: bar
+        title: Beurteilung Tarifbeschäftigte — Teilzeit vs. Vollzeit
+
+    - title: "Wie werden tarifbeschäftigte Frauen und Männer in den Organisationseinheiten beurteilt?"
+      include: full
+      comment: Optional
+      datenquelle: PVS
+      personenkreis: Tarifbeschäftigte
+      caption: "Durchschnittliche Beurteilung tarifbeschäftigter Frauen und Männer je Organisationseinheit."
+      table:
+        data: Stichtag
+        filter: Tarifbeschäftigte
+        groupby:
+          rows: Organisationseinheit
+          cols: Geschlecht
+        aggregation: mean
+        value: Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung
+      chart:
+        type: distance
+        title: Beurteilung Tarifbeschäftigte je Organisationseinheit
+
+    # ═══ Beförderungen und Höhergruppierungen ═══
+    - section: Beförderungen und Höhergruppierungen
+      definitions: |
+        **Beförderung**: Erfasst werden alle Beamtinnen und Beamten, die im Zeitraum mindestens eine Beförderung (d. h. eine Ernennung, durch die ein anderes Amt mit höherem Endgrundgehalt oder ein anderes Amt mit höherer Amtszulage verliehen wird) erhalten haben.
+
+        **Höhergruppierung erfolgt**: Erfasst werden alle Tarifbeschäftigten, bei denen im Zeitraum mindestens eine Höhergruppierung (d.h. die tarifrechtliche Zuordnung in eine höhere Entgeltgruppe) erfolgt ist.
+
+        **Höhergruppierung auf Antrag erfolgt**: Erfasst wird, ob eine Höhergruppierung auf Antrag oder automatisch erfolgt ist.
+
+    - title: "Wie viele Frauen und Männer sind in den QEs befördert worden?"
+      include: full
+      comment: Optional
+      datenquelle: PVS
+      personenkreis: Beamte
+      caption: "Anteil der beförderten Beamtinnen und Beamten je Qualifikationsebene und Geschlecht."
+      table:
+        data: Zeitraum_Befoerderung
+        filter: Beamte
+        groupby:
+          rows: QE
+          cols: Geschlecht
+        aggregation: share_group
+        value: Beförderung (ja/nein)
+      chart:
+        type: bar
+        title: Anteil Beförderungen je QE — Beamte
+
+    - title: "Wie viele Frauen und Männer sind in den Besoldungsgruppen befördert worden?"
+      include: full
+      comment: Optional
+      datenquelle: PVS
+      personenkreis: Beamte
+      caption: "Anteil der beförderten Beamtinnen und Beamten je Besoldungsgruppe und Geschlecht."
+      table:
+        data: Zeitraum_Befoerderung
+        filter: Beamte
+        groupby:
+          rows: "Entgeltgruppe / Besoldungsgruppe"
+          cols: Geschlecht
+        aggregation: share_group
+        value: Beförderung (ja/nein)
+      chart:
+        type: bar
+        title: Anteil Beförderungen je Besoldungsgruppe — Beamte
+
+    - title: "Wie viele Frauen und Männer wurden im Zeitraum höhergruppiert?"
+      include: full
+      comment: Optional
+      datenquelle: "PVS, Eigene Liste"
+      personenkreis: Tarifbeschäftigte
+      caption: "Anzahl der Höhergruppierungen nach Maßnahmenart und Geschlecht."
+      table:
+        data: Zeitraum_Befoerderung
+        filter: Tarifbeschäftigte
+        groupby:
+          rows: Maßnahmenart
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        title: Höhergruppierungen nach Maßnahmenart
+
+    - title: "Wie viele der erfolgten Höhergruppierungen von Frauen und Männern erfolgten auf Antrag?"
+      include: full
+      comment: Optional
+      datenquelle: "PVS, Eigene Liste"
+      personenkreis: Höhergruppierung genehmigt
+      caption: "Anzahl der Höhergruppierungen nach Antragsart und Geschlecht."
+      table:
+        data: Zeitraum_Befoerderung
+        filter: Höhergruppierung genehmigt
+        groupby:
+          rows: Maßnahmenantrag
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        title: Höhergruppierungen — auf Antrag vs. dienstseitig
+
+    # ═══ Qualifizierung ═══
+    - section: Qualifizierung
+      definitions: |
+        **Qualifizierungsmaßnahme abgeschlossen**: Erfasst werden alle Personen, die im Zeitraum mindestens eine Qualifizierungsmaßnahme (Modulare Qualifizierung [MQ], Ausbildungsqualifizierung [AQ] oder Beschäftigtenlehrgang [BL]) erfolgreich abgeschlossen haben.
+
+    # TODO(data): Spalten "Qualifizierungsmaßnahme abgeschlossen (ja / nein)"
+    # und "Qualifizierungsmaßnahme bewilligt (ja / nein)" existieren nicht in
+    # Zeitraum_Qualifikation.
+    - title: "Wie viele Frauen und Männer haben im letzten Jahr Qualifizierungen abgeschlossen?"
+      include: full
+      comment: Optional
+      datenquelle: "PVS, Eigene Liste"
+      personenkreis: Alle
+      caption: "Anteil abgeschlossener Qualifizierungsmaßnahmen je Qualifikationsart und Geschlecht."
+      table:
+        data: Zeitraum_Qualifikation
+        groupby:
+          rows: Qualifikationsart
+          cols: Geschlecht
+        aggregation: share_group
+        value: "Qualifizierungsmaßnahme abgeschlossen (ja / nein)"
+      chart:
+        type: distance
+        title: Anteil abgeschlossener Qualifizierungen je Art
+
+    - title: "Wie viele Qualifizierungsmaßnahmen wurden für Frauen und Männer bewilligt?"
+      include: full
+      comment: Optional
+      datenquelle: PVS
+      personenkreis: Alle
+      caption: "Anteil bewilligter Qualifizierungsmaßnahmen je Qualifikationsart und Geschlecht."
+      table:
+        data: Zeitraum_Qualifikation
+        groupby:
+          rows: Qualifikationsart
+          cols: Geschlecht
+        aggregation: share_group
+        value: "Qualifizierungsmaßnahme bewilligt (ja / nein)"
+      chart:
+        type: distance
+        title: Anteil bewilligter Qualifizierungen je Art
+
+    # ═══ Fortbildungen ═══
+    - section: Fortbildungen
+      definitions: |
+        **Teilnahme an Fortbildung**: Erfasst wird die Teilnahme an nicht-verpflichtenden Fortbildungen im Zeitraum. Für jede absolvierte Fortbildung einer Person wird ein separater Dateneintrag angelegt.
+
+    # TODO(data): Spalte "Teilnahme an Fortbildung (ja / nein)" existiert nicht
+    # in Zeitraum_Fortbildung.
+    - title: "Wie viele Frauen und Männer in Teil- und Vollzeit nehmen an Fortbildungen teil?"
+      include: full
+      comment: Optional
+      datenquelle: unklar
+      personenkreis: Alle
+      caption: "Anteil der Fortbildungsteilnahmen von Frauen und Männern in Teil- und Vollzeit."
+      table:
+        data: Zeitraum_Fortbildung
+        groupby:
+          rows: "Teilzeit / Vollzeit"
+          cols: Geschlecht
+        aggregation: share_group
+        value: "Teilnahme an Fortbildung (ja / nein)"
+      chart:
+        type: bar
+        title: Anteil Fortbildungsteilnahme — Teilzeit vs. Vollzeit
+
+    # ═══ Leistungskomponenten ═══
+    - section: Leistungskomponenten
+      definitions: |
+        **Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB)**: Erfasst wird die Summe aller im vorangegangenen Kalenderjahr zusätzlich zum Grundgehalt gezahlten leistungsabhängigen Zulagen und Prämien.
+
+        **LK erhalten**: Gibt an, ob die Person im vorangegangenen Kalenderjahr (01.01.–31.12.) zusätzlich zum Grundgehalt leistungsabhängige Zulagen oder Prämien erhalten hat.
+
+    - title: "Wie hoch sind die LK, die Frauen und Männer in den Entgelt-/Besoldungsgruppen erhalten?"
+      comment: "Verpflichtend für Stellen, bei denen alle LK erhalten"
+      datenquelle: "PVS, Eigene Liste"
+      personenkreis: Alle
+      caption: "Durchschnittliche Höhe der Leistungskomponenten je Entgelt- bzw. Besoldungsgruppe und Geschlecht."
+      table:
+        data: Zeitraum_Leistungskomponente
+        groupby:
+          rows: "Entgeltgruppe / Besoldungsgruppe"
+          cols: Geschlecht
+        aggregation: mean
+        value: "Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB)"
+        format: currency
+      chart:
+        type: distance
+        title: Ø Leistungskomponente je Entgeltgruppe
+
+    - title: "Wie hoch sind die LK, die Frauen und Männer in den QEs erhalten?"
+      comment: Optional
+      datenquelle: "PVS, Eigene Liste"
+      personenkreis: Alle
+      caption: "Durchschnittliche Höhe der Leistungskomponenten je Qualifikationsebene und Geschlecht."
+      table:
+        data: Zeitraum_Leistungskomponente
+        groupby:
+          rows: QE
+          cols: Geschlecht
+        aggregation: mean
+        value: "Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB)"
+        format: currency
+      chart:
+        type: pyramid
+        title: Ø Leistungskomponente je QE
+
+    - title: "Wie hoch sind die LK, die Frauen und Männer in Teil- und Vollzeit erhalten?"
+      include: full
+      comment: Optional
+      datenquelle: "PVS, Eigene Liste"
+      personenkreis: Alle
+      caption: "Durchschnittliche Höhe der Leistungskomponenten in Teil- und Vollzeit nach Geschlecht."
+      table:
+        data: Zeitraum_Leistungskomponente
+        groupby:
+          rows: "Teilzeit / Vollzeit"
+          cols: Geschlecht
+        aggregation: mean
+        value: "Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB)"
+        format: currency
+      chart:
+        type: bar
+        title: Ø Leistungskomponente — Teilzeit vs. Vollzeit
+
+    - title: "Wie hoch sind die LK, die verbeamtete und tarifbeschäftigte Frauen und Männer erhalten?"
+      include: full
+      comment: Optional
+      datenquelle: "PVS, Eigene Liste"
+      personenkreis: Alle
+      caption: "Durchschnittliche Höhe der Leistungskomponenten für Beamte und Tarifbeschäftigte nach Geschlecht."
+      table:
+        data: Zeitraum_Leistungskomponente
+        groupby:
+          rows: "Beamte / Tarifbeschäftigte"
+          cols: Geschlecht
+        aggregation: mean
+        value: "Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB)"
+        format: currency
+      chart:
+        type: bar
+        title: Ø Leistungskomponente — Beamte vs. Tarifbeschäftigte
+
+    - title: "Wie viele Frauen und Männer erhalten LK?"
+      comment: "Verpflichtend für Stellen, bei denen nicht alle LK erhalten"
+      datenquelle: "PVS, Eigene Liste"
+      personenkreis: Alle
+      caption: "Anzahl der Frauen und Männer, die Leistungskomponenten erhalten haben."
+      table:
+        data: Zeitraum_Leistungskomponente
+        groupby:
+          rows: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        title: Personen mit LK nach Geschlecht
+
+    - title: "Wie viele Frauen und Männer in den QEs erhalten LK?"
+      include: full
+      comment: Optional
+      datenquelle: "PVS, Eigene Liste"
+      personenkreis: Alle
+      caption: "Anzahl der Frauen und Männer mit Leistungskomponenten je Qualifikationsebene."
+      table:
+        data: Zeitraum_Leistungskomponente
+        groupby:
+          rows: QE
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        title: Personen mit LK je QE
+
+    - title: "Wie viele Frauen und Männer in den Entgelt-/Besoldungsgruppen erhalten LK?"
+      include: full
+      comment: Optional
+      datenquelle: "PVS, Eigene Liste"
+      personenkreis: Alle
+      caption: "Anteil der Frauen und Männer, die Leistungskomponenten erhalten haben."
+      table:
+        data: Zeitraum_Leistungskomponente
+        groupby:
+          rows: "Entgeltgruppe / Besoldungsgruppe"
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        title: Personen mit LK je Entgelt-/Besoldungsgruppe
+
+    - title: "Wie viele verbeamtete und tarifbeschäftigte Frauen und Männer erhalten LK?"
+      include: full
+      comment: Optional
+      datenquelle: "PVS, Eigene Liste"
+      personenkreis: Alle
+      caption: "Anzahl der verbeamteten und tarifbeschäftigten Frauen und Männer mit Leistungskomponenten."
+      table:
+        data: Zeitraum_Leistungskomponente
+        groupby:
+          rows: "Beamte / Tarifbeschäftigte"
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        title: Personen mit LK — Beamte vs. Tarifbeschäftigte

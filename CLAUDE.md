@@ -40,7 +40,7 @@ The app ships in **German (default)** and **English**, switchable via a language
 - **Every program-authored string** routes through `t()` — step headings, buttons, data-validation warnings, render/chart/aggregation error messages, the per-block "TBD" note, and the DOCX "Table of Contents" heading.
 - **Default locale is `de`** (`DEFAULT_LOCALE` in the i18n module). `LOCALES` lists the selectable languages with their native display names.
 - **Switching language re-runs `initApp`**, which re-parses the config and re-renders — so all text (including config-driven labels) reflects the new language.
-- **Chart alt text** is localized too: `generateAltText(spec, data?, locale = getLocale())` keeps its own German/English phrase tables so the Alt Text Module stays self-contained while honouring the selection.
+- **Chart alt text** is localized too: `generateAltText(spec, wrangled?, locale = getLocale())` keeps its own German/English phrase tables so the Alt Text Module stays self-contained while honouring the selection.
 - **Config labels can be localized**: any `label` (parameters and `template.files`) may be a plain string (same in every language) or a per-locale map `{ de: "…", en: "…" }`, resolved against the active locale at parse time. See Config File.
 
 To add UI text: add the key to both `de` and `en` dictionaries in `src/modules/i18n/index.ts` and call `t("your.key", { ...params })`. Missing keys fall back to the default locale, then to the raw key.
@@ -66,9 +66,11 @@ data:
   # and template options — see the Info Module.
 
 template:
-  # Lists the bundled Markdown templates the user picks from. Each entry has a
-  # `file`, an optional localized `label`, and an optional `id` referenced by
+  # `files`: the bundled Markdown templates the user picks from. Each entry has
+  # a `file`, an optional localized `label`, and an optional `id` referenced by
   # the data `include` lists to scope which sheets/columns that template needs.
+  # `questions`: the question catalog rendered into the templates by
+  # `npm run gen:templates` (see Template Format) — ignored at runtime.
 ```
 
 **Example**
@@ -268,9 +270,47 @@ The config is imported at build time via Vite's `?raw` import and parsed on app 
 
 Templates are Markdown files. Charts and tables are defined as fenced code blocks with a typed language tag. The block body is a YAML specification describing the data binding and formatting.
 
-**Templates are generated, not hand-edited.** The files under `templates/` are **build artifacts** (git-ignored). They are produced from a single master, `templates/master.md`, by `scripts/gen-templates.ts` (`npm run gen:templates`, wired as a `predev`/`prebuild`/`pretest` hook). The generator reads `config/template.yaml`, and for every entry with an `id` + `file` writes a filtered copy to `templates/<file>`. Edit `templates/master.md` — not the generated files.
+**Templates are generated, not hand-edited.** The files under `templates/` are **build artifacts** (git-ignored). They are assembled from two sources by `scripts/gen-templates.ts` (`npm run gen:templates`, wired as a `predev`/`prebuild`/`pretest` hook; pure logic in `scripts/gen-templates-lib.ts`):
 
-**Section markers** decide which templates a block lands in, reusing the config `include:` vocabulary (HTML comments, so they never render). Unmarked content goes into **every** template:
+1. **The prose skeleton** `templates/master.md` — front/back matter plus two generation-time placeholders: `{{questions}}` (inside `## Situationsbeschreibung`) and `{{tables}}` (inside `## Anhang → ### Tabellen`). The generator throws if either is missing. Runtime parameter placeholders such as `{{title}}`/`{{office}}` pass through untouched.
+2. **The question catalog** `template.questions` in `config/template.yaml` — a flat, ordered YAML list consumed only by the generator (the runtime config parser ignores the key). For every entry in `template.files` with an `id` + `file`, the generator renders the catalog for that id and writes `templates/<file>`.
+
+Edit `templates/master.md` and `config/template.yaml` — not the generated files.
+
+**Question catalog.** Two entry types, discriminated by their first key:
+
+```yaml
+template:
+  questions:
+    - section: Leistungskomponenten        # emits "### …" + a Definitionen callout;
+      definitions: |                       # a Fazit callout is appended automatically
+        **LK erhalten**: Gibt an, ob …     # after the section's last question
+
+    - title: "Wie viele Frauen und Männer in den Entgelt-/Besoldungsgruppen erhalten LK?"
+      include: full            # template id(s); scalar or list; omit ⇒ every template
+      comment: Optional        # italic status line under the heading; omit ⇒ none
+      datenquelle: "PVS, Eigene Liste"
+      personenkreis: Alle
+      caption: "Anteil der Frauen und Männer, die LK erhalten haben."
+      text:                    # omit/null ⇒ default freetext placeholder
+      table:                   # the crosstab spec shared by chart + appendix table
+        data: Zeitraum_Leistungskomponente
+        filter: Alle           # optional truthy-row filter
+        groupby:
+          rows: "Entgeltgruppe / Besoldungsgruppe"
+          cols: Geschlecht     # optional
+        aggregation: count     # default count
+        # value: <column>      # required by sum/mean/min/max/median/share_group
+        # format: currency     # optional cell format for the appendix table
+      chart:                   # presentation only
+        type: bar              # bar | line | pie | doughnut | pyramid | distance
+        stacked: true          # bar/line: stack the series
+        title: Personen mit LK je Entgelt-/Besoldungsgruppe
+```
+
+Per question the generator emits `#### title`, the italic `comment`, a source blockquote `> Datenquelle: {datenquelle} · Personenkreis: {personenkreis} · Datensatz: {table.data}`, a ` ```chart ` block (presentation keys + the nested `table:`; the question `caption` becomes the chart caption unless `chart.caption` overrides it), and the freetext paragraph. Into `{{tables}}` it emits `#### title` + a ` ```table ` block with the same spec and `caption` (falling back to `chart.title`). Sections whose questions are all excluded for a template id are skipped entirely (heading, Definitionen, Fazit). The generator validates the catalog (exactly one of `section`/`title`; `table.data` + `groupby.rows` required; value-ops require `value:`; include ids checked against `template.files[].id`) and fails/warns loudly.
+
+**Section markers** scope remaining **prose** to specific templates, reusing the config `include:` vocabulary (HTML comments, so they never render). Unmarked content goes into **every** template:
 
 ````markdown
 <!-- include: full -->
@@ -278,140 +318,57 @@ Templates are Markdown files. Charts and tables are defined as fenced code block
 <!-- /include -->
 ````
 
-The id list is comma/space separated (`<!-- include: full, mandatory -->`); markers must not nest and are stripped from the output. Since the master currently carries no markers, all generated templates are identical until markers are added.
+The id list is comma/space separated (`<!-- include: full, mandatory -->`); markers must not nest and are stripped from the output. Questions are scoped via their catalog `include:` field, not markers.
 
-**Chart block:**
-````markdown
-```chart
-data: sales
-x: month
-y: revenue
-type: bar
-title: Monthly Revenue
-```
-````
+**The crosstab spec (wrangled table).** Chart and table blocks share a single data-shaping description; it is turned into a `WrangledTable` by `wrangleTable(spec, data, threshold)` in the aggregation module (filter → group by `groupby.rows` × optional `groupby.cols`, first-seen order, empty keys skipped → `aggregation` op per cell, with per-cell data-protection flags). The table renderer, the chart renderer, and the alt-text generator all consume this one structure, so they can never disagree.
 
-Supported chart types: `bar`, `line`, `pie`, `doughnut`, `scatter`, `pyramid`, `distance`.
-
-**Grouping (long-form data).** The optional `color` field names a column whose distinct values become the chart's series. Each series is coloured sequentially from the active palette. The renderer pivots long-form rows internally — no pre-aggregation needed — so a single dataset like `(month, region, revenue)` can be plotted as one line per region, one set of grouped bars per region, etc.
-
-| Chart type        | Behaviour with `color`                                                                     |
-|-------------------|---------------------------------------------------------------------------------------------|
-| `bar`, `line`     | Pivot to wide-form: one series per distinct value; `y` is summed within each `(x, group)`. |
-| `scatter`         | One dataset of `{x, y}` points per group; no aggregation.                                  |
-| `pie`, `doughnut` | One slice per distinct value; `y` summed (or rows counted if `y` is omitted).              |
-| `pyramid`         | `color` is the binary split column (alias for `split`).                                    |
-
-For multi-series `bar` (and `line`) charts, `stacked: true` stacks groups along the value axis instead of placing them side-by-side. Default is dodged (`stacked: false`); pyramid is always stacked regardless of this flag.
-
-````markdown
-```chart
-data: Stichtag
-type: bar
-x: QE
-y: PersNr
-color: Geschlecht
-stacked: true
-aggregation:
-  y: count
-```
-````
-
-````markdown
-```chart
-data: sales
-x: month
-y: revenue
-color: region        # one series per distinct region value
-type: line
-```
-````
-
-**Pyramid chart** (population-pyramid layout — horizontal stacked bars mirrored across a central y-axis). Aggregates raw rows internally, so the `data` source contains one row per record (e.g. one row per employee), not pre-summarised values:
-
-````markdown
-```chart
-data: Stichtag
-type: pyramid
-y: Entgeltgruppe / Besoldungsgruppe   # category axis
-split: Geschlecht                      # column with exactly 2 distinct values
-value: Arbeitszeitanteil               # optional — sums this column; omit to count rows
-title: Headcount by pay grade and gender
-```
-````
-
-The `split` field must contain exactly two distinct non-empty values across the dataset; the first encountered renders on the left, the second on the right. Tooltips and x-axis ticks display absolute values, so negative numbers are an implementation detail and not visible to the reader.
-
-**Table block:**
-````markdown
-```table
-data: sales
-columns: [month, revenue, growth]
-format:
-  revenue: currency
-  growth: percent
-```
-````
-
-**Aggregation.** Both chart and table specs accept an `aggregation` field. Supported ops: `identity`, `count`, `sum`, `mean`, `min`, `max`, `median`, `share_total`, `share_group`.
-- `count` ignores the field and returns the row count.
-- `identity` is the group key (passthrough — used to keep a column verbatim).
-- `share_total` returns the group's row count as a percentage of the dataset (after filtering).
-- `share_group` interprets the field as a boolean (true / "Ja" / "Yes" / "1" are truthy) and returns the percentage of `true` rows in the group.
-
-*Charts* — `aggregation: { x?, y? }`. Setting `y` to a non-identity op turns on grouping by `x` (and `color`, if set). Defaults: ungrouped charts → `identity` (rows are data points); `color`-grouped or pyramid charts → `sum`.
-
-````markdown
-```chart
-data: employees
-x: department
-y: salary
-type: bar
-aggregation:
-  y: mean        # one bar per department, height = average salary
-```
-````
-
-*Tables* — `aggregation: { <column>: op, ... }`. Columns marked `identity` (or omitted from the map) become group keys; others are aggregated. If the field is absent, rows render verbatim.
+**Table block** — renders the crosstab as an accessible HTML table (`<th scope="col">` header row: the `groupby.rows` column name plus one header per `cols` value or the value column; `<th scope="row">` per row):
 
 ````markdown
 ```table
-data: employees
-columns: [department, headcount, total_salary]
-aggregation:
-  department: identity
-  headcount: count
-  total_salary: sum
-format:
-  total_salary: currency
+data: Stichtag
+filter: Tarifbeschäftigte        # optional
+groupby:
+  rows: Befristet / Unbefristet
+  cols: Geschlecht               # optional; omit ⇒ single value column
+aggregation: count               # count | sum | mean | min | max | median | share_total | share_group
+# value: <column>                # required by sum/mean/min/max/median/share_group
+# format: integer | decimal | percent | currency   # optional; default derives from the op
+caption: Befristete und unbefristete Arbeitsverhältnisse nach Geschlecht.
 ```
 ````
 
-**Row filter (Personenkreis).** Both chart and table specs accept an optional `filter: <column>` that keeps only rows where the column's value is truthy (`true`, `"Ja"`, `"Yes"`, `"true"`, `"1"`). The values `Alle`, `-`, or empty disable the filter. Applied before aggregation.
+Default cell formatting: share ops render as `x %` (one decimal), whole numbers plainly, other values with two decimals; `format: currency` uses EUR.
+
+**Chart block** — embeds the same spec under `table:` and adds presentation keys:
 
 ````markdown
 ```chart
-data: Stichtag
-type: bar
-x: Geschlecht
-y: PersNr
-filter: Beurlaubung   # only rows where Beurlaubung is truthy
-aggregation: { y: count }
+type: bar                        # bar | line | pie | doughnut | pyramid | distance
+stacked: true                    # bar/line only; pyramid is always stacked
+title: Tarifbeschäftigte vs. Beamte
+caption: …                       # figcaption; alt / alt-intro as below
+table:
+  data: Stichtag
+  groupby:
+    rows: Beamte / Tarifbeschäftigte
+    cols: Geschlecht
+  aggregation: count
 ```
 ````
 
-**Distance plot.** Layout-equivalent to a horizontal grouped bar chart (`indexAxis: 'y'`), used for "X versus Y across categories" comparisons. Requires a `color` field naming the binary group:
+How the crosstab maps onto each chart type:
 
-````markdown
-```chart
-data: Stichtag
-type: distance
-x: Entgeltgruppe / Besoldungsgruppe   # categorical axis (rendered on y)
-y: PersNr                              # value axis (rendered on x)
-color: Geschlecht                      # binary comparator
-aggregation: { y: count }
-```
-````
+| Chart type        | Mapping                                                                                       |
+|-------------------|-----------------------------------------------------------------------------------------------|
+| `bar`, `line`     | rows → category axis, one series per `cols` value. Without `cols`: one series, per-category palette colors, no legend. `stacked: true` stacks the series. |
+| `pie`, `doughnut` | rows → slices; `cols` is not supported (error).                                                |
+| `pyramid`         | Population-pyramid layout: rows → categories, `cols` must hold exactly 2 distinct values (left = first-seen). Tooltips/ticks show absolute values. |
+| `distance`        | Dumbbell plot (`indexAxis: 'y'`): rows → categories, `cols` must hold exactly 2 distinct values; markers + connecting line colored by the leading value. |
+
+**Aggregation.** One op per block: `count` (rows per cell; ignores `value`), `sum` / `mean` / `min` / `max` / `median` (over `value`), `share_total` (cell row count as % of the filtered dataset), `share_group` (interprets `value` as a boolean — true / "Ja" / "Yes" / "1" are truthy — and returns the % of true rows within the cell). Omitting `aggregation` defaults to `count` (normalized by the template parser).
+
+**Row filter (Personenkreis).** The optional `filter: <column>` keeps only rows where the column's value is truthy (`true`, `"Ja"`, `"Yes"`, `"true"`, `"1"`). The values `Alle`, `-`, or empty disable the filter; a missing column is a silent no-op. Applied before grouping/aggregation.
 
 **Callouts.** Pandoc-style fenced divs render as styled boxes (preview + DOCX). Recognised classes: `callout` (generic), `callout-note`, `callout-tip`, `callout-warning`, `callout-caution`, `callout-important`. Optional `title='…'`. Inner content is parsed as Markdown.
 
@@ -430,8 +387,11 @@ data_protection:
   smallest_group: 5
 ```
 
+The protection flag is computed once per cell in `wrangleTable` (the cell keeps its raw value plus `protected: true`); each consumer applies its own presentation:
+
 - **Tables:** affected cells render as `<5` instead of the formatted value.
 - **Charts:** affected bars/slices are clamped to the threshold so a small bar is still drawn, and the tooltip displays `<5` instead of the actual number.
+- **Alt texts:** affected cells enumerate as `<5`, matching what the chart shows.
 - **Applies to** count-like operations (`count`, `sum`, `share_total`, `share_group`). Means/medians/min/max are not masked because they don't reveal group sizes.
 
 ## Data Loading
@@ -491,7 +451,7 @@ preprocessing:
 - Joins run **in order, after all mutations**; a later join may reference an earlier join's output, and joins propagate mutation-derived columns.
 - Keys are matched after NFC + whitespace normalization (so `PersNr` numbers/strings line up).
 
-**Why the StMAS templates need both:** the `Zeitraum_*` event sheets (e.g. `Zeitraum_Befoerderung`) carry only event data. Mutations derive the `Beamte`/`Tarifbeschäftigte` classification (from `Entgeltgruppe / Besoldungsgruppe`) on `Stichtag` and the `Beförderung (ja/nein)` / `Höhergruppierung genehmigt` flags (from `Maßnahmenart`) on the event sheet; the `Stichtag → Zeitraum_Befoerderung` join then carries the classification onto each event by `PersNr`. Together they supply every column the Beförderung charts reference in their `filter:` and `y:`.
+**Why the StMAS templates need both:** the `Zeitraum_*` event sheets (e.g. `Zeitraum_Befoerderung`) carry only event data. Mutations derive the `Beamte`/`Tarifbeschäftigte` classification (from `Entgeltgruppe / Besoldungsgruppe`) on `Stichtag` and the `Beförderung (ja/nein)` / `Höhergruppierung genehmigt` flags (from `Maßnahmenart`) on the event sheet; the `Stichtag → Zeitraum_Befoerderung` join then carries the classification onto each event by `PersNr`. Together they supply every column the Beförderung blocks reference in their `filter:` and `value:`.
 
 ## Architecture
 
@@ -546,11 +506,12 @@ The generated report output must be accessible. The following measures apply acr
 A dedicated submodule responsible for generating descriptive alt texts for charts and graphics. Fully offline — no network requests. Independent of the renderers and reusable in other projects.
 
 **Inputs**
-- The resolved YAML chart spec (chart type, title, axis labels, aggregation, filter, optional `altIntro`)
-- The resolved dataset (used to enumerate every aggregated data point)
+- The resolved YAML chart spec (chart type, title, the embedded `table:` crosstab spec, optional `altIntro`)
+- The already-wrangled crosstab (`WrangledTable`, the same structure the chart is drawn from — used to enumerate every shown cell)
 
 **Generation strategy**
-- Derive alt text from the spec and data: chart type, what is being measured (aggregation op + y field), how it is broken down (x axis, color grouping, filter), and when data is provided, an explicit enumeration of every aggregated data point shown in the chart.
+- Derive alt text from the spec: chart type, what is being measured (aggregation op + `value` column, or the row axis for plain counts/shares), how it is broken down (`groupby.rows`, `groupby.cols`, filter).
+- When the wrangled table is provided, append an explicit enumeration of every cell shown in the chart. Privacy-protected cells enumerate as `<threshold`, matching the rendered chart and tables.
 - The optional `altIntro` is prepended verbatim.
 - The `alt:` field in the YAML spec always takes precedence and bypasses generation entirely.
 
@@ -559,8 +520,10 @@ A dedicated submodule responsible for generating descriptive alt texts for chart
 
 **API shape**
 ```ts
-generateAltText(spec: ChartSpec, data?: DataSet): string
+generateAltText(spec: ChartSpec, wrangled?: WrangledTable, locale?: Locale): string
 ```
+
+**Golden tests** — `test/alt-text/` holds two golden suites (spec-only and with-data) generated against `templates/template_full.md` and the `dummy.xlsx` fixture (run through the real config preprocessing). After intentional output changes, regenerate with `npm run test:bootstrap-alt-text` and review the diff.
 
 ## Info Module
 

@@ -1,7 +1,8 @@
 /**
- * Aggregation module — small set of named aggregation operations applied
- * to row sets. Used by both the chart renderer (pivot/grouping) and the
- * table renderer (GROUP BY semantics). Self-contained and reusable.
+ * Aggregation module — named aggregation operations applied to row sets,
+ * plus the shared "wrangle" step (filter → groupby → aggregate crosstab)
+ * consumed by the table renderer, the chart renderer, and the alt-text
+ * module. Self-contained and reusable.
  */
 import type { DataSet } from "../types";
 import { t } from "../i18n";
@@ -125,190 +126,118 @@ export function applyFilter(data: DataSet, field?: string): DataSet {
   return data.filter((row) => coerceBoolean(row[field]));
 }
 
+// ── Wrangle ─────────────────────────────────────────────────────────
+// The shared "wrangled table" step: filter → group by rows (× cols) →
+// aggregate. Computed once per block and consumed by the table renderer,
+// the chart renderer, and the alt-text module, so all three present the
+// exact same numbers (and the same data-protection flags).
+
+/** The data-shaping subset of a table spec (structurally satisfied by `TableSpec`). */
+export interface WrangleSpec {
+  /** Boolean column whose truthy rows are kept before aggregation. */
+  filter?: string;
+  /** Crosstab axes: `rows` labels the table rows, optional `cols` the columns. */
+  groupby: { rows: string; cols?: string };
+  /** Single aggregation op applied per cell. */
+  aggregation: AggregationOp;
+  /** Column the op aggregates (required by sum/mean/min/max/median/share_group). */
+  value?: string;
+}
+
+export interface WrangledCell {
+  /** Raw aggregated value — never clamped/masked here; consumers decide presentation. */
+  value: number;
+  /** Number of source rows in the cell's bucket. */
+  n: number;
+  /** True when data protection applies (count-like op, 0 < |value| < threshold). */
+  protected: boolean;
+}
+
+export interface WrangledTable {
+  /** The `groupby.rows` column name (crosstab corner header). */
+  rowHeader: string;
+  /** Distinct row labels, first-seen order. */
+  rows: string[];
+  /** The `groupby.cols` column name, if a column axis was requested. */
+  colHeader?: string;
+  /** Distinct column labels (first-seen order) — `[valueLabel]` when `cols` is omitted. */
+  cols: string[];
+  /** Header for the synthetic single column (localized op name, or the value column). */
+  valueLabel: string;
+  /** cells[rowIdx][colIdx]. */
+  cells: WrangledCell[][];
+  aggregation: AggregationOp;
+  /** Formatting hint: values are percentages (share ops). */
+  isShare: boolean;
+  /** The data-protection threshold used, echoed for display masking ("<5"). */
+  threshold: number;
+}
+
 /**
- * Replace numeric values below a privacy threshold with the threshold
- * itself (so the bar/cell is still visible at minimum size), and return
- * a parallel set of indices that callers can use to relabel them as
- * "<threshold" in tooltips, tables, etc.
- *
- * Zero is preserved (no data to protect). Negative values (e.g. pyramid
- * left-side which is negated) are protected by absolute magnitude.
+ * Build the wrangled crosstab for a spec: apply the row filter, bucket rows
+ * by `groupby.rows` (and `groupby.cols` when present, both in first-seen
+ * order, skipping empty keys), then aggregate each bucket with the spec's
+ * op. Cells keep the raw value plus a `protected` flag; clamping (charts)
+ * and masking (tables, alt text) are the consumers' concern.
  */
-export function applyDataProtection(
-  values: number[],
-  threshold: number
-): { values: number[]; protectedIdx: Set<number> } {
-  const protectedIdx = new Set<number>();
-  const out = values.map((v, i) => {
-    const abs = Math.abs(v);
-    if (abs > 0 && abs < threshold) {
-      protectedIdx.add(i);
-      return v < 0 ? -threshold : threshold;
+export function wrangleTable(spec: WrangleSpec, data: DataSet, threshold = 0): WrangledTable {
+  const op = spec.aggregation;
+  const filtered = applyFilter(data, spec.filter);
+  const total = filtered.length;
+
+  const rowField = spec.groupby.rows;
+  const colField = spec.groupby.cols;
+
+  const rows: string[] = [];
+  const cols: string[] = [];
+  // buckets[rowLabel][colLabel] — colLabel is "" for the synthetic single column.
+  const buckets = new Map<string, Map<string, DataSet>>();
+
+  for (const row of filtered) {
+    const r = String(row[rowField] ?? "");
+    if (r === "") continue;
+    let c = "";
+    if (colField) {
+      c = String(row[colField] ?? "");
+      if (c === "") continue;
+      if (!cols.includes(c)) cols.push(c);
     }
-    return v;
-  });
-  return { values: out, protectedIdx };
-}
-
-/**
- * Apply `identity` semantics: returns the first non-empty raw value of
- * `field` across `rows`. Preserves non-numeric values (strings, dates, ...),
- * unlike `aggregateField` which coerces to number.
- */
-export function firstValue(rows: DataSet, field: string): unknown {
-  for (const r of rows) {
-    const v = r[field];
-    if (v !== undefined && v !== null && v !== "") return v;
-  }
-  return "";
-}
-
-// ── Pivots ──────────────────────────────────────────────────────────
-// Pure data-shape transformations used by both the chart renderer and the
-// alt-text module so both consume the same source of truth.
-
-/** Bucket rows by the string value of `field`, preserving first-seen order. */
-export function groupRowsBy(data: DataSet, field: string): Map<string, DataSet> {
-  const groups = new Map<string, DataSet>();
-  for (const row of data) {
-    const key = String(row[field] ?? "");
-    if (key === "") continue;
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key)!.push(row);
-  }
-  return groups;
-}
-
-/**
- * Pivot long-form rows to wide-form: labels = unique x values (insertion
- * order), one series per distinct color value, y aggregated per (x, group)
- * using `op`.
- */
-export function pivotByGroup(
-  data: DataSet,
-  xField: string,
-  yField: string,
-  colorField: string,
-  op: AggregationOp,
-  total: number
-): { labels: string[]; series: { name: string; data: number[] }[] } {
-  const labels: string[] = [];
-  const seen = new Set<string>();
-  const groups = new Map<string, Map<string, DataSet>>();
-
-  for (const row of data) {
-    const x = String(row[xField] ?? "");
-    if (x === "") continue;
-    const c = String(row[colorField] ?? "");
-    if (c === "") continue;
-
-    if (!seen.has(x)) {
-      seen.add(x);
-      labels.push(x);
+    if (!buckets.has(r)) {
+      rows.push(r);
+      buckets.set(r, new Map());
     }
-    if (!groups.has(c)) groups.set(c, new Map());
-    const m = groups.get(c)!;
-    if (!m.has(x)) m.set(x, []);
-    m.get(x)!.push(row);
+    const byCol = buckets.get(r)!;
+    if (!byCol.has(c)) byCol.set(c, []);
+    byCol.get(c)!.push(row);
   }
 
-  const series = [...groups.entries()].map(([name, m]) => ({
-    name,
-    data: labels.map((x) => aggregateField(m.get(x) ?? [], yField, op, total)),
-  }));
-  return { labels, series };
-}
+  const valueLabel = spec.value ?? t(`agg.valueLabel.${op}`);
+  const colLabels = colField ? cols : [valueLabel];
+  const colKeys = colField ? cols : [""];
 
-/** Group raw rows into one {x, y} dataset per distinct color value (scatter). */
-export function groupScatter(
-  data: DataSet,
-  xField: string,
-  yField: string,
-  colorField: string
-): { name: string; points: { x: number; y: number }[] }[] {
-  const groups = new Map<string, { x: number; y: number }[]>();
-  for (const row of data) {
-    const c = String(row[colorField] ?? "");
-    if (c === "") continue;
-    const x = Number(row[xField]);
-    const y = Number(row[yField]);
-    if (Number.isNaN(x) || Number.isNaN(y)) continue;
-    if (!groups.has(c)) groups.set(c, []);
-    groups.get(c)!.push({ x, y });
-  }
-  return [...groups.entries()].map(([name, points]) => ({ name, points }));
-}
+  const cells = rows.map((r) =>
+    colKeys.map((c): WrangledCell => {
+      const bucket = buckets.get(r)!.get(c) ?? [];
+      const value = aggregateField(bucket, spec.value, op, total);
+      const abs = Math.abs(value);
+      return {
+        value,
+        n: bucket.length,
+        protected: shouldProtect(op) && threshold > 0 && abs > 0 && abs < threshold,
+      };
+    })
+  );
 
-/** Aggregate by color group: one number per distinct value, using `op`. */
-export function aggregateByGroup(
-  data: DataSet,
-  yField: string | undefined,
-  colorField: string,
-  op: AggregationOp,
-  total: number
-): { labels: string[]; values: number[] } {
-  const groups = new Map<string, DataSet>();
-  for (const row of data) {
-    const c = String(row[colorField] ?? "");
-    if (c === "") continue;
-    if (!groups.has(c)) groups.set(c, []);
-    groups.get(c)!.push(row);
-  }
-  const labels = [...groups.keys()];
-  const values = labels.map((k) => aggregateField(groups.get(k)!, yField, op, total));
-  return { labels, values };
-}
-
-/**
- * Pyramid pivot: bucket raw rows per (category, side) so any aggregation op
- * can be applied. Validates exactly two distinct split values.
- */
-export function aggregatePyramid(
-  data: DataSet,
-  yField: string,
-  splitField: string,
-  valueField: string | undefined,
-  op: AggregationOp,
-  total: number
-): { categories: string[]; leftKey: string; rightKey: string; left: number[]; right: number[] } {
-  const buckets = new Map<string, [DataSet, DataSet]>();
-  let leftKey: string | null = null;
-  let rightKey: string | null = null;
-  const extras = new Set<string>();
-
-  for (const row of data) {
-    const cat = String(row[yField] ?? "");
-    if (cat === "") continue;
-    const split = String(row[splitField] ?? "");
-    if (split === "") continue;
-
-    if (leftKey === null) leftKey = split;
-    else if (rightKey === null && split !== leftKey) rightKey = split;
-    else if (split !== leftKey && split !== rightKey) extras.add(split);
-
-    if (!buckets.has(cat)) buckets.set(cat, [[], []]);
-    const pair = buckets.get(cat)!;
-    if (split === leftKey) pair[0].push(row);
-    else if (split === rightKey) pair[1].push(row);
-  }
-
-  if (leftKey === null || rightKey === null) {
-    throw new Error(
-      t("agg.pyramidNeeds2", { field: splitField, count: leftKey === null ? 0 : 1 })
-    );
-  }
-  if (extras.size > 0) {
-    throw new Error(
-      t("agg.pyramidExtra", { field: splitField, extras: [...extras].join(", ") })
-    );
-  }
-
-  const categories = [...buckets.keys()];
   return {
-    categories,
-    leftKey,
-    rightKey,
-    left: categories.map((c) => aggregateField(buckets.get(c)![0], valueField, op, total)),
-    right: categories.map((c) => aggregateField(buckets.get(c)![1], valueField, op, total)),
+    rowHeader: rowField,
+    rows,
+    colHeader: colField,
+    cols: colLabels,
+    valueLabel,
+    cells,
+    aggregation: op,
+    isShare: isShareOp(op),
+    threshold,
   };
 }
+

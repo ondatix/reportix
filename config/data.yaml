@@ -148,6 +148,16 @@ preprocessing:
         starts_with: [E]
       then: "Ja"
       else: "Nein"
+    # Kategoriale Variante der Statusunterscheidung — als Zeilen-/Spaltenachse
+    # in den Auswertungen nutzbar (die booleschen Spalten oben dienen als Filter).
+    - dataset: Stichtag
+      column: "Beamte / Tarifbeschäftigte"
+      definition: "Kategoriale Statusunterscheidung: „Beamte“ für Besoldungsgruppen (A/B/R/W), sonst „Tarifbeschäftigte“; abgeleitet aus der Entgelt-/Besoldungsgruppe."
+      from: "Entgeltgruppe / Besoldungsgruppe"
+      when:
+        starts_with: [A, B, R, W]
+      then: "Beamte"
+      else: "Tarifbeschäftigte"
     # Beförderungsereignisse klassifizieren (eigene Spalten von Zeitraum_Befoerderung):
     - dataset: Zeitraum_Befoerderung
       column: "Beförderung (ja/nein)"
