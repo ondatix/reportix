@@ -24,23 +24,23 @@ data:
           - column: PersNr
             definition: "Eindeutige Personalnummer; Schlüssel für die Joins mit den Zeitraum-Blättern."
           - column: Geschlecht
-            definition: "Geschlecht der Person."
+            definition: "Geschlecht der Person"
           - column: "Entgeltgruppe / Besoldungsgruppe"
             definition: "Gibt an, welcher Entgeltgruppe (für Tarifbeschäftigte) bzw. Besoldungsgruppe (für Beamtinnen bzw. Beamte) die Tätigkeit bzw. das Amt der Person zum Stichtag zugeordnet ist."
           - column: QE
-            definition: "Qualifikationsebene: Laufbahngruppen 1–4 nach Art. 5 LlbG; entspricht im Tarifbereich näherungsweise den E-Gruppen."
+            definition: "Gibt die derzeitige Qualifikationsebene (QE) bei Beamtinnen und Beamten an. Für Tarifbeschäftigte kann ein entsprechendes QE-Äquivalent ausgewiesen werden."
           - column: Einstiegs-QE
-            definition: "Qualifikationsebene bei Einstellung."
+            definition: "Qualifikationsebene bei Einstellung"
           - column: "Teilzeit / Vollzeit"
             definition: "Gibt an, ob der festgelegte Arbeitszeitumfang der Person Vollzeit (100 %) oder Teilzeit (weniger als 100 %) beträgt."
           - column: Arbeitszeitanteil
-            definition: "Einstufung des Arbeitszeitanteils in folgende Kategorien: bis unter 50 %; 50 % bis unter 90 %; 90 % bis unter 100 %; 100 % (entspricht den Normstunden bei Vollzeit)."
+            definition: "Einstufung des Arbeitszeitanteils in folgende Kategorien: bis unter 50 %; 50 % bis unter 90 %; 90 % bis unter 100 %; 100 % (entspricht den Normstunden bei Vollzeit)"
           - column: Führungsebene
-            definition: "Hierarchische Einordnung der Führungsfunktion (1 = höchste Ebene)."
+            definition: "Führungsebenen klassifizieren Führungspositionen und leitende Funktionen nach dem Grad ihrer Entscheidungskompetenz sowie dem Umfang ihrer Verantwortlichkeiten."
           - column: Organisationseinheit
             definition: "Gibt an, in welcher Organisationseinheit (z. B. Abteilung, Referat, Amt) die betreffende Person zum Stichtag tätig ist."
           - column: Ausbildungsbereich
-            definition: "Kategorisierung verschiedener Ausbildungsbereiche der Auszubildenden der Dienststelle."
+            definition: "Kategorisierung verschiedener Ausbildungsbereiche der Auszubildenden der Dienststelle"
           - column: Führungskraft (aktiv) in Tandem
             definition: "Gibt an, ob die Führungskraft ihre Führungs- bzw. Leitungsfunktion am Stichtag gemeinsam mit mindestens einer weiteren aktiven (d. h. nicht beurlaubten) Person ausübt."
           - column: Führungskraft (aktiv)
@@ -81,7 +81,7 @@ data:
           - column: Organisationseinheit
             definition: "Referat / Sachgebiet / Amt — je nach Verwaltungsebene unterschiedlich tief gegliedert."
       - sheet: Zeitraum_Einstellung
-        definition: " Einstellungen umfassen alle Personen, die neu von extern in die Organisation aufgenommen werden. Dazu zählen auch ehemalige Nachwuchskräfte (z. B. Referendarinnen und Referendare sowie Auszubildende), die nach Abschluss ihrer Ausbildung ein Beschäftigungsverhältnis in der Organisation eingehen. Berücksichtigt werden sowohl befristete als auch unbefristete Beschäftigungsverhältnisse. Abordnungen und Versetzungen aus anderen Ressorts (im Beamtenbereich) zählen nicht als Einstellungen. Saisonarbeitende sowie vergleichbare saisonale Beschäftigte bleiben ebenfalls unberücksichtigt."
+        definition: "Einstellungen umfassen alle Personen, die neu von extern in die Organisation aufgenommen werden. Dazu zählen auch ehemalige Nachwuchskräfte (z. B. Referendarinnen und Referendare sowie Auszubildende), die nach Abschluss ihrer Ausbildung ein Beschäftigungsverhältnis in der Organisation eingehen. Berücksichtigt werden sowohl befristete als auch unbefristete Beschäftigungsverhältnisse. Abordnungen und Versetzungen aus anderen Ressorts (im Beamtenbereich) zählen nicht als Einstellungen. Saisonarbeitende sowie vergleichbare saisonale Beschäftigte bleiben ebenfalls unberücksichtigt."
         columns:
           - column: PersNr
             definition: "Personalnummer; Join-Schlüssel zu Stichtag."
@@ -116,7 +116,7 @@ data:
           - column: PersNr
             definition: "Personalnummer; Join-Schlüssel zu Stichtag."
           - column: Maßnahmenantrag
-            definition: "Beantragung der Höhergruppierung durch die beschäftigte Person bzw. Stelle."
+            definition: "Erfasst wird, ob eine Höhergruppierung auf Antrag oder automatisch erfolgt ist."
           - column: Maßnahmenart
             definition: "Art der Maßnahme; Grundlage der abgeleiteten Flags Beförderung (ja/nein) und Höhergruppierung genehmigt."
 
@@ -152,7 +152,7 @@ preprocessing:
     # in den Auswertungen nutzbar (die booleschen Spalten oben dienen als Filter).
     - dataset: Stichtag
       column: "Beamte / Tarifbeschäftigte"
-      definition: "Kategoriale Statusunterscheidung: „Beamte“ für Besoldungsgruppen (A/B/R/W), sonst „Tarifbeschäftigte“; abgeleitet aus der Entgelt-/Besoldungsgruppe."
+      definition: "Gibt an, ob eine Person zum Stichtag verbeamtet ist (Beamtinnen und Beamte) oder als Tarifbeschäftigte bzw. Tarifbeschäftigter nach TVöD bzw. TV-L beschäftigt wird."
       from: "Entgeltgruppe / Besoldungsgruppe"
       when:
         starts_with: [A, B, R, W]
@@ -161,7 +161,7 @@ preprocessing:
     # Beförderungsereignisse klassifizieren (eigene Spalten von Zeitraum_Befoerderung):
     - dataset: Zeitraum_Befoerderung
       column: "Beförderung (ja/nein)"
-      definition: "Beförderung: Verleihung eines höheren statusrechtlichen Amtes (Beamte); abgeleitet aus der Maßnahmenart."
+      definition: "Erfasst werden alle Beamtinnen und Beamten, die im Zeitraum mindestens eine Beförderung (d. h. eine Ernennung, durch die ein anderes Amt mit höherem Endgrundgehalt oder ein anderes Amt mit höherer Amtszulage verliehen wird) erhalten haben."
       from: Maßnahmenart
       when:
         equals: "Beförderung"
@@ -169,7 +169,7 @@ preprocessing:
       else: "Nein"
     - dataset: Zeitraum_Befoerderung
       column: "Höhergruppierung genehmigt"
-      definition: "Höhergruppierung: Eingruppierung in eine höhere Entgeltgruppe (Tarifbeschäftigte); abgeleitet aus der Maßnahmenart."
+      definition: "Erfasst werden alle Tarifbeschäftigten, bei denen im Zeitraum mindestens eine Höhergruppierung (d.h. die tarifrechtliche Zuordnung in eine höhere Entgeltgruppe) erfolgt ist."
       from: Maßnahmenart
       when:
         equals: "Höhergruppierung"

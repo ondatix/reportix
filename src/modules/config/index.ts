@@ -4,7 +4,7 @@
  */
 import { parse as parseYAML } from "yaml";
 import { getLocale, DEFAULT_LOCALE } from "../i18n";
-import type { AppConfig, ParameterDef, DataSourceDef, SheetDef, ColumnDef, TemplateDef, TemplateOption, ExportConfig, ChartDefaults, DataProtectionConfig, PreprocessingConfig, JoinDef, JoinColumnSelect, MutationDef, MutationCondition } from "../types";
+import type { AppConfig, ParameterDef, DataSourceDef, SheetDef, ColumnDef, TemplateDef, TemplateOption, ExportConfig, ChartDefaults, DataProtectionConfig, PreprocessingConfig, JoinDef, JoinColumnSelect, MutationDef, MutationCondition, TemplateBlock } from "../types";
 
 /**
  * Resolve a possibly-localized string for the active locale. A value may be:
@@ -445,6 +445,117 @@ export function dataForTemplate(
         columns: s.columns.filter((c) => includedFor(c.include, templateId)),
       }));
     out[source] = { sheets };
+  }
+  return out;
+}
+
+/**
+ * Filter data-source definitions down to what the given template blocks
+ * actually reference, so the data-loading step only prompts for required
+ * sheets/columns. A block's needs are its crosstab spec's `groupby.rows`,
+ * `groupby.cols`, `value`, and `filter` columns on its `data` dataset; each
+ * need is resolved back to physical columns through the preprocessing
+ * pipeline:
+ *
+ *   - declared column on the dataset's sheet → required as-is;
+ *   - mutation-derived column → the mutation's `from` column is required
+ *     (recursively, since mutations may chain);
+ *   - column supplied by a join (the dataset is a join output) → the column
+ *     is resolved on the right sheet (honouring `select`/`as`/`prefix`), and
+ *     the join keys become required on both sides.
+ *
+ * Unresolvable references (e.g. columns that exist in no sheet) are ignored —
+ * they are no-ops at render time too. Sheets with no required column are
+ * dropped, as are sources with no remaining sheets.
+ */
+export function requiredDataForBlocks(
+  blocks: TemplateBlock[],
+  data: Record<string, DataSourceDef>,
+  preprocessing?: PreprocessingConfig
+): Record<string, DataSourceDef> {
+  // Index of declared physical columns per sheet name.
+  const declared = new Map<string, Set<string>>();
+  for (const source of Object.values(data)) {
+    for (const sheet of source.sheets) {
+      declared.set(sheet.sheet, new Set(sheet.columns.map((c) => c.name)));
+    }
+  }
+
+  const mutations = preprocessing?.mutations ?? [];
+  const joins = preprocessing?.joins ?? [];
+  const joinByName = new Map(joins.map((j) => [j.name, j]));
+
+  const required = new Map<string, Set<string>>();
+  const require_ = (sheet: string, col: string) => {
+    if (!required.has(sheet)) required.set(sheet, new Set());
+    required.get(sheet)!.add(col);
+  };
+
+  /** Map a join-output column name back to the right sheet's column name. */
+  const rightColumnFor = (j: JoinDef, col: string): string | undefined => {
+    if (j.select) {
+      const entries = j.select.map((s) => (typeof s === "string" ? { column: s } : s));
+      return entries.find((s) => (s.as ?? s.column) === col)?.column;
+    }
+    if (j.prefix) return col.startsWith(j.prefix) ? col.slice(j.prefix.length) : undefined;
+    return col;
+  };
+
+  /** Resolve a needed (dataset, column) to physical requirements. */
+  const resolve = (dataset: string, col: string, seen: Set<string>): boolean => {
+    const key = `${dataset} ${col}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+
+    if (declared.get(dataset)?.has(col)) {
+      require_(dataset, col);
+      return true;
+    }
+
+    const mutation = mutations.find((m) => m.dataset === dataset && m.column === col);
+    if (mutation) return resolve(dataset, mutation.from, seen);
+
+    const join = joinByName.get(dataset);
+    if (join) {
+      if (join.left !== dataset && resolve(join.left, col, seen)) return true;
+      const viaRight =
+        col === join.indicator ||
+        (() => {
+          const rightCol = rightColumnFor(join, col);
+          return rightCol ? resolve(join.right, rightCol, seen) : false;
+        })();
+      if (viaRight) {
+        // The join must run → its keys are required on both sides.
+        const leftKey = join.leftOn ?? join.on;
+        const rightKey = join.rightOn ?? join.on;
+        if (leftKey) resolve(join.left, leftKey, new Set());
+        if (rightKey) resolve(join.right, rightKey, new Set());
+        return true;
+      }
+    }
+    return false;
+  };
+
+  for (const block of blocks) {
+    if (block.type === "text") continue;
+    const spec = block.type === "chart" ? block.spec.table : block.spec;
+    if (!spec?.data || !spec.groupby?.rows) continue;
+    const cols = [spec.groupby.rows, spec.groupby.cols, spec.value];
+    if (spec.filter && spec.filter !== "Alle" && spec.filter !== "-") cols.push(spec.filter);
+    for (const col of cols) {
+      if (col) resolve(spec.data, col, new Set());
+    }
+  }
+
+  const out: Record<string, DataSourceDef> = {};
+  for (const [source, def] of Object.entries(data)) {
+    const sheets = def.sheets
+      .filter((s) => required.has(s.sheet))
+      .map((s) => ({
+        ...s,
+        columns: s.columns.filter((c) => required.get(s.sheet)!.has(c.name)),
+      }));
+    if (sheets.length > 0) out[source] = { sheets };
   }
   return out;
 }

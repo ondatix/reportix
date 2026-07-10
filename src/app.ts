@@ -2,7 +2,7 @@
  * App orchestration — wires the modular pipeline together:
  *   config (bundled) → data upload → template choice → parameters → render → export
  */
-import { loadConfig, dataForTemplate } from "./modules/config";
+import { loadConfig, dataForTemplate, requiredDataForBlocks } from "./modules/config";
 import {
   parseWorkbook,
   parseTable,
@@ -11,7 +11,7 @@ import {
   type SourceTable,
   type DataMapping,
 } from "./modules/data-loader";
-import { applyPreprocessing } from "./modules/preprocessing";
+import { applyPreprocessing, preprocessingForStore } from "./modules/preprocessing";
 import {
   buildParameterForm,
   collectParameterValues,
@@ -176,8 +176,15 @@ export function initApp(root: HTMLElement): void {
     stepData.hidden = false;
     container.innerHTML = "";
 
-    // Only request the sheets/columns the selected template actually uses.
-    const defs = dataForTemplate(config.data, selectedTemplateId);
+    // Only request the sheets/columns the selected template actually uses:
+    // first the manual `include:` scoping from data.yaml, then the columns
+    // computed from the template's own chart/table blocks (resolved through
+    // mutations and joins back to physical columns).
+    const defs = requiredDataForBlocks(
+      parseTemplate(templateText),
+      dataForTemplate(config.data, selectedTemplateId),
+      config.preprocessing
+    );
 
     let dataFormat: "xlsx" | "csv" = "xlsx";
 
@@ -434,8 +441,12 @@ export function initApp(root: HTMLElement): void {
 
       const result = assembleStore(defs, mapping);
       // Build derived datasets (mutations + joins) before rendering; surface
-      // their warnings alongside the mapping ones.
-      const pre = applyPreprocessing(result.store, config.preprocessing);
+      // their warnings alongside the mapping ones. Steps for sheets the
+      // template didn't request are dropped, not warned about.
+      const pre = applyPreprocessing(
+        result.store,
+        preprocessingForStore(result.store, config.preprocessing)
+      );
       dataStore = pre.store;
 
       const warnings = [...result.warnings, ...pre.warnings];

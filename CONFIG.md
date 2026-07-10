@@ -216,7 +216,7 @@ data:
 
 **DataStore-Schlüssel.** Intern wird jedes geladene Blatt unter seinem Blattnamen abgelegt. Diagramm- und Tabellenblöcke verweisen über diesen Schlüssel auf Daten — z. B. sucht `data: Blatt 1` in einem Diagrammblock `DataStore["Blatt 1"]`.
 
-**Vorlagenabhängiger Datenschritt.** Der Datenschritt zeigt nur die Blätter und Spalten, deren `include` die `id` der gewählten Vorlage enthält (bzw. die kein `include` haben). So fragt eine Vorlage nur die Daten ab, die sie tatsächlich nutzt. Ausgeschlossene Blätter/Spalten erzeugen keine Warnungen, da sie gar nicht abgefragt werden.
+**Vorlagenabhängiger Datenschritt.** Der Datenschritt fragt nur die Daten ab, die die gewählte Vorlage tatsächlich nutzt — in zwei Stufen: Zuerst greift die manuelle `include:`-Filterung (Blätter/Spalten, deren `include` die `id` der Vorlage enthält bzw. die kein `include` haben). Anschließend berechnet die App aus den Diagramm-/Tabellenblöcken der Vorlage automatisch die **benötigten Spalten** (`groupby.rows`/`cols`, `value`, echte `filter`-Spalten) und löst sie durch die Preprocessing-Pipeline zu physischen Spalten auf: abgeleitete Spalten benötigen ihre `from`-Quellspalte, per Join gelieferte Spalten das rechte Blatt samt Join-Schlüsseln auf beiden Seiten. Nicht benötigte Blätter/Spalten werden gar nicht abgefragt und erzeugen keine Warnungen.
 
 **Hinweis zu den `Zeitraum_*`-Blättern.** Aus den `Zeitraum_*`-Ereignisblättern wurden Spalten bewusst entfernt, die Stammdaten doppelt führten — diese werden zur Laufzeit über den Join mit `Stichtag` (Schlüssel `PersNr`) ergänzt (siehe [`preprocessing:`](#de-preprocessing)). Ausnahme: `Zeitraum_Bewerbung` hat einen eigenen Schlüssel (`BewerberID`) und wird nicht mit `Stichtag` verknüpft, behält seine Personenmerkmale also direkt.
 
@@ -354,8 +354,15 @@ Eine flache, **geordnete** Liste, die ausschließlich vom Generator gelesen wird
 template:
   questions:
     - section: Leistungskomponenten     # "### …"-Überschrift + Definitionen-Callout;
-      definitions: |                    # ein Fazit-Callout wird automatisch nach der
-        **LK erhalten**: Gibt an, ob …  # letzten Frage des Abschnitts angehängt
+      definitions:                      # ein Fazit-Callout wird automatisch nach der
+                                        #   letzten Frage des Abschnitts angehängt.
+        # Einträge verweisen auf die definition:-Texte in data.yaml (Spalten,
+        # abgeleitete Spalten, Blätter — eine einzige Quelle für den Wortlaut):
+        - "Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB)"
+        - term: Beförderung             # angezeigter Begriff ≠ data.yaml-Name
+          ref: "Beförderung (ja/nein)"
+        - term: LK erhalten             # Konzept ohne data.yaml-Eintrag → Text inline
+          text: "Gibt an, ob …"
 
     - title: "Wie viele Frauen und Männer erhalten LK?"
       include: full                     # Vorlagen-id(s); weglassen ⇒ jede Vorlage
@@ -382,7 +389,7 @@ template:
 | Feld | Typ | Anmerkungen |
 |---|---|---|
 | `section` | String | Abschnittseintrag: emittiert `### <section>`; Abschnitte ohne enthaltene Frage werden komplett übersprungen. |
-| `definitions` | String (Markdown) | Inhalt des `Definitionen`-Callouts unter der Abschnittsüberschrift. |
+| `definitions` | Liste | Einträge des `Definitionen`-Callouts, gerendert als `**Begriff**: Text`. Ein einfacher String schlägt sich selbst in data.yaml nach (Spalten in Dokumentreihenfolge, dann abgeleitete Spalten aus `preprocessing.mutations`, dann Blätter per Blattname); `{term, ref}` zeigt `term` an, löst aber `ref` auf; `{term, text}` gibt den Text wörtlich aus. Ein nicht auflösbarer `ref` bricht die Generierung ab — der Wortlaut lebt damit ausschließlich in den `definition:`-Feldern von data.yaml. |
 | `title` | String | Frageeintrag: emittiert `#### <title>` (im Dokument und im Tabellen-Anhang). |
 | `include` | String \| Liste | Vorlagen-id(s) aus `template.files[].id`; weglassen ⇒ jede Vorlage. |
 | `comment` | String | Kursive Statuszeile (z. B. `Optional`, `Verpflichtend für …`). |
@@ -967,7 +974,7 @@ data:
 
 **DataStore keying.** Internally each loaded sheet is stored under its sheet name. Chart and table blocks reference data via this key — e.g. `data: Sheet 1` in a chart block looks up `DataStore["Sheet 1"]`.
 
-**Template-scoped data step.** The data step shows only the sheets and columns whose `include` contains the selected template's `id` (or that have no `include`). A template therefore only asks for the data it actually uses; excluded sheets/columns produce no warnings because they are never requested.
+**Template-scoped data step.** The data step only asks for the data the selected template actually uses — in two passes: first the manual `include:` filter (sheets/columns whose `include` contains the template's `id`, or that have no `include`), then the app automatically computes the **required columns** from the template's chart/table blocks (`groupby.rows`/`cols`, `value`, real `filter` columns) and resolves them through the preprocessing pipeline back to physical columns: derived columns require their `from` source column, join-supplied columns require the right sheet plus the join keys on both sides. Unneeded sheets/columns are never requested and produce no warnings.
 
 **Note on the `Zeitraum_*` sheets.** Columns that duplicated master data were deliberately removed from the `Zeitraum_*` event sheets — they are supplied at runtime by joining with `Stichtag` (key `PersNr`; see [`preprocessing:`](#en-preprocessing)). Exception: `Zeitraum_Bewerbung` has its own key (`BewerberID`) and is not joined with `Stichtag`, so it keeps its person attributes directly.
 
@@ -1105,8 +1112,15 @@ A flat, **ordered** list read only by the generator — the runtime config parse
 template:
   questions:
     - section: Leistungskomponenten     # "### …" heading + Definitionen callout;
-      definitions: |                    # a Fazit callout is appended automatically
-        **LK erhalten**: Gibt an, ob …  # after the section's last question
+      definitions:                      # a Fazit callout is appended automatically
+                                        #   after the section's last question.
+        # Entries reference the definition: texts in data.yaml (columns,
+        # derived columns, sheets — a single source of truth for the wording):
+        - "Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB)"
+        - term: Beförderung             # displayed term ≠ data.yaml name
+          ref: "Beförderung (ja/nein)"
+        - term: LK erhalten             # concept without a data.yaml entry → inline text
+          text: "Gibt an, ob …"
 
     - title: "Wie viele Frauen und Männer erhalten LK?"
       include: full                     # template id(s); omit ⇒ every template
@@ -1133,7 +1147,7 @@ template:
 | Field | Type | Notes |
 |---|---|---|
 | `section` | string | Section entry: emits `### <section>`; sections with no included question are skipped entirely. |
-| `definitions` | string (Markdown) | Body of the `Definitionen` callout under the section heading. |
+| `definitions` | list | Entries of the `Definitionen` callout, rendered as `**term**: text`. A plain string looks itself up in data.yaml (columns in document order, then derived columns from `preprocessing.mutations`, then sheets by sheet name); `{term, ref}` displays `term` but resolves `ref`; `{term, text}` is emitted verbatim. A dangling `ref` fails the generation — the wording therefore lives exclusively in data.yaml's `definition:` fields. |
 | `title` | string | Question entry: emits `#### <title>` (in the document and in the table appendix). |
 | `include` | string \| list | Template id(s) from `template.files[].id`; omit ⇒ every template. |
 | `comment` | string | Italic status line (e.g. `Optional`, `Verpflichtend für …`). |

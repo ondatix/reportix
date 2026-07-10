@@ -55,23 +55,21 @@ template:
   #       title: "…"
   questions:
     # ═══ Gesamtübersicht ═══
+    # `definitions:` entries reference the column/mutation/sheet definitions in
+    # data.yaml (single source of truth). Entry forms:
+    #   - <name>                       # term = data.yaml name
+    #   - term: <shown>, ref: <name>   # displayed term differs from data.yaml name
+    #   - term: <shown>, text: <text>  # verbatim — concept without data.yaml entry
     - section: Gesamtübersicht
-      definitions: |
-        **Ausbildungsbereich**: Kategorisierung verschiedener Ausbildungsbereiche der Auszubildenden der Dienststelle
-
-        **Beamte / Tarifbeschäftigte**: Gibt an, ob eine Person zum Stichtag verbeamtet ist (Beamtinnen und Beamte) oder als Tarifbeschäftigte bzw. Tarifbeschäftigter nach TVöD bzw. TV-L beschäftigt wird.
-
-        **Befristet / Unbefristet**: Gibt an, ob eine Person zum Stichtag befristet oder unbefristet beschäftigt ist.
-
-        **Einstiegs-QE**: Qualifikationsebene bei Einstellung
-
-        **Entgeltgruppe / Besoldungsgruppe**: Gibt an, welcher Entgeltgruppe (für Tarifbeschäftigte) bzw. Besoldungsgruppe (für Beamtinnen bzw. Beamte) die Tätigkeit bzw. das Amt der Person zum Stichtag zugeordnet ist.
-
-        **Geschlecht**: Geschlecht der Person
-
-        **Organisationseinheit**: Gibt an, in welcher Organisationseinheit (z. B. Abteilung, Referat, Amt) die betreffende Person zum Stichtag tätig ist.
-
-        **QE**: Gibt die derzeitige Qualifikationsebene (QE) bei Beamtinnen und Beamten an. Für Tarifbeschäftigte kann ein entsprechendes QE-Äquivalent ausgewiesen werden.
+      definitions:
+        - Ausbildungsbereich
+        - "Beamte / Tarifbeschäftigte"
+        - "Befristet / Unbefristet"
+        - Einstiegs-QE
+        - "Entgeltgruppe / Besoldungsgruppe"
+        - Geschlecht
+        - Organisationseinheit
+        - QE
 
     - title: "Wie viele Männer und Frauen arbeiten bei uns?"
       datenquelle: PVS
@@ -201,10 +199,11 @@ template:
 
     # ═══ Bewerbungen und Einstellungen ═══
     - section: Bewerbungen und Einstellungen
-      definitions: |
-        **Einstellungen**: Einstellungen umfassen alle Personen, die neu von extern in die Organisation aufgenommen werden. Dazu zählen auch ehemalige Nachwuchskräfte (z. B. Referendarinnen und Referendare sowie Auszubildende), die nach Abschluss ihrer Ausbildung ein Beschäftigungsverhältnis in der Organisation eingehen. Berücksichtigt werden sowohl befristete als auch unbefristete Beschäftigungsverhältnisse. Abordnungen und Versetzungen aus anderen Ressorts (im Beamtenbereich) zählen nicht als Einstellungen. Saisonarbeitende sowie vergleichbare saisonale Beschäftigte bleiben ebenfalls unberücksichtigt.
-
-        **Qualifizierte Bewerbung**: Als qualifizierte Bewerbungen gelten Bewerbungen auf ausgeschriebene Stellen, die die fachlichen Anforderungen erfüllen, sowie Initiativbewerbungen, die die fachlichen Anforderungen für eine aktuell offene Stelle erfüllen.
+      definitions:
+        - term: Einstellungen
+          ref: Zeitraum_Einstellung   # sheet definition
+        - term: Qualifizierte Bewerbung
+          text: "Als qualifizierte Bewerbungen gelten Bewerbungen auf ausgeschriebene Stellen, die die fachlichen Anforderungen erfüllen, sowie Initiativbewerbungen, die die fachlichen Anforderungen für eine aktuell offene Stelle erfüllen."
 
     # TODO(data): Filterspalte "Qualifizierte Bewerbungen" existiert nicht in
     # Zeitraum_Bewerbung — Filter ist derzeit ein stiller No-op (gilt für die
@@ -330,12 +329,10 @@ template:
 
     # ═══ Führung ═══
     - section: Führung
-      definitions: |
-        **Führungsebene**: Führungsebenen klassifizieren Führungspositionen und leitende Funktionen nach dem Grad ihrer Entscheidungskompetenz sowie dem Umfang ihrer Verantwortlichkeiten.
-
-        **Führungskraft (aktiv)**: Gibt an, ob die Person am Stichtag eine Führungsposition oder leitende Funktion aktiv ausübt.
-
-        **Führungskraft (aktiv) in Tandem**: Gibt an, ob die Führungskraft ihre Führungs- bzw. Leitungsfunktion am Stichtag gemeinsam mit mindestens einer weiteren aktiven (d. h. nicht beurlaubten) Person ausübt.
+      definitions:
+        - Führungsebene
+        - Führungskraft (aktiv)
+        - Führungskraft (aktiv) in Tandem
 
     - title: "Wie viele Männer und Frauen sind in leitenden Funktionen tätig?"
       datenquelle: PVS
@@ -436,10 +433,10 @@ template:
 
     # ═══ Teilzeit ═══
     - section: Teilzeit
-      definitions: |
-        **Arbeitszeitanteile**: Einstufung des Arbeitszeitanteils in folgende Kategorien: bis unter 50 %; 50 % bis unter 90 %; 90 % bis unter 100 %; 100 % (entspricht den Normstunden bei Vollzeit)
-
-        **Teilzeit / Vollzeit**: Gibt an, ob der festgelegte Arbeitszeitumfang der Person Vollzeit (100 %) oder Teilzeit (weniger als 100 %) beträgt.
+      definitions:
+        - term: Arbeitszeitanteile
+          ref: Arbeitszeitanteil
+        - "Teilzeit / Vollzeit"
 
     - title: "Wie viele Männer und Frauen arbeiten in Teil- bzw. Vollzeit?"
       datenquelle: PVS
@@ -472,15 +469,19 @@ template:
 
     # ═══ Beurlaubung ═══
     - section: Beurlaubung
-      definitions: |
-        **Beginn der Elternzeit im Zeitraum 01.01. - 31.12. des vorangegangenen Kalenderjahres**: Erfasst wird das Beginndatum jeder Elternzeit, die für eine Person im Kalenderjahr X besteht. Hat die Elternzeit bereits am 01.01._X_ oder früher begonnen, wird als Beginn der 01.01._X_ angegeben.
-        Für Personen, die im Jahr _X_ mehrere Elternzeiten angetreten haben, wird für jede Elternzeit ein separater Dateneintrag erstellt.
+      definitions:
+        # Konzeptdefinitionen ohne data.yaml-Spalte → Text inline.
+        - term: "Beginn der Elternzeit im Zeitraum 01.01. - 31.12. des vorangegangenen Kalenderjahres"
+          text: |
+            Erfasst wird das Beginndatum jeder Elternzeit, die für eine Person im Kalenderjahr X besteht. Hat die Elternzeit bereits am 01.01._X_ oder früher begonnen, wird als Beginn der 01.01._X_ angegeben.
+            Für Personen, die im Jahr _X_ mehrere Elternzeiten angetreten haben, wird für jede Elternzeit ein separater Dateneintrag erstellt.
+        - term: Beurlaubung aus familiären Gründen
+          text: "Gibt an, ob sich die Person zum Stichtag entweder in Elternzeit (ohne Elternteilzeit) oder in familienpolitischer Beurlaubung befindet."
+        - term: "Ende der Elternzeit im Zeitraum 01.01. - 31.12. des vorangegangenen Kalenderjahres"
+          text: |
+            Erfasst wird das Enddatum jeder Elternzeit, die für eine Person im Kalenderjahr _X_ besteht. Endet die Elternzeit erst am 31.12._X_ oder später, wird als Ende der 31.12._X_ angegeben.
 
-        **Beurlaubung aus familiären Gründen**: Gibt an, ob sich die Person zum Stichtag entweder in Elternzeit (ohne Elternteilzeit) oder in familienpolitischer Beurlaubung befindet.
-
-        **Ende der Elternzeit im Zeitraum 01.01. - 31.12. des vorangegangenen Kalenderjahres**: Erfasst wird das Enddatum jeder Elternzeit, die für eine Person im Kalenderjahr _X_ besteht. Endet die Elternzeit erst am 31.12._X_ oder später, wird als Ende der 31.12._X_ angegeben.
-
-        Für Personen, die im Jahr _X_ mehrere Elternzeiten hatten, wird für jede Elternzeit ein separater Dateneintrag erstellt.
+            Für Personen, die im Jahr _X_ mehrere Elternzeiten hatten, wird für jede Elternzeit ein separater Dateneintrag erstellt.
 
     # TODO(data): Spalte "Beurlaubung" existiert nicht auf Stichtag — sie müsste
     # z. B. per Mutation aus "Ab- oder Anwesenheitsart" abgeleitet werden (die
@@ -539,8 +540,8 @@ template:
 
     # ═══ Beurteilungen ═══
     - section: Beurteilungen
-      definitions: |
-        **Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung:** Das Ergebnis der zuletzt für die Person durchgeführten periodischen Beurteilung.
+      definitions:
+        - Aktuellestes vorliegendes Ergebnis periodischer dienstlicher Beurteilung
 
     - title: "Wie werden verbeamtete Frauen und Männer in den QEs beurteilt?"
       include: full
@@ -652,12 +653,13 @@ template:
 
     # ═══ Beförderungen und Höhergruppierungen ═══
     - section: Beförderungen und Höhergruppierungen
-      definitions: |
-        **Beförderung**: Erfasst werden alle Beamtinnen und Beamten, die im Zeitraum mindestens eine Beförderung (d. h. eine Ernennung, durch die ein anderes Amt mit höherem Endgrundgehalt oder ein anderes Amt mit höherer Amtszulage verliehen wird) erhalten haben.
-
-        **Höhergruppierung erfolgt**: Erfasst werden alle Tarifbeschäftigten, bei denen im Zeitraum mindestens eine Höhergruppierung (d.h. die tarifrechtliche Zuordnung in eine höhere Entgeltgruppe) erfolgt ist.
-
-        **Höhergruppierung auf Antrag erfolgt**: Erfasst wird, ob eine Höhergruppierung auf Antrag oder automatisch erfolgt ist.
+      definitions:
+        - term: Beförderung
+          ref: "Beförderung (ja/nein)"          # abgeleitete Spalte (Mutation)
+        - term: Höhergruppierung erfolgt
+          ref: "Höhergruppierung genehmigt"     # abgeleitete Spalte (Mutation)
+        - term: Höhergruppierung auf Antrag erfolgt
+          ref: Maßnahmenantrag
 
     - title: "Wie viele Frauen und Männer sind in den QEs befördert worden?"
       include: full
@@ -731,8 +733,9 @@ template:
 
     # ═══ Qualifizierung ═══
     - section: Qualifizierung
-      definitions: |
-        **Qualifizierungsmaßnahme abgeschlossen**: Erfasst werden alle Personen, die im Zeitraum mindestens eine Qualifizierungsmaßnahme (Modulare Qualifizierung [MQ], Ausbildungsqualifizierung [AQ] oder Beschäftigtenlehrgang [BL]) erfolgreich abgeschlossen haben.
+      definitions:
+        - term: Qualifizierungsmaßnahme abgeschlossen
+          text: "Erfasst werden alle Personen, die im Zeitraum mindestens eine Qualifizierungsmaßnahme (Modulare Qualifizierung [MQ], Ausbildungsqualifizierung [AQ] oder Beschäftigtenlehrgang [BL]) erfolgreich abgeschlossen haben."
 
     # TODO(data): Spalten "Qualifizierungsmaßnahme abgeschlossen (ja / nein)"
     # und "Qualifizierungsmaßnahme bewilligt (ja / nein)" existieren nicht in
@@ -773,8 +776,9 @@ template:
 
     # ═══ Fortbildungen ═══
     - section: Fortbildungen
-      definitions: |
-        **Teilnahme an Fortbildung**: Erfasst wird die Teilnahme an nicht-verpflichtenden Fortbildungen im Zeitraum. Für jede absolvierte Fortbildung einer Person wird ein separater Dateneintrag angelegt.
+      definitions:
+        - term: Teilnahme an Fortbildung
+          text: "Erfasst wird die Teilnahme an nicht-verpflichtenden Fortbildungen im Zeitraum. Für jede absolvierte Fortbildung einer Person wird ein separater Dateneintrag angelegt."
 
     # TODO(data): Spalte "Teilnahme an Fortbildung (ja / nein)" existiert nicht
     # in Zeitraum_Fortbildung.
@@ -797,10 +801,10 @@ template:
 
     # ═══ Leistungskomponenten ═══
     - section: Leistungskomponenten
-      definitions: |
-        **Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB)**: Erfasst wird die Summe aller im vorangegangenen Kalenderjahr zusätzlich zum Grundgehalt gezahlten leistungsabhängigen Zulagen und Prämien.
-
-        **LK erhalten**: Gibt an, ob die Person im vorangegangenen Kalenderjahr (01.01.–31.12.) zusätzlich zum Grundgehalt leistungsabhängige Zulagen oder Prämien erhalten hat.
+      definitions:
+        - "Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB)"
+        - term: LK erhalten
+          text: "Gibt an, ob die Person im vorangegangenen Kalenderjahr (01.01.–31.12.) zusätzlich zum Grundgehalt leistungsabhängige Zulagen oder Prämien erhalten hat."
 
     - title: "Wie hoch sind die LK, die Frauen und Männer in den Entgelt-/Besoldungsgruppen erhalten?"
       comment: "Verpflichtend für Stellen, bei denen alle LK erhalten"

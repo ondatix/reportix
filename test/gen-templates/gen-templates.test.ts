@@ -12,8 +12,11 @@ import { resolve } from "node:path";
 import { parse as parseYAML } from "yaml";
 import {
   type CatalogEntry,
+  type DefinitionLookup,
   DEFAULT_FREETEXT,
+  buildDefinitionLookup,
   renderAppendixTables,
+  renderDefinitions,
   renderQuestionBlock,
   renderQuestions,
   renderTemplate,
@@ -25,10 +28,15 @@ import type { ChartBlock, TableBlock } from "../../src/modules/types";
 
 const ROOT = resolve(__dirname, "../..");
 
+const lookup: DefinitionLookup = new Map([
+  ["Geschlecht", "Geschlecht der Person"],
+  ["X-Spalte", "nur full."],
+]);
+
 const catalog: CatalogEntry[] = [
   {
     section: "Gesamtübersicht",
-    definitions: "**Geschlecht**: Geschlecht der Person",
+    definitions: ["Geschlecht"],
   },
   {
     title: "Wie viele Männer und Frauen arbeiten bei uns?",
@@ -57,7 +65,7 @@ const catalog: CatalogEntry[] = [
     },
     chart: { type: "bar", stacked: true, title: "Befristet vs. unbefristet" },
   },
-  { section: "Nur-Voll-Sektion", definitions: "**X**: nur full." },
+  { section: "Nur-Voll-Sektion", definitions: [{ term: "X", ref: "X-Spalte" }] },
   {
     title: "Zweite volle Frage?",
     include: ["full"],
@@ -96,7 +104,7 @@ describe("renderQuestionBlock", () => {
 
 describe("renderQuestions — include filtering, sections, Fazit", () => {
   it("full template contains every question and both sections", () => {
-    const md = renderQuestions(catalog, "full");
+    const md = renderQuestions(catalog, "full", lookup);
     expect(md).toContain("### Gesamtübersicht");
     expect(md).toContain("### Nur-Voll-Sektion");
     expect((md.match(/^#### /gm) ?? []).length).toBe(3);
@@ -106,7 +114,7 @@ describe("renderQuestions — include filtering, sections, Fazit", () => {
   });
 
   it("mandatory template drops full-only questions and skips empty sections entirely", () => {
-    const md = renderQuestions(catalog, "mandatory");
+    const md = renderQuestions(catalog, "mandatory", lookup);
     expect((md.match(/^#### /gm) ?? []).length).toBe(1);
     expect(md).toContain("### Gesamtübersicht");
     expect(md).not.toContain("Nur-Voll-Sektion");
@@ -114,7 +122,7 @@ describe("renderQuestions — include filtering, sections, Fazit", () => {
   });
 
   it("section definitions render as a Definitionen callout", () => {
-    const md = renderQuestions(catalog, "mandatory");
+    const md = renderQuestions(catalog, "mandatory", lookup);
     expect(md).toContain("::: {.callout-note title='Definitionen'}");
     expect(md).toContain("**Geschlecht**: Geschlecht der Person");
   });
@@ -150,7 +158,7 @@ describe("renderTemplate — placeholder substitution", () => {
   ].join("\n");
 
   it("substitutes both placeholders and keeps runtime placeholders untouched", () => {
-    const md = renderTemplate(segmentMaster(master), catalog, "mandatory");
+    const md = renderTemplate(segmentMaster(master), catalog, "mandatory", lookup);
     expect(md).toContain("# {{title}}");
     expect(md).not.toContain("{{questions}}");
     expect(md).not.toContain("{{tables}}");
@@ -160,7 +168,7 @@ describe("renderTemplate — placeholder substitution", () => {
   });
 
   it("throws when a placeholder is missing from the master", () => {
-    expect(() => renderTemplate(segmentMaster("# nix"), catalog, "full")).toThrow(
+    expect(() => renderTemplate(segmentMaster("# nix"), catalog, "full", lookup)).toThrow(
       /\{\{questions\}\}/
     );
   });
@@ -169,7 +177,7 @@ describe("renderTemplate — placeholder substitution", () => {
 describe("round-trip — generated markdown parses back into the catalog specs", () => {
   it("chart and table blocks survive YAML quoting of German column names", () => {
     const master = "{{questions}}\n\n{{tables}}";
-    const md = renderTemplate(segmentMaster(master), catalog, "full");
+    const md = renderTemplate(segmentMaster(master), catalog, "full", lookup);
     const blocks = parseTemplate(md);
 
     const charts = blocks.filter((b): b is ChartBlock => b.type === "chart");
@@ -230,19 +238,68 @@ describe("validateCatalog", () => {
   });
 });
 
+describe("buildDefinitionLookup / renderDefinitions", () => {
+  const raw = {
+    data: {
+      Quelle: {
+        sheets: [
+          {
+            sheet: "Blatt",
+            definition: "Blattdefinition.",
+            columns: ["plain", { column: "Spalte", definition: "Spaltendefinition." }],
+          },
+        ],
+      },
+    },
+    preprocessing: {
+      mutations: [{ column: "Abgeleitet", definition: "Mutationsdefinition." }],
+    },
+  };
+  const built = buildDefinitionLookup(raw as any);
+
+  it("indexes columns, mutations, and sheets (columns win)", () => {
+    expect(built.get("Spalte")).toBe("Spaltendefinition.");
+    expect(built.get("Abgeleitet")).toBe("Mutationsdefinition.");
+    expect(built.get("Blatt")).toBe("Blattdefinition.");
+    expect(built.has("plain")).toBe(false); // string column has no definition
+  });
+
+  it("renders string, {term,ref}, and {term,text} entries", () => {
+    const md = renderDefinitions(
+      ["Spalte", { term: "Anders", ref: "Abgeleitet" }, { term: "Inline", text: "Eigener Text." }],
+      built
+    );
+    expect(md).toBe(
+      "**Spalte**: Spaltendefinition.\n\n**Anders**: Mutationsdefinition.\n\n**Inline**: Eigener Text."
+    );
+  });
+
+  it("throws on a dangling ref", () => {
+    expect(() => renderDefinitions(["Nicht da"], built)).toThrow(/no data\.yaml definition/);
+  });
+});
+
 describe("real catalog + real master (smoke)", () => {
   const master = readFileSync(resolve(ROOT, "templates/master.md"), "utf8");
   const config = parseYAML(readFileSync(resolve(ROOT, "config/template.yaml"), "utf8"));
   const entries: CatalogEntry[] = config.template.questions;
   const segments = segmentMaster(master);
+  const realLookup = buildDefinitionLookup(
+    parseYAML(readFileSync(resolve(ROOT, "config/data.yaml"), "utf8"))
+  );
 
   it("validates without warnings", () => {
     expect(validateCatalog(entries, new Set(["full", "mandatory"]))).toEqual([]);
   });
 
+  it("every section definition reference resolves against data.yaml", () => {
+    // renderQuestions throws on a dangling ref — this is the guard.
+    expect(() => renderQuestions(entries, "full", realLookup)).not.toThrow();
+  });
+
   it("full = 47 questions + 47 appendix tables; mandatory = 16 + 16", () => {
-    const full = renderTemplate(segments, entries, "full");
-    const mandatory = renderTemplate(segments, entries, "mandatory");
+    const full = renderTemplate(segments, entries, "full", realLookup);
+    const mandatory = renderTemplate(segments, entries, "mandatory", realLookup);
     expect((full.match(/^```chart$/gm) ?? []).length).toBe(47);
     expect((full.match(/^```table$/gm) ?? []).length).toBe(47);
     expect((mandatory.match(/^```chart$/gm) ?? []).length).toBe(16);
@@ -255,7 +312,7 @@ describe("real catalog + real master (smoke)", () => {
   });
 
   it("every generated block parses and references a groupby", () => {
-    const blocks = parseTemplate(renderTemplate(segments, entries, "full"));
+    const blocks = parseTemplate(renderTemplate(segments, entries, "full", realLookup));
     const specs = blocks.filter((b) => b.type !== "text") as (ChartBlock | TableBlock)[];
     expect(specs.length).toBe(94);
     for (const b of specs) {

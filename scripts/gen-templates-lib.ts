@@ -54,10 +54,24 @@ export interface RawTableSpec {
   format?: string;
 }
 
+/**
+ * One entry of a section's Definitionen callout:
+ *   - `"Geschlecht"`                      — term shown = lookup name in data.yaml
+ *   - `{ term: "Beförderung", ref: "Beförderung (ja/nein)" }`
+ *                                         — displayed term differs from the
+ *                                           data.yaml name it resolves to
+ *   - `{ term: "LK erhalten", text: "…" }` — verbatim text for concepts that
+ *                                           have no data.yaml counterpart
+ */
+export type DefinitionEntry = string | { term: string; ref?: string; text?: string };
+
+/** name → definition text, built from data.yaml (columns, mutations, sheets). */
+export type DefinitionLookup = Map<string, string>;
+
 export interface SectionEntry {
   section: string;
-  /** Markdown body of the section's Definitionen callout. */
-  definitions?: string;
+  /** Entries of the section's Definitionen callout. */
+  definitions?: DefinitionEntry[];
 }
 
 export interface QuestionEntry {
@@ -87,6 +101,76 @@ export type CatalogEntry = SectionEntry | QuestionEntry;
 
 export function isSectionEntry(e: CatalogEntry): e is SectionEntry {
   return "section" in e;
+}
+
+// ── Definition lookup (data.yaml) ───────────────────────────────────
+
+/** The subset of raw config/data.yaml the definition lookup reads. */
+interface RawDataConfig {
+  data?: Record<
+    string,
+    {
+      sheets?: Array<{
+        sheet?: string;
+        definition?: string;
+        columns?: Array<string | { column?: string; name?: string; definition?: string }>;
+      }>;
+    }
+  >;
+  preprocessing?: {
+    mutations?: Array<{ column?: string; definition?: string }>;
+  };
+}
+
+/**
+ * Build the name → definition map the section callouts resolve against.
+ * Sources, in priority order (first definition wins): sheet columns
+ * (document order), mutation-derived columns, then whole sheets (by sheet
+ * name — for concept definitions like "Einstellungen" that describe an
+ * event sheet rather than a column).
+ */
+export function buildDefinitionLookup(raw: RawDataConfig): DefinitionLookup {
+  const lookup: DefinitionLookup = new Map();
+  const add = (name: unknown, definition: unknown) => {
+    if (typeof name !== "string" || typeof definition !== "string") return;
+    const key = name.trim();
+    if (key && definition.trim() && !lookup.has(key)) lookup.set(key, definition.trim());
+  };
+
+  const sheets = Object.values(raw.data ?? {}).flatMap((s) => s.sheets ?? []);
+  for (const sheet of sheets) {
+    for (const col of sheet.columns ?? []) {
+      if (typeof col === "object" && col) add(col.column ?? col.name, col.definition);
+    }
+  }
+  for (const m of raw.preprocessing?.mutations ?? []) add(m.column, m.definition);
+  for (const sheet of sheets) add(sheet.sheet, sheet.definition);
+
+  return lookup;
+}
+
+/** Resolve one definition entry to `{ term, text }`; throws on a dangling ref. */
+function resolveDefinition(entry: DefinitionEntry, lookup: DefinitionLookup): { term: string; text: string } {
+  const term = typeof entry === "string" ? entry : entry.term;
+  if (typeof entry === "object" && entry.text) return { term, text: entry.text.trim() };
+  const ref = typeof entry === "string" ? entry : (entry.ref ?? entry.term);
+  const text = lookup.get(ref.trim());
+  if (!text) {
+    throw new Error(
+      `Definition "${term}": no data.yaml definition found for "${ref}" (checked columns, mutations, and sheets).`
+    );
+  }
+  return { term, text };
+}
+
+/** Render a section's Definitionen callout body from its entry list. */
+export function renderDefinitions(entries: DefinitionEntry[], lookup: DefinitionLookup): string {
+  return entries
+    .map((entry) => {
+      const { term, text } = resolveDefinition(entry, lookup);
+      return `**${term}**: ${text}`;
+    })
+    .join("\n\n");
 }
 
 export function isIncluded(include: string | string[] | undefined, id: string): boolean {
@@ -198,7 +282,11 @@ export function renderAppendixTable(q: QuestionEntry): string {
  * each section's last question. Sections whose questions are all excluded
  * are skipped entirely.
  */
-export function renderQuestions(entries: CatalogEntry[], id: string): string {
+export function renderQuestions(
+  entries: CatalogEntry[],
+  id: string,
+  lookup: DefinitionLookup = new Map()
+): string {
   const parts: string[] = [];
   let pendingSection: string | null = null;
   let sectionOpen = false;
@@ -212,9 +300,9 @@ export function renderQuestions(entries: CatalogEntry[], id: string): string {
     if (isSectionEntry(entry)) {
       closeSection();
       const header: string[] = [`### ${entry.section}`];
-      if (entry.definitions) {
+      if (entry.definitions?.length) {
         header.push(
-          `::: {.callout-note title='Definitionen'}\n${entry.definitions.trim()}\n:::`
+          `::: {.callout-note title='Definitionen'}\n${renderDefinitions(entry.definitions, lookup)}\n:::`
         );
       }
       pendingSection = header.join("\n\n");
@@ -321,9 +409,14 @@ function substitutePlaceholder(text: string, name: string, content: string): str
  * Produce the final template text for one id: marker filtering, then
  * `{{questions}}`/`{{tables}}` substitution, then blank-line cleanup.
  */
-export function renderTemplate(segments: Segment[], entries: CatalogEntry[], id: string): string {
+export function renderTemplate(
+  segments: Segment[],
+  entries: CatalogEntry[],
+  id: string,
+  lookup: DefinitionLookup = new Map()
+): string {
   let text = renderFor(segments, id);
-  text = substitutePlaceholder(text, "questions", renderQuestions(entries, id));
+  text = substitutePlaceholder(text, "questions", renderQuestions(entries, id, lookup));
   text = substitutePlaceholder(text, "tables", renderAppendixTables(entries, id));
   // Collapse blank-line runs left by dropped blocks; trim leading blank lines.
   return text.replace(/\n{3,}/g, "\n\n").replace(/^\n+/, "");

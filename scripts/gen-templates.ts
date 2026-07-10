@@ -22,6 +22,7 @@ import { fileURLToPath } from "node:url";
 import { parse as parseYAML } from "yaml";
 import {
   type CatalogEntry,
+  buildDefinitionLookup,
   markerIds,
   renderTemplate,
   segmentMaster,
@@ -31,6 +32,7 @@ import {
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const MASTER_PATH = resolve(ROOT, "templates/master.md");
 const TEMPLATE_CONFIG_PATH = resolve(ROOT, "config/template.yaml");
+const DATA_CONFIG_PATH = resolve(ROOT, "config/data.yaml");
 const OUT_DIR = resolve(ROOT, "templates");
 
 function main(): void {
@@ -45,6 +47,10 @@ function main(): void {
   };
   const files = config.template?.files ?? [];
   const questions = config.template?.questions ?? [];
+
+  // Section Definitionen callouts resolve against the column/mutation/sheet
+  // definitions in data.yaml, so the wording lives in exactly one place.
+  const lookup = buildDefinitionLookup(parseYAML(readFileSync(DATA_CONFIG_PATH, "utf8")));
 
   const knownIds = new Set(files.map((f) => f.id).filter(Boolean) as string[]);
 
@@ -62,7 +68,7 @@ function main(): void {
       continue;
     }
     const outPath = resolve(OUT_DIR, f.file);
-    writeFileSync(outPath, renderTemplate(segments, questions, f.id) + "\n", "utf8");
+    writeFileSync(outPath, renderTemplate(segments, questions, f.id, lookup) + "\n", "utf8");
     console.log(`  ✓ ${f.file}  (id: ${f.id})`);
     written++;
   }

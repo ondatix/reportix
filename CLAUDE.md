@@ -283,8 +283,15 @@ Edit `templates/master.md` and `config/template.yaml` — not the generated file
 template:
   questions:
     - section: Leistungskomponenten        # emits "### …" + a Definitionen callout;
-      definitions: |                       # a Fazit callout is appended automatically
-        **LK erhalten**: Gibt an, ob …     # after the section's last question
+      definitions:                         # a Fazit callout is appended automatically
+                                           #   after the section's last question.
+        # Entries reference the definition texts in data.yaml (single source
+        # of truth — columns, mutation-derived columns, and sheets by name):
+        - "Höhe Leistungskomponente (LK = Leistungsprämien/-entgelt, LOB)"
+        - term: Beförderung                # displayed term ≠ data.yaml name
+          ref: "Beförderung (ja/nein)"
+        - term: LK erhalten                # concept without a data.yaml entry
+          text: "Gibt an, ob …"            #   → verbatim text
 
     - title: "Wie viele Frauen und Männer in den Entgelt-/Besoldungsgruppen erhalten LK?"
       include: full            # template id(s); scalar or list; omit ⇒ every template
@@ -309,6 +316,8 @@ template:
 ```
 
 Per question the generator emits `#### title`, the italic `comment`, a source blockquote `> Datenquelle: {datenquelle} · Personenkreis: {personenkreis} · Datensatz: {table.data}`, a ` ```chart ` block (presentation keys + the nested `table:`; the question `caption` becomes the chart caption unless `chart.caption` overrides it), and the freetext paragraph. Into `{{tables}}` it emits `#### title` + a ` ```table ` block with the same spec and `caption` (falling back to `chart.title`). Sections whose questions are all excluded for a template id are skipped entirely (heading, Definitionen, Fazit). The generator validates the catalog (exactly one of `section`/`title`; `table.data` + `groupby.rows` required; value-ops require `value:`; include ids checked against `template.files[].id`) and fails/warns loudly.
+
+**Definitions resolve against data.yaml.** The generator builds a name → definition lookup from `config/data.yaml` — sheet columns (document order, first wins), then mutation-derived columns, then whole sheets by sheet name — via `buildDefinitionLookup` in `scripts/gen-templates-lib.ts`. A section's `definitions:` entries render as `**term**: text` paragraphs: a plain string looks itself up, `{term, ref}` displays `term` but resolves `ref`, `{term, text}` is verbatim (for concepts with no data.yaml counterpart). A dangling `ref` fails the build. The definition **wording** therefore lives in exactly one place: the `definition:` fields in data.yaml (which also feed the mapping-UI tooltips).
 
 **Section markers** scope remaining **prose** to specific templates, reusing the config `include:` vocabulary (HTML comments, so they never render). Unmarked content goes into **every** template:
 
@@ -398,7 +407,7 @@ The protection flag is computed once per cell in `wrangleTable` (the cell keeps 
 
 The data step (`src/modules/data-loader/`, driven by `src/app.ts`) does **not** validate the upload against fixed names — instead the user maps their actual data onto the `config.data` sheets/columns. There is no hard schema check; mismatches are resolved by the user, not rejected.
 
-- **Template-scoped definitions** — before rendering the mapping UI, `app.ts` computes `dataForTemplate(config.data, selectedTemplateId)` (exported from `src/modules/config/`), keeping only the sheets/columns whose `include` list contains the selected template's `id` (an omitted/empty `include` ⇒ included in every template). That filtered set drives both the UI and `assembleStore`, so excluded sheets/columns are never requested and produce no warnings. `SheetDef`/`ColumnDef` also carry optional `definition`/`info`/`notes` metadata; `definition`/`info` surface as click-to-open tooltips in the mapping UI (see Info Module). Derived columns (`preprocessing.mutations[]`) likewise accept an optional `definition`.
+- **Template-scoped definitions** — before rendering the mapping UI, `app.ts` filters `config.data` in two passes (both exported from `src/modules/config/`): `dataForTemplate(config.data, selectedTemplateId)` applies the manual `include` lists (an omitted/empty `include` ⇒ every template), then `requiredDataForBlocks(parseTemplate(templateText), defs, config.preprocessing)` keeps only the sheets/columns the selected template's chart/table blocks actually reference. Each block's needs (`groupby.rows`/`cols`, `value`, real `filter` columns on its `data` dataset) are resolved back to physical columns through the preprocessing pipeline: mutation-derived columns require their `from` column, join-supplied columns require the right sheet's column plus the join keys on both sides (honouring `select`/`as`/`prefix`); unresolvable references are ignored (they no-op at render time too). The filtered set drives both the UI and `assembleStore`, so unneeded sheets/columns are never requested and produce no warnings. `SheetDef`/`ColumnDef` also carry optional `definition`/`info`/`notes` metadata; `definition`/`info` surface as click-to-open tooltips in the mapping UI (see Info Module) and the `definition` texts double as the source for the templates' Definitionen callouts (see Template Format). Derived columns (`preprocessing.mutations[]`) likewise accept an optional `definition`.
 - **Format choice** — two buttons: **XLSX** (one workbook per data source; map each config sheet → a workbook sheet) or **CSV** (one single-table file per config sheet — the per-sheet input also accepts a single-sheet `.xlsx`).
 - **Mapping UI** — the config's source→sheets→columns hierarchy is rendered with a `<select>` per sheet (XLSX only) and per column. Options come from the parsed file; the option whose **normalized name** (NFC, trimmed, lower-cased) matches the config name is **pre-selected** (`matchName`). Any choice may be left "(none)".
 - **Module API** — `parseWorkbook(buffer)` → `Record<sheet, SourceTable>`; `parseTable(buffer, filename, preferSheet?)` → one `SourceTable` (CSV decoded as text, XLSX prefers the named sheet then the first); `assembleStore(definitions, mapping)` builds the `DataStore` **keyed by config sheet name**, copying each row with the chosen source columns **renamed to the config column names** (only mapped columns are kept). `SourceTable = { columns, rows }`, `DataMapping = Record<configSheet, { table?, columns: Record<configCol, sourceCol> }>`.

@@ -27,6 +27,32 @@ export interface PreprocessingResult {
 }
 
 /**
+ * Restrict a preprocessing config to the datasets actually present in the
+ * store. When the data step only requests a template's required sheets (see
+ * `requiredDataForBlocks` in the config module), mutations and joins for the
+ * unrequested sheets are expected to be inapplicable — without this filter
+ * they would surface as "dataset not found" warnings. Joins are checked
+ * sequentially, so a join whose `right` is an earlier (kept) join output
+ * stays.
+ */
+export function preprocessingForStore(
+  store: DataStore,
+  config?: PreprocessingConfig
+): PreprocessingConfig | undefined {
+  if (!config) return config;
+  const available = new Set(Object.keys(store));
+  const mutations = (config.mutations ?? []).filter((m) => available.has(m.dataset));
+  const joins: JoinDef[] = [];
+  for (const join of config.joins ?? []) {
+    if (available.has(join.left) && available.has(join.right)) {
+      joins.push(join);
+      available.add(join.name);
+    }
+  }
+  return { mutations, joins };
+}
+
+/**
  * Apply every configured join in order, returning a new store with the join
  * outputs added (or overwritten when a join's `name` equals an existing key).
  * The input store is not mutated. Joins run sequentially against the evolving
