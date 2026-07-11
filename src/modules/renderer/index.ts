@@ -54,25 +54,46 @@ export function renderBlocks(
 
 /**
  * Apply document-level structure to an already-rendered preview:
- *   • section numbering — toggles a CSS-counter class so headings render
- *     "1.", "1.1.", … (sections start at <h2>; the <h1> title is excluded).
+ *   • section numbering — labels headings "1.", "1.1.", … (sections start
+ *     at <h2>; the <h1> title is excluded).
  *   • table of contents — builds a `<nav class="report-toc">` listing the
  *     section headings and inserts it just before the first <h2> (so it sits
  *     after the title/subtitle front matter, matching the .docx layout).
  *
- * Section numbers are computed in JS for the TOC entries so they match the
- * CSS-counter numbers shown on the headings. Idempotent per render — the app
- * rebuilds the preview from scratch each time.
+ * Numbers are computed once in JS (`numberHeadings`) and stored in a
+ * `data-secnum` attribute, painted onto the heading via `content:
+ * attr(data-secnum)` in CSS. Plain CSS counter-reset/increment can't do this:
+ * each text block renders into its own <section> wrapper, and a counter's
+ * scope ends at the end of its containing element — so a reset on one <h2>
+ * doesn't reach an <h3> living in the *next* text block's <section>, even
+ * though they're logically the same section. Computing in JS via
+ * querySelectorAll (which flattens across that wrapper structure) sidesteps
+ * that entirely, and lets the TOC reuse the exact same numbers. Idempotent
+ * per render — the app rebuilds the preview from scratch each time.
  */
 export function applyDocumentStructure(
   container: HTMLElement,
   opts: { sectionNumbering?: boolean; toc?: boolean }
 ): void {
-  container.classList.toggle("section-numbered", Boolean(opts.sectionNumbering));
-  if (opts.toc) buildTableOfContents(container, Boolean(opts.sectionNumbering));
+  const numbered = Boolean(opts.sectionNumbering);
+  container.classList.toggle("section-numbered", numbered);
+  if (numbered) numberHeadings(container);
+  if (opts.toc) buildTableOfContents(container);
 }
 
-function buildTableOfContents(container: HTMLElement, numbered: boolean): void {
+function numberHeadings(container: HTMLElement): void {
+  const headings = Array.from(container.querySelectorAll<HTMLElement>("h2, h3, h4"));
+  const counters = [0, 0, 0]; // h2, h3, h4
+
+  for (const h of headings) {
+    const level = Number(h.tagName[1]) - 2; // h2 → 0, h3 → 1, h4 → 2
+    counters[level]++;
+    for (let k = level + 1; k < counters.length; k++) counters[k] = 0;
+    h.dataset.secnum = counters.slice(0, level + 1).join(".") + ". ";
+  }
+}
+
+function buildTableOfContents(container: HTMLElement): void {
   const headings = Array.from(
     container.querySelectorAll<HTMLElement>("h2, h3, h4")
   );
@@ -88,24 +109,16 @@ function buildTableOfContents(container: HTMLElement, numbered: boolean): void {
   nav.appendChild(title);
 
   const list = document.createElement("ul");
-  const counters = [0, 0, 0]; // h2, h3, h4
 
   headings.forEach((h, i) => {
     const level = Number(h.tagName[1]) - 2; // h2 → 0, h3 → 1, h4 → 2
     if (!h.id) h.id = `sec-${i}`;
 
-    let prefix = "";
-    if (numbered) {
-      counters[level]++;
-      for (let k = level + 1; k < counters.length; k++) counters[k] = 0;
-      prefix = counters.slice(0, level + 1).join(".") + ". ";
-    }
-
     const li = document.createElement("li");
     li.className = `report-toc-l${level}`;
     const a = document.createElement("a");
     a.href = `#${h.id}`;
-    a.textContent = prefix + (h.textContent ?? "");
+    a.textContent = (h.dataset.secnum ?? "") + (h.textContent ?? "");
     li.appendChild(a);
     list.appendChild(li);
   });

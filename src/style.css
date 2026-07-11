@@ -511,22 +511,14 @@ button:hover {
 .page-number-none::after { display: none; }
 .page-number-none { opacity: 0.55; }
 
-/* ── Section numbering (preview) — CSS counters on h2–h4 ──────────────── */
-.report-preview.section-numbered { counter-reset: sec2; }
-.report-preview.section-numbered h2 { counter-reset: sec3; }
-.report-preview.section-numbered h3 { counter-reset: sec4; }
-
-.report-preview.section-numbered h2::before {
-  counter-increment: sec2;
-  content: counter(sec2) ". ";
-}
-.report-preview.section-numbered h3::before {
-  counter-increment: sec3;
-  content: counter(sec2) "." counter(sec3) ". ";
-}
+/* ── Section numbering (preview) ────────────────────────────────────────
+ * Numbers are computed in JS (renderer's numberHeadings) into a
+ * data-secnum attribute — each text block renders into its own <section>,
+ * which breaks plain CSS counter-reset/increment scoping across blocks. */
+.report-preview.section-numbered h2::before,
+.report-preview.section-numbered h3::before,
 .report-preview.section-numbered h4::before {
-  counter-increment: sec4;
-  content: counter(sec2) "." counter(sec3) "." counter(sec4) ". ";
+  content: attr(data-secnum);
 }
 
 /* ── Table of contents (preview) ──────────────────────────────────────── */
