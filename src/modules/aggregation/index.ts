@@ -1,10 +1,11 @@
 /**
- * Aggregation module — small set of named aggregation operations applied
- * to row sets. Used by both the chart renderer (pivot/grouping) and the
- * table renderer (GROUP BY semantics). Self-contained and reusable.
+ * Aggregation module — named aggregation operations applied to row sets,
+ * plus the shared "wrangle" step (filter → groupby → aggregate crosstab)
+ * consumed by the table renderer, the chart renderer, and the alt-text
+ * module. Self-contained and reusable.
  */
 import type { DataSet } from "../types";
-import { t } from "../i18n";
+import { t, getLocale } from "../i18n";
 
 export type AggregationOp =
   | "identity"
@@ -39,8 +40,14 @@ export function isShareOp(op: AggregationOp): boolean {
  * apply to this aggregation. Counts, sums, and shares are "count-like" and
  * therefore reveal group sizes; means/medians/min/max do not.
  */
-export function shouldProtect(op: AggregationOp): boolean {
-  return op === "count" || op === "sum" || op === "share_total" || op === "share_group";
+/**
+ * Does this op's displayed number *is* the group size? Only then may a masked
+ * cell be shown as `<threshold`: for a mean or a sum, that label would be a
+ * factual lie (a suppressed mean of 4200 € is not "< 5"), so those render a
+ * neutral placeholder instead. See `wrangleTable` for the masking criterion.
+ */
+export function showsGroupCount(op: AggregationOp): boolean {
+  return op === "count";
 }
 
 export function isAggregationOp(s: unknown): s is AggregationOp {
@@ -118,197 +125,230 @@ function coerceBoolean(v: unknown): boolean {
  * Strings like "Ja"/"Yes"/"true"/"1" are treated as truthy.
  */
 export function applyFilter(data: DataSet, field?: string): DataSet {
-  if (!field || field === "Alle" || field === "-") return data;
+  if (!isFilterActive(field)) return data;
   // If the named field doesn't exist on any row, leave the data unchanged
-  // (keeps templates resilient to filter typos / data-driven configs).
-  if (data.length > 0 && !(field in data[0])) return data;
-  return data.filter((row) => coerceBoolean(row[field]));
+  // (keeps templates resilient to filter typos / data-driven configs) — the
+  // no-op is reported separately by `checkFilterColumns` in the validation
+  // module, so a filter typo doesn't quietly widen the Personenkreis.
+  if (data.length > 0 && filterColumnMissing(data, field)) return data;
+  return data.filter((row) => coerceBoolean(row[field!]));
+}
+
+/** True when `field` names a real filter — `Alle`, `-`, empty and undefined disable filtering. */
+export function isFilterActive(field?: string): field is string {
+  return !!field && field !== "Alle" && field !== "-";
 }
 
 /**
- * Replace numeric values below a privacy threshold with the threshold
- * itself (so the bar/cell is still visible at minimum size), and return
- * a parallel set of indices that callers can use to relabel them as
- * "<threshold" in tooltips, tables, etc.
- *
- * Zero is preserved (no data to protect). Negative values (e.g. pyramid
- * left-side which is negated) are protected by absolute magnitude.
+ * True when an active filter names a column no row carries. Scans every row,
+ * not just the first: sheets are sparse (empty cells are omitted), so the
+ * first row alone is not evidence that a column is absent.
  */
-export function applyDataProtection(
-  values: number[],
-  threshold: number
-): { values: number[]; protectedIdx: Set<number> } {
-  const protectedIdx = new Set<number>();
-  const out = values.map((v, i) => {
-    const abs = Math.abs(v);
-    if (abs > 0 && abs < threshold) {
-      protectedIdx.add(i);
-      return v < 0 ? -threshold : threshold;
-    }
-    return v;
+export function filterColumnMissing(data: DataSet, field?: string): boolean {
+  if (!isFilterActive(field)) return false;
+  return !data.some((row) => field in row);
+}
+
+// ── Wrangle ─────────────────────────────────────────────────────────
+// The shared "wrangled table" step: filter → group by rows (× cols) →
+// aggregate. Computed once per block and consumed by the table renderer,
+// the chart renderer, and the alt-text module, so all three present the
+// exact same numbers (and the same data-protection flags).
+
+/** Separator joining the parts of a composite row label / row header. */
+export const COMPOSITE_KEY_SEPARATOR = " · ";
+
+/** The data-shaping subset of a table spec (structurally satisfied by `TableSpec`). */
+export interface WrangleSpec {
+  /** Boolean column whose truthy rows are kept before aggregation. */
+  filter?: string;
+  /** Crosstab axes: `rows` labels the table rows, optional `cols` the columns.
+   *  `rows` may be a single column name or a list of them — a list buckets by
+   *  the tuple of values, joined with `COMPOSITE_KEY_SEPARATOR` for the label.
+   *  Omitting `rows` collapses every row into a single synthetic total row. */
+  groupby: { rows?: string | string[]; cols?: string };
+  /** Single aggregation op applied per cell. */
+  aggregation: AggregationOp;
+  /** Column the op aggregates (required by sum/mean/min/max/median/share_group). */
+  value?: string;
+}
+
+export interface WrangledCell {
+  /** Raw aggregated value — never clamped/masked here; consumers decide presentation. */
+  value: number;
+  /** Number of source rows in the cell's bucket. */
+  n: number;
+  /** True when data protection applies (count-like op, 0 < |value| < threshold). */
+  protected: boolean;
+}
+
+export interface WrangledTable {
+  /** The `groupby.rows` column name (crosstab corner header); `""` when `rows`
+   *  was omitted, or the parts joined with `COMPOSITE_KEY_SEPARATOR` for a list. */
+  rowHeader: string;
+  /** Distinct row labels, sorted naturally by default ("E8" before "E10"), or per a configured
+   *  `category_order` for single-column `groupby.rows` (composite labels are
+   *  the tuple parts joined with `COMPOSITE_KEY_SEPARATOR`, always natural order).
+   *  A single localized "Total" label when `rows` was omitted. */
+  rows: string[];
+  /** The `groupby.cols` column name, if a column axis was requested. */
+  colHeader?: string;
+  /** Distinct column labels — first-seen order by default, or per a configured
+   *  `category_order` for this column — `[valueLabel]` when `cols` is omitted. */
+  cols: string[];
+  /** Header for the synthetic single column (localized op name, or the value column). */
+  valueLabel: string;
+  /** cells[rowIdx][colIdx]. */
+  cells: WrangledCell[][];
+  aggregation: AggregationOp;
+  /** Formatting hint: values are percentages (share ops). */
+  isShare: boolean;
+  /** The data-protection threshold used, echoed for display masking ("<5"). */
+  threshold: number;
+}
+
+/**
+ * Natural (alphanumeric) label order: text compares by locale, embedded
+ * numbers by value — so "E8" < "E9" < "E10" rather than "E10" < "E8".
+ */
+function naturalCompare(a: string, b: string): number {
+  return a.localeCompare(b, getLocale(), { numeric: true });
+}
+
+/**
+ * Order `values` in place: entries found in `order` (matched NFC + trimmed)
+ * come first, in `order`'s sequence; anything not listed follows in natural
+ * order (see `naturalCompare`). Used to apply a `data_parameters.category_order`
+ * override for a specific column, falling back to the default natural
+ * (rows) / first-seen (cols) order for values the config doesn't mention.
+ */
+function applyCategoryOrder(values: string[], order: string[]): void {
+  const normalize = (s: string) => s.normalize("NFC").trim();
+  const rank = new Map(order.map((v, i) => [normalize(v), i]));
+  values.sort((a, b) => {
+    const ra = rank.get(normalize(a));
+    const rb = rank.get(normalize(b));
+    if (ra !== undefined && rb !== undefined) return ra - rb;
+    if (ra !== undefined) return -1;
+    if (rb !== undefined) return 1;
+    return naturalCompare(a, b);
   });
-  return { values: out, protectedIdx };
 }
 
 /**
- * Apply `identity` semantics: returns the first non-empty raw value of
- * `field` across `rows`. Preserves non-numeric values (strings, dates, ...),
- * unlike `aggregateField` which coerces to number.
+ * Build the wrangled crosstab for a spec: apply the row filter, bucket rows
+ * by `groupby.rows` (skipping empty keys) and `groupby.cols` when present
+ * (first-seen order), then aggregate each bucket with the spec's op. Row
+ * labels (the category axis) are sorted naturally by default (text alphabetically, numbers by value). Cells
+ * keep the raw value plus a `protected` flag; clamping (charts) and masking
+ * (tables, alt text) are the consumers' concern. Omitting `groupby.rows`
+ * puts every row in a single bucket labelled with the localized "Total"
+ * term, producing a one-row crosstab.
+ *
+ * `categoryOrder` (from `data_parameters.category_order`) overrides the
+ * default order for a named column's values — on the column axis always,
+ * and on the row axis when `groupby.rows` is a single column (a composite
+ * row tuple keeps the default natural order).
  */
-export function firstValue(rows: DataSet, field: string): unknown {
-  for (const r of rows) {
-    const v = r[field];
-    if (v !== undefined && v !== null && v !== "") return v;
-  }
-  return "";
-}
-
-// ── Pivots ──────────────────────────────────────────────────────────
-// Pure data-shape transformations used by both the chart renderer and the
-// alt-text module so both consume the same source of truth.
-
-/** Bucket rows by the string value of `field`, preserving first-seen order. */
-export function groupRowsBy(data: DataSet, field: string): Map<string, DataSet> {
-  const groups = new Map<string, DataSet>();
-  for (const row of data) {
-    const key = String(row[field] ?? "");
-    if (key === "") continue;
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key)!.push(row);
-  }
-  return groups;
-}
-
-/**
- * Pivot long-form rows to wide-form: labels = unique x values (insertion
- * order), one series per distinct color value, y aggregated per (x, group)
- * using `op`.
- */
-export function pivotByGroup(
+export function wrangleTable(
+  spec: WrangleSpec,
   data: DataSet,
-  xField: string,
-  yField: string,
-  colorField: string,
-  op: AggregationOp,
-  total: number
-): { labels: string[]; series: { name: string; data: number[] }[] } {
-  const labels: string[] = [];
-  const seen = new Set<string>();
-  const groups = new Map<string, Map<string, DataSet>>();
+  threshold = 0,
+  categoryOrder?: Record<string, string[]>
+): WrangledTable {
+  const op = spec.aggregation;
+  const filtered = applyFilter(data, spec.filter);
+  const total = filtered.length;
 
-  for (const row of data) {
-    const x = String(row[xField] ?? "");
-    if (x === "") continue;
-    const c = String(row[colorField] ?? "");
-    if (c === "") continue;
+  // `groupby.rows` may be a single column or a list; normalize to an array.
+  const rowFields = spec.groupby.rows
+    ? Array.isArray(spec.groupby.rows)
+      ? spec.groupby.rows
+      : [spec.groupby.rows]
+    : [];
+  const colField = spec.groupby.cols;
+  // Omitting `groupby.rows` collapses every row into one synthetic "total" bucket.
+  const totalLabel = t("agg.rowLabel.total");
 
-    if (!seen.has(x)) {
-      seen.add(x);
-      labels.push(x);
+  const rows: string[] = [];
+  const cols: string[] = [];
+  // buckets[rowLabel][colLabel] — colLabel is "" for the synthetic single column.
+  const buckets = new Map<string, Map<string, DataSet>>();
+
+  for (const row of filtered) {
+    let r: string;
+    if (rowFields.length > 0) {
+      const parts = rowFields.map((f) => String(row[f] ?? ""));
+      // Skip incomplete tuples (any missing component), matching the
+      // single-column "empty key is skipped" rule.
+      if (parts.some((p) => p === "")) continue;
+      r = parts.join(COMPOSITE_KEY_SEPARATOR);
+    } else {
+      r = totalLabel;
     }
-    if (!groups.has(c)) groups.set(c, new Map());
-    const m = groups.get(c)!;
-    if (!m.has(x)) m.set(x, []);
-    m.get(x)!.push(row);
+    let c = "";
+    if (colField) {
+      c = String(row[colField] ?? "");
+      if (c === "") continue;
+      if (!cols.includes(c)) cols.push(c);
+    }
+    if (!buckets.has(r)) {
+      rows.push(r);
+      buckets.set(r, new Map());
+    }
+    const byCol = buckets.get(r)!;
+    if (!byCol.has(c)) byCol.set(c, []);
+    byCol.get(c)!.push(row);
   }
 
-  const series = [...groups.entries()].map(([name, m]) => ({
-    name,
-    data: labels.map((x) => aggregateField(m.get(x) ?? [], yField, op, total)),
-  }));
-  return { labels, series };
-}
-
-/** Group raw rows into one {x, y} dataset per distinct color value (scatter). */
-export function groupScatter(
-  data: DataSet,
-  xField: string,
-  yField: string,
-  colorField: string
-): { name: string; points: { x: number; y: number }[] }[] {
-  const groups = new Map<string, { x: number; y: number }[]>();
-  for (const row of data) {
-    const c = String(row[colorField] ?? "");
-    if (c === "") continue;
-    const x = Number(row[xField]);
-    const y = Number(row[yField]);
-    if (Number.isNaN(x) || Number.isNaN(y)) continue;
-    if (!groups.has(c)) groups.set(c, []);
-    groups.get(c)!.push({ x, y });
-  }
-  return [...groups.entries()].map(([name, points]) => ({ name, points }));
-}
-
-/** Aggregate by color group: one number per distinct value, using `op`. */
-export function aggregateByGroup(
-  data: DataSet,
-  yField: string | undefined,
-  colorField: string,
-  op: AggregationOp,
-  total: number
-): { labels: string[]; values: number[] } {
-  const groups = new Map<string, DataSet>();
-  for (const row of data) {
-    const c = String(row[colorField] ?? "");
-    if (c === "") continue;
-    if (!groups.has(c)) groups.set(c, []);
-    groups.get(c)!.push(row);
-  }
-  const labels = [...groups.keys()];
-  const values = labels.map((k) => aggregateField(groups.get(k)!, yField, op, total));
-  return { labels, values };
-}
-
-/**
- * Pyramid pivot: bucket raw rows per (category, side) so any aggregation op
- * can be applied. Validates exactly two distinct split values.
- */
-export function aggregatePyramid(
-  data: DataSet,
-  yField: string,
-  splitField: string,
-  valueField: string | undefined,
-  op: AggregationOp,
-  total: number
-): { categories: string[]; leftKey: string; rightKey: string; left: number[]; right: number[] } {
-  const buckets = new Map<string, [DataSet, DataSet]>();
-  let leftKey: string | null = null;
-  let rightKey: string | null = null;
-  const extras = new Set<string>();
-
-  for (const row of data) {
-    const cat = String(row[yField] ?? "");
-    if (cat === "") continue;
-    const split = String(row[splitField] ?? "");
-    if (split === "") continue;
-
-    if (leftKey === null) leftKey = split;
-    else if (rightKey === null && split !== leftKey) rightKey = split;
-    else if (split !== leftKey && split !== rightKey) extras.add(split);
-
-    if (!buckets.has(cat)) buckets.set(cat, [[], []]);
-    const pair = buckets.get(cat)!;
-    if (split === leftKey) pair[0].push(row);
-    else if (split === rightKey) pair[1].push(row);
+  // Categories (the row/category axis) sort naturally by default — text
+  // alphabetically, embedded numbers by value ("E8" < "E10") — so
+  // chart category axes and table rows have a stable, predictable order
+  // independent of first-appearance in the source data — unless a fixed
+  // order was configured for this column (composite/tuple rows always keep
+  // the default, since a per-tuple order isn't well-defined).
+  const rowOrder = rowFields.length === 1 ? categoryOrder?.[rowFields[0]] : undefined;
+  if (rowOrder) {
+    applyCategoryOrder(rows, rowOrder);
+  } else {
+    rows.sort(naturalCompare);
   }
 
-  if (leftKey === null || rightKey === null) {
-    throw new Error(
-      t("agg.pyramidNeeds2", { field: splitField, count: leftKey === null ? 0 : 1 })
-    );
-  }
-  if (extras.size > 0) {
-    throw new Error(
-      t("agg.pyramidExtra", { field: splitField, extras: [...extras].join(", ") })
-    );
-  }
+  const colOrder = colField ? categoryOrder?.[colField] : undefined;
+  if (colOrder) applyCategoryOrder(cols, colOrder);
 
-  const categories = [...buckets.keys()];
+  const valueLabel = spec.value ?? t(`agg.valueLabel.${op}`);
+  const colLabels = colField ? cols : [valueLabel];
+  const colKeys = colField ? cols : [""];
+
+  const cells = rows.map((r) =>
+    colKeys.map((c): WrangledCell => {
+      const bucket = buckets.get(r)!.get(c) ?? [];
+      const value = aggregateField(bucket, spec.value, op, total);
+      return {
+        value,
+        n: bucket.length,
+        // Masked on the **group size**, not on the value. What identifies a
+        // person is how few rows stand behind a number; the value only proxies
+        // for that in `count` (where n === value, so this is unchanged). For a
+        // mean the value is unrelated to group size — thresholding it used to
+        // mask a Beurteilung average of 3.2 as "<5" while leaving a 4200 €
+        // average over two people fully exposed.
+        protected: threshold > 0 && bucket.length > 0 && bucket.length < threshold,
+      };
+    })
+  );
+
   return {
-    categories,
-    leftKey,
-    rightKey,
-    left: categories.map((c) => aggregateField(buckets.get(c)![0], valueField, op, total)),
-    right: categories.map((c) => aggregateField(buckets.get(c)![1], valueField, op, total)),
+    rowHeader: rowFields.join(COMPOSITE_KEY_SEPARATOR),
+    rows,
+    colHeader: colField,
+    cols: colLabels,
+    valueLabel,
+    cells,
+    aggregation: op,
+    isShare: isShareOp(op),
+    threshold,
   };
 }
+

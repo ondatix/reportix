@@ -4,7 +4,7 @@
  * key aliases (left_on/right_on), in-place overwrite, and warnings.
  */
 import { describe, it, expect } from "vitest";
-import { applyPreprocessing } from "../../src/modules/preprocessing";
+import { applyPreprocessing, preprocessingForStore } from "../../src/modules/preprocessing";
 import type { DataStore } from "../../src/modules/types";
 
 function store(): DataStore {
@@ -119,5 +119,32 @@ describe("applyPreprocessing — joins", () => {
     const before = JSON.stringify(s);
     applyPreprocessing(s, { joins: [{ name: "Bef", left: "Befoerderung", right: "Stichtag", on: "PersNr" }] });
     expect(JSON.stringify(s)).toBe(before);
+  });
+});
+
+describe("preprocessingForStore", () => {
+  it("drops mutations and joins whose datasets were not loaded, keeping chained joins", () => {
+    const filtered = preprocessingForStore(
+      { Stichtag: [], Befoerderung: [] },
+      {
+        mutations: [
+          { dataset: "Stichtag", column: "A", from: "Org", then: "x" },
+          { dataset: "NichtGeladen", column: "B", from: "Org", then: "x" },
+        ],
+        joins: [
+          { name: "Bef", left: "Befoerderung", right: "Stichtag", on: "PersNr", type: "left" },
+          // right is the previous join's output → stays
+          { name: "Zweit", left: "Stichtag", right: "Bef", on: "PersNr", type: "left" },
+          // left sheet missing → dropped
+          { name: "Weg", left: "NichtGeladen", right: "Stichtag", on: "PersNr", type: "left" },
+        ],
+      }
+    )!;
+    expect(filtered.mutations!.map((m) => m.dataset)).toEqual(["Stichtag"]);
+    expect(filtered.joins!.map((j) => j.name)).toEqual(["Bef", "Zweit"]);
+  });
+
+  it("passes undefined through", () => {
+    expect(preprocessingForStore({}, undefined)).toBeUndefined();
   });
 });

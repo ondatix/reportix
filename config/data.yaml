@@ -1,198 +1,223 @@
+# SHOWCASE EXAMPLE — annual report of a (fictional) German secondary school
+# ("Gymnasium Beispielstadt"). One snapshot sheet `Schueler` holds the pupil
+# body at the reporting date; the `Zeitraum_*` sheets hold events during the
+# school year and are enriched from `Schueler` via joins (see preprocessing
+# below). Replace this file (and template.yaml / templates/master.md) to build
+# a report for your own domain.
+
+# ── Facts about the dataset itself: which period it covers and from which
+#    group size values are masked. Both are overridable in the form via
+#    config/parameters.yaml. ──
+data_parameters:
+  smallest_group: 5           # bound by parameters.smallest_group
+  # A school year does not follow the calendar year, so the default is a fixed
+  # date pair. For a calendar-year report use the relative tokens instead —
+  # last_year_start, last_year_end, this_year_start, this_year_end, today —
+  # which never age. The user overrides both in step 1, and the
+  # Beurlaubungsdauer clamp below follows the overridden value.
+  period_start: "2025-08-01"   # bound by parameters.period_start
+  period_end: "2026-07-31"     # bound by parameters.period_end
+  # Fixed display order per column (instead of natural sorting). Values not
+  # listed are appended in natural order.
+  category_order:
+    Geschlecht: [männlich, weiblich]
+    Herkunftsschulart: [Grundschule, Mittelschule, Realschule, Gymnasium]
+
 data:
-  # Each sheet and each column may carry three optional metadata fields:
-  #   definition   — human-readable definition of the sheet/column
-  #   notes        — optional further notes
-  #   include      — list of template ids (see template.yaml `id:`) this
-  #                  sheet/column belongs to. OMITTED ⇒ included in every
-  #                  template. To restrict, list the ids, e.g.
-  #                    include: [full]            # only the full template
-  #                    include: [full, mandatory] # both
-  #                  The data-loading step shows only the sheets/columns whose
-  #                  `include` matches the selected template.
-  # A column may be written as a plain string (no metadata) or as an object
-  # with `column:` (or `name:`) plus any of the fields above.
-  #
-  # SHOWCASE EXAMPLE — annual report of a (fictional) German public secondary
-  # school ("Gymnasium Beispielstadt"). One snapshot sheet `Schueler` holds the
-  # pupil body at the reporting date; the `Zeitraum_*` sheets hold events during
-  # the school year and are enriched from `Schueler` via joins (see preprocessing
-  # below). Definitions mirror the "Definitionen" callouts in the template.
+  # Each sheet and each column may carry optional metadata:
+  #   definition   — human-readable definition (German); also the source of
+  #                  the templates' "Definitionen" callouts
+  #   info         — bilingual tooltip text ({ de, en }); wins over definition
+  #   notes        — free-form notes
+  #   warning      — text appended to the "not mapped" warning
+  #   include      — template ids (see template.yaml `id:`) this sheet/column
+  #                  belongs to. OMITTED ⇒ every template.
+  # A column may be a plain string or an object with `column:` plus the fields above.
   Schuldatensatz:
     sheets:
       - sheet: Schueler
-        definition: "Stichtagsbezogener Schülerstand — eine Zeile je Schülerin/Schüler zum Stichtag des Schuljahres."
+        definition: "Stichtagsbezogener Schülerstand — eine Zeile je Schülerin bzw. Schüler zum Stichtag der amtlichen Schulstatistik."
         columns:
           - column: SchuelerID
             definition: "Eindeutige Schülerkennung; Schlüssel für die Joins mit den Zeitraum-Blättern."
           - column: Geschlecht
-            definition: "Im Datensatz wird zwischen den Ausprägungen unterschieden, die das Schulverwaltungssystem führt (männlich, weiblich, divers)."
+            definition: "Geschlecht laut Schulverwaltungsprogramm."
           - column: Jahrgangsstufe
-            definition: "Jahrgangsstufe der Schülerin/des Schülers (5–12 am bayerischen Gymnasium)."
+            definition: "Jahrgangsstufe der Schülerin bzw. des Schülers (5–13 am neunjährigen Gymnasium)."
           - column: Klasse
             definition: "Klassenbezeichnung innerhalb der Jahrgangsstufe (z. B. 7a, 7b)."
           - column: Ausbildungsrichtung
-            definition: "Profil des Gymnasiums, z. B. Naturwissenschaftlich-technologisch, Sprachlich, Musisch, Wirtschaftswissenschaftlich."
+            definition: "Profil des Gymnasiums, z. B. Naturwissenschaftlich-technologisch, Sprachlich, Musisch, Wirtschafts- und sozialwissenschaftlich."
           - column: Erste Fremdsprache
             definition: "In Jahrgangsstufe 5 begonnene erste Fremdsprache (Englisch, Französisch, Latein)."
-          - column: Religionsunterricht
-            definition: "Besuchter Religions- bzw. Ethikunterricht (katholisch, evangelisch, Ethik, weitere)."
           - column: Migrationshintergrund
             definition: "Liegt nach Definition der amtlichen Schulstatistik ein Migrationshintergrund vor (Ja/Nein)."
           - column: Ganztagsbetreuung
             definition: "Teilnahme an der offenen oder gebundenen Ganztagsbetreuung (Ja/Nein)."
-          - column: Fahrschüler
-            definition: "Schülerin/Schüler mit anerkanntem Anspruch auf Schülerbeförderung (Ja/Nein)."
           - column: Inklusion
             definition: "Festgestellter sonderpädagogischer Förderbedarf bzw. inklusive Beschulung (Ja/Nein)."
-          - column: Wiederholer
-            definition: "Wiederholt die aktuelle Jahrgangsstufe (Ja/Nein)."
+            include: [full]
           - column: Notendurchschnitt
             definition: "Zeugnisnotendurchschnitt im Berichtszeitraum (1,0 = sehr gut … 6,0 = ungenügend)."
       - sheet: Zeitraum_Anmeldung
-        definition: "Anmeldungen zum kommenden Schuljahr. Eigener Schlüssel (AnmeldeID), daher kein Schueler-Join — die benötigten Merkmale stehen direkt im Blatt."
-        notes: "Aufnahmeempfehlung: Die Grundschule bzw. das Übertrittszeugnis empfiehlt die Eignung für das Gymnasium."
+        definition: "Anmeldungen zum kommenden Schuljahr, eine Zeile je Anmeldung. Angemeldete Kinder stehen noch nicht im Blatt Schueler, daher kein Join — alle benötigten Angaben stehen direkt in diesem Blatt."
         columns:
           - column: AnmeldeID
             definition: "Eindeutige Anmeldekennung."
           - column: Geschlecht
-            definition: "Im Datensatz wird zwischen den Ausprägungen unterschieden, die das Schulverwaltungssystem führt."
-          - column: Gewünschte Ausbildungsrichtung
-            definition: "Bei der Anmeldung gewählte Ausbildungsrichtung."
+            definition: "Geschlecht laut Anmeldung."
           - column: Herkunftsschulart
             definition: "Bisher besuchte Schulart (Grundschule, Mittelschule, Realschule, anderes Gymnasium)."
           - column: Sprengelzugehörigkeit
-            definition: "Wohnt die Schülerin/der Schüler im Schulsprengel (Sprengel) oder kommt sie/er als Gastschüler (Gastschüler)."
-          - column: Aufnahmeempfehlung
-            definition: "Liegt eine Eignungsempfehlung der abgebenden Schule bzw. ein geeignetes Übertrittszeugnis vor (Ja/Nein)."
+            definition: "Wohnt das Kind im Schulsprengel (Sprengel) oder kommt es als Gastschülerin bzw. Gastschüler von außerhalb (Gastschüler)."
+            include: [full]
       - sheet: Zeitraum_Eintritt
-        definition: "Eintritte (Neuaufnahmen) im Berichtszeitraum. Stammdaten werden per Join mit Schueler (SchuelerID) ergänzt."
-        notes: "Doppelt vorgehaltene Stammdatenspalten wurden entfernt; sie stammen aus dem Schueler-Join."
+        definition: "Eintritte (Neuaufnahmen) im Berichtszeitraum, eine Zeile je Eintritt. Stammdaten werden per Join mit Schueler (SchuelerID) ergänzt."
         columns:
           - column: SchuelerID
             definition: "Schülerkennung; Join-Schlüssel zu Schueler."
-      - sheet: Zeitraum_Beurlaubung
-        definition: "Schulische Beurlaubungen vom Unterricht im Berichtszeitraum. Stammdaten werden per Join mit Schueler (SchuelerID) ergänzt."
-        notes: >-
-          Spalten, die bereits über den Schueler-Join erreichbar sind, wurden hier bewusst entfernt (keine Doppelerfassung).
-          Beurlaubung: Befreiung vom Unterricht aus einem anerkannten Grund (z. B. familiäre Anlässe, gesundheitliche Kur).
-        columns:
-          - column: SchuelerID
-            definition: "Schülerkennung; Join-Schlüssel zu Schueler."
-          - column: Beurlaubungsgrund
-            definition: "Anerkannter Grund der Beurlaubung."
-          - column: Dauer der Beurlaubung (Tage)
-            definition: "Kalendertage zwischen Beginn und Ende der Beurlaubung."
       - sheet: Zeitraum_Foerdermassnahme
         definition: "Fördermaßnahmen im Berichtszeitraum (z. B. Förderkurse, LRS-Förderung, Begabtenförderung). Stammdaten werden per Join mit Schueler (SchuelerID) ergänzt."
-        notes: >-
-          Doppelt vorgehaltene Stammdatenspalten wurden entfernt; sie stammen aus dem Schueler-Join.
-          Bewilligt vs. abgeschlossen: Eine bewilligte Maßnahme kann noch laufen; abgeschlossen heißt erfolgreich beendet.
+        notes: "Bewilligt vs. abgeschlossen: Eine bewilligte Maßnahme kann noch laufen; abgeschlossen heißt erfolgreich beendet."
         columns:
           - column: SchuelerID
             definition: "Schülerkennung; Join-Schlüssel zu Schueler."
           - column: Förderart
             definition: "Art der Fördermaßnahme (z. B. LRS-Förderung, Sprachförderung, Begabtenförderung, Förderkurs)."
-          - column: "Fördermaßnahme bewilligt (ja/nein)"
+          - column: "Fördermaßnahme bewilligt"
             definition: "Wurde die Fördermaßnahme bewilligt (Ja/Nein)."
-          - column: "Fördermaßnahme abgeschlossen (ja/nein)"
+          - column: "Fördermaßnahme abgeschlossen"
             definition: "Wurde die Fördermaßnahme erfolgreich abgeschlossen (Ja/Nein)."
+            include: [full]
+      - sheet: Zeitraum_Beurlaubung
+        definition: "Beurlaubungen vom Unterricht im Berichtszeitraum, eine Zeile je Beurlaubung. Stammdaten werden per Join mit Schueler (SchuelerID) ergänzt."
+        notes: "Beurlaubung: Befreiung vom Unterricht aus einem anerkannten Grund (z. B. familiärer Anlass, Kur, Austausch)."
+        include: [full]
+        columns:
+          - column: SchuelerID
+            definition: "Schülerkennung; Join-Schlüssel zu Schueler."
+          - column: Beurlaubungsgrund
+            definition: "Anerkannter Grund der Beurlaubung, so wie er im Schulverwaltungsprogramm geführt wird. Welche Gründe als familiärer Anlass zählen, legen Sie im Schritt „3. Datenvalidierung“ fest."
+          - column: Beurlaubungsbeginn
+            definition: "Erster Tag der Beurlaubung. Das tatsächliche Datum angeben — liegt es vor dem Berichtszeitraum, zählt reportix automatisch ab dessen erstem Tag."
+            warning: "Ohne diese Spalte kann die Beurlaubungsdauer nicht berechnet werden — die Abbildung und die Tabelle zur Dauer bleiben leer."
+          - column: Beurlaubungsende
+            definition: "Letzter Tag der Beurlaubung. Das tatsächliche Datum angeben — liegt es nach dem Berichtszeitraum, zählt reportix automatisch bis zu dessen letztem Tag."
+            warning: "Ohne diese Spalte kann die Beurlaubungsdauer nicht berechnet werden — die Abbildung und die Tabelle zur Dauer bleiben leer."
       - sheet: Zeitraum_Wettbewerb
         definition: "Teilnahmen an Schülerwettbewerben im Berichtszeitraum (z. B. Jugend forscht, Mathematik-Olympiade, Vorlesewettbewerb). Stammdaten werden per Join mit Schueler (SchuelerID) ergänzt."
-        notes: "Doppelt vorgehaltene Stammdatenspalten wurden entfernt; sie stammen aus dem Schueler-Join."
+        include: [full]
         columns:
           - column: SchuelerID
             definition: "Schülerkennung; Join-Schlüssel zu Schueler."
           - column: Wettbewerbsart
             definition: "Fachliche Ausrichtung des Wettbewerbs (z. B. MINT, Sprachen, Musik, Sport)."
-          - column: "Erfolgreiche Teilnahme (ja/nein)"
+          - column: "Erfolgreiche Teilnahme"
             definition: "Wurde die Teilnahme mit einer Platzierung bzw. Urkunde abgeschlossen (Ja/Nein)."
-      - sheet: Zeitraum_Auszeichnung
-        definition: "Auszeichnungen und Preise im Berichtszeitraum. Stammdaten werden per Join mit Schueler (SchuelerID) ergänzt."
-        notes: "Doppelt vorgehaltene Stammdatenspalten wurden entfernt; sie stammen aus dem Schueler-Join."
-        columns:
-          - column: SchuelerID
-            definition: "Schülerkennung; Join-Schlüssel zu Schueler."
-          - column: Auszeichnungsart
-            definition: "Art der Auszeichnung (z. B. Wettbewerbspreis, Sozialpreis, Sportabzeichen)."
-          - column: Punkte
-            definition: "Erreichte Wertungspunkte bzw. Höhe der Auszeichnung im Berichtszeitraum."
       - sheet: Zeitraum_Vorrueckung
-        definition: "Vorrückungs- und Wiederholungsentscheidungen am Schuljahresende. Stammdaten (inkl. abgeleiteter Oberstufe/Unterstufe-Klassifikation) werden per Join mit Schueler (SchuelerID) ergänzt."
-        notes: "Doppelt vorgehaltene Stammdatenspalten wurden entfernt; sie stammen aus dem Schueler-Join."
+        definition: "Vorrückungs- und Wiederholungsentscheidungen am Schuljahresende, eine Zeile je Entscheidung. Stammdaten werden per Join mit Schueler (SchuelerID) ergänzt."
         columns:
           - column: SchuelerID
             definition: "Schülerkennung; Join-Schlüssel zu Schueler."
           - column: Antrag
-            definition: "Erfolgte die Entscheidung auf Antrag der Eltern (z. B. freiwilliges Wiederholen) oder regulär durch die Klassenkonferenz."
+            definition: "Erfolgte die Entscheidung auf Antrag der Eltern (z. B. freiwilliges Wiederholen) oder regulär durch die Klassenkonferenz (Ja/Nein)."
+            include: [full]
           - column: Ergebnis
-            definition: "Ergebnis der Jahrgangsstufenentscheidung; Grundlage der abgeleiteten Flags Vorgerückt (ja/nein) und Wiederholung (ja/nein)."
+            definition: "Ergebnis der Entscheidung (Vorrückung, Vorrückung auf Probe, Wiederholung); Grundlage der abgeleiteten Spalten Vorgerückt und Wiederholung."
 
 # Derived columns and datasets, built from the sheets above before rendering.
-# Kept in this file because mutations/joins operate directly on the `data`
-# sheets and share their context.
-#   `mutations` (run first) add a column via a simple if-else rule, then
-#   `joins` enrich one sheet with another's columns by a shared key.
-# A mutation may carry an optional `definition` (metadata) describing the
-# derived column, mirroring the column metadata above.
+#   `mutations` (run first) add a column via an if/elif/…/else rule or a
+#   transform function (`fn:`), then `joins` enrich one sheet with another's
+#   columns by a shared key.
 preprocessing:
   mutations:
-    # Ober-/Unterstufe aus der Jahrgangsstufe ableiten (numerischer Vergleich):
-    # Jahrgangsstufe ≥ 11 ⇒ Oberstufe; Jahrgangsstufe ≤ 6 ⇒ Unterstufe.
-    # Auf Schueler abgeleitet — der Join unten trägt sie nach Zeitraum_Vorrueckung.
+    # Unter-/Mittel-/Oberstufe aus der Jahrgangsstufe ableiten (numerischer
+    # Vergleich, erste passende Regel gewinnt). Auf Schueler abgeleitet — die
+    # Joins unten tragen die Spalte in jedes Zeitraum-Blatt.
+    - dataset: Schueler
+      column: Stufe
+      definition: "Unterstufe (Jahrgangsstufe 5–7), Mittelstufe (8–10) oder Oberstufe (ab 11); abgeleitet aus der Jahrgangsstufe."
+      from: Jahrgangsstufe
+      cases:
+        - when: { empty: true }
+          then: ""
+        - when: { gte: 11 }
+          then: "Oberstufe"
+        - when: { gte: 8 }
+          then: "Mittelstufe"
+      else: "Unterstufe"
     - dataset: Schueler
       column: Oberstufe
-      definition: "Zugehörigkeit zur gymnasialen Oberstufe (separate Auswertung wegen abweichender Leistungsbewertung); Ja ab Jahrgangsstufe 11, abgeleitet aus der Jahrgangsstufe."
+      definition: "Zugehörigkeit zur gymnasialen Oberstufe (ab Jahrgangsstufe 11, eigenes Punktesystem); abgeleitet aus der Jahrgangsstufe."
       from: Jahrgangsstufe
-      when:
-        gte: 11
+      when: { gte: 11 }
       then: "Ja"
       else: "Nein"
+    # Welche Ausbildungsrichtungen als MINT-Zweig zählen, wählt der Nutzer im
+    # Schritt „Datenvalidierung" (Parameter `mint_profiles`).
     - dataset: Schueler
-      column: Unterstufe
-      definition: "Zugehörigkeit zur Unterstufe; Ja bis einschließlich Jahrgangsstufe 6, abgeleitet aus der Jahrgangsstufe."
-      from: Jahrgangsstufe
-      when:
-        lte: 6
-      then: "Ja"
+      column: MINT-Zweig
+      definition: "Gibt an, ob die Ausbildungsrichtung der Schülerin bzw. des Schülers als MINT-Zweig (Mathematik, Informatik, Naturwissenschaften, Technik) gilt. Welche Ausbildungsrichtungen dazu zählen, legen Sie im Schritt „3. Datenvalidierung“ fest."
+      from: Ausbildungsrichtung
+      cases:
+        - when: { empty: true }
+          then: ""
+        - when: { in: { from_config: dataParameters.selections.mint_profiles } }
+          then: "Ja"
       else: "Nein"
-    # Vorrückungsereignisse klassifizieren (eigene Spalten von Zeitraum_Vorrueckung):
+    # Entscheidungen am Schuljahresende klassifizieren:
     - dataset: Zeitraum_Vorrueckung
-      column: "Vorgerückt (ja/nein)"
-      definition: "Vorrückung: regulärer Aufstieg in die nächste Jahrgangsstufe; abgeleitet aus dem Ergebnis."
+      column: Vorgerückt
+      definition: "Regulärer Aufstieg in die nächste Jahrgangsstufe, auch auf Probe (Ja/Nein); abgeleitet aus dem Ergebnis."
       from: Ergebnis
-      when:
-        equals: "Vorrückung"
+      when: { starts_with: "Vorrückung" }
       then: "Ja"
       else: "Nein"
     - dataset: Zeitraum_Vorrueckung
-      column: "Wiederholung (ja/nein)"
-      definition: "Wiederholung: erneutes Durchlaufen der Jahrgangsstufe (freiwillig oder angeordnet); abgeleitet aus dem Ergebnis."
+      column: Wiederholung
+      definition: "Erneutes Durchlaufen der Jahrgangsstufe, freiwillig oder angeordnet (Ja/Nein); abgeleitet aus dem Ergebnis."
       from: Ergebnis
-      when:
-        equals: "Wiederholung"
-      then: "Ja"
+      cases:
+        - when: { equals: "Wiederholung" }
+          then: "Ja"
+        - when: { starts_with: "Vorrückung" }
+          then: "Nein"
+      # Weder Vorrückung noch Wiederholung: Wert bleibt leer, und Schritt 3
+      # zeigt eine Warnung mit der Zeilenzahl.
+      else: ""
+      else_warning: "Unbekanntes Ergebnis — erwartet werden Vorrückung, Vorrückung auf Probe oder Wiederholung."
+    # Welche Beurlaubungsgründe als familiärer Anlass zählen, wählt der Nutzer
+    # im Schritt „Datenvalidierung" (Parameter `family_leave_reasons`).
+    - dataset: Zeitraum_Beurlaubung
+      column: Familiärer Anlass
+      definition: "Gibt an, ob die Beurlaubung aus einem familiären Anlass erfolgte (Ja/Nein)."
+      from: Beurlaubungsgrund
+      cases:
+        - when: { in: { from_config: dataParameters.selections.family_leave_reasons } }
+          then: "Ja"
       else: "Nein"
+    # Berechnete Spalte über eine Transformationsfunktion: `fn` benennt einen
+    # Export aus config/functions/*.ts, `from` die Spalten, die ihr — in dieser
+    # Reihenfolge — als Arrays übergeben werden. `options` geht unverändert
+    # durch; `from_config` liest den vom Nutzer in Schritt 1 gewählten
+    # Berichtszeitraum.
+    - dataset: Zeitraum_Beurlaubung
+      column: Beurlaubungsdauer
+      definition: "Anzahl der Beurlaubungstage im Berichtszeitraum, berechnet aus Beurlaubungsbeginn und -ende (beide Tage mitgezählt)."
+      fn: date_difference
+      from: [Beurlaubungsende, Beurlaubungsbeginn]
+      options:
+        inclusive: true
+        min: 0
+        clamp_start: { from_config: dataParameters.periodStart }
+        clamp_end: { from_config: dataParameters.periodEnd }
 
   # ── Joins: look up matching rows in `right` by key (first match wins — left
   #    rows are never duplicated) and copy its columns onto `left`. Setting
-  #    `name` = `left` enriches the source in place, so the template's existing
-  #    `data:` blocks pick up the added columns automatically. ──
+  #    `name` = `left` enriches the source in place, so the template's `data:`
+  #    blocks pick up the added columns automatically. `select` omitted → every
+  #    Schueler column (including the derived ones above) not yet on the left. ──
   joins:
-    # Vorrückungsereignisse mit den Stammdaten der Schülerin/des Schülers aus
-    # `Schueler` anreichern (Schlüssel: SchuelerID). Trägt u. a. die oben
-    # abgeleitete Oberstufe/Unterstufe-Klassifikation in Zeitraum_Vorrueckung,
-    # die die Vorrückungs-Diagramme als `filter:` nutzen. `select` weggelassen →
-    # alle Schueler-Spalten, die in Zeitraum_Vorrueckung noch nicht vorhanden sind.
-    - name: Zeitraum_Vorrueckung   # in-place enrichment of the source sheet
-      left: Zeitraum_Vorrueckung
-      right: Schueler
-      on: SchuelerID
-      type: left
-    - name: Zeitraum_Beurlaubung
-      left: Zeitraum_Beurlaubung
-      right: Schueler
-      on: SchuelerID
-      type: left
     - name: Zeitraum_Eintritt
       left: Zeitraum_Eintritt
       right: Schueler
@@ -203,13 +228,37 @@ preprocessing:
       right: Schueler
       on: SchuelerID
       type: left
+    - name: Zeitraum_Beurlaubung
+      left: Zeitraum_Beurlaubung
+      right: Schueler
+      on: SchuelerID
+      type: left
     - name: Zeitraum_Wettbewerb
       left: Zeitraum_Wettbewerb
       right: Schueler
       on: SchuelerID
       type: left
-    - name: Zeitraum_Auszeichnung
-      left: Zeitraum_Auszeichnung
+    - name: Zeitraum_Vorrueckung
+      left: Zeitraum_Vorrueckung
       right: Schueler
       on: SchuelerID
       type: left
+
+# Row-level checks on the loaded (and preprocessed) data. Failing rows surface
+# as one non-blocking warning per rule in step 3.
+validation:
+  rules:
+    - dataset: Schueler
+      column: Notendurchschnitt
+      definition: "Der Notendurchschnitt muss zwischen 1,0 und 6,0 liegen oder leer sein."
+      check:
+        or:
+          - and:
+              - gte: 1
+              - lte: 6
+          - empty: true
+    - dataset: Zeitraum_Beurlaubung
+      column: Beurlaubungsdauer
+      definition: "Die berechnete Beurlaubungsdauer muss größer als 0 Tage sein. 0 bedeutet, dass das Ende vor dem Beginn liegt oder die Beurlaubung außerhalb des Berichtszeitraums; leer bedeutet, dass eines der beiden Daten nicht lesbar war."
+      check:
+        gt: 0

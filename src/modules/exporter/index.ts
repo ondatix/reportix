@@ -224,7 +224,8 @@ function buildHeadingNumbering(): INumberingOptions {
 
 /**
  * Map an HTML heading level to a numbering level. Sections start at <h2>
- * (the document's <h1> is the title), so h2→0 ("1."), h3→1 ("1.1."), h4→2.
+ * (the document's <h1> is the title), so h2→0 ("1."), h3→1 ("1.1."), h4→2,
+ * h5→3.
  * Returns null for levels that aren't numbered.
  */
 function numberingLevelFor(
@@ -274,12 +275,35 @@ function titleParagraph(el: HTMLElement, s: ResolvedSettings): Paragraph {
   });
 }
 
+/**
+ * The proofing language for the document: the `lang` the preview declares on
+ * (or above) the container, so the DOCX matches what a screen reader is told
+ * on screen. Word expects a full culture tag, so a bare primary subtag ("de")
+ * borrows the region from the export locale when the two agree ("de-DE").
+ */
+function documentLanguage(container: HTMLElement, s: ResolvedSettings): string {
+  const lang = container.closest("[lang]")?.getAttribute("lang")?.trim();
+  if (!lang) return s.locale;
+  if (lang.includes("-")) return lang;
+  return s.locale.split("-")[0].toLowerCase() === lang.toLowerCase() ? s.locale : lang;
+}
+
 // ── Public API ───────────────────────────────────────────────────────
 
+/** Serialize the rendered report and download it as a .docx file. */
 export async function exportToDocx(
   container: HTMLElement,
   config?: ExportConfig
 ): Promise<void> {
+  const blob = await Packer.toBlob(buildDocx(container, config));
+  saveAs(blob, resolveSettings(config).filename);
+}
+
+/**
+ * Build the docx `Document` for a rendered report without packing or saving
+ * it — the half of `exportToDocx` that tests can inspect.
+ */
+export function buildDocx(container: HTMLElement, config?: ExportConfig): Document {
   const s = resolveSettings(config);
 
   // Front matter: the first <h1> is the document title — rendered as a centred
@@ -298,7 +322,7 @@ export async function exportToDocx(
     sectionChildren.splice(s.titleEl ? 1 : 0, 0, ...tocBlock(s));
   }
 
-  const doc = new Document({
+  return new Document({
     title: s.title,
     subject: s.subject,
     creator: s.creator,
@@ -314,6 +338,9 @@ export async function exportToDocx(
             font: s.fontFamily,
             size: s.fontSize,
             color: s.fontColor,
+            // Without it Word proofs — and screen readers voice — the text in
+            // whatever language the reader's Word happens to default to.
+            language: { value: documentLanguage(container, s) },
           },
           paragraph: {
             alignment: s.alignment,
@@ -338,6 +365,12 @@ export async function exportToDocx(
           paragraph: { spacing: { before: 160, after: 60 } },
         },
         heading4: {
+          run: { font: s.headingFamily, size: s.h4Size, color: s.headingColor, bold: true },
+          paragraph: { spacing: { before: 120, after: 40 } },
+        },
+        // The appendix tables sit at h5; without an explicit style Word falls
+        // back to its own Heading 5 (different font/colour). Shares h4's size.
+        heading5: {
           run: { font: s.headingFamily, size: s.h4Size, color: s.headingColor, bold: true },
           paragraph: { spacing: { before: 120, after: 40 } },
         },
@@ -387,9 +420,6 @@ export async function exportToDocx(
       },
     ],
   });
-
-  const blob = await Packer.toBlob(doc);
-  saveAs(blob, s.filename);
 }
 
 // ── Footer ───────────────────────────────────────────────────────────
@@ -469,7 +499,7 @@ function convertElement(child: HTMLElement, s: ResolvedSettings): DocxChild[] {
     case "p":  return [bodyParagraph(child, s)];
     case "ul":
     case "ol": return listItems(child, s);
-    case "table": return [convertTable(child as HTMLTableElement, s)];
+    case "table": return convertTable(child as HTMLTableElement, s);
     case "figure": return convertFigure(child, s);
     case "section": return convertChildren(child, s);
     case "div":
@@ -590,7 +620,12 @@ function convertCallout(el: HTMLElement, s: ResolvedSettings): DocxChild[] {
   const titleEl = el.querySelector(".callout-title");
   const titleText = titleEl?.textContent?.trim() ?? "";
 
-  const bodyChildren: DocxChild[] = [];
+  // A table cell holds only paragraphs and tables (docx ≥ 9.9 types it so).
+  // The one other thing convertElement can yield is the TOC, and only if the
+  // template's first <h2> sat inside a callout — hoist it in front of the box
+  // rather than drop it, since `tocInserted` is already latched by then.
+  const bodyChildren: (Paragraph | Table)[] = [];
+  const hoisted: TableOfContents[] = [];
   if (titleText) {
     bodyChildren.push(
       new Paragraph({
@@ -615,7 +650,10 @@ function convertCallout(el: HTMLElement, s: ResolvedSettings): DocxChild[] {
     const child = node as HTMLElement;
     if (child === titleEl) continue;
     if (child.tagName.toLowerCase() === "div" && child.classList.contains("callout-title")) continue;
-    bodyChildren.push(...convertElement(child, s));
+    for (const converted of convertElement(child, s)) {
+      if (converted instanceof TableOfContents) hoisted.push(converted);
+      else bodyChildren.push(converted);
+    }
   }
   // Fallback for callouts whose body is text only (no <p> wrappers).
   if (bodyChildren.length === (titleText ? 1 : 0)) {
@@ -632,6 +670,7 @@ function convertCallout(el: HTMLElement, s: ResolvedSettings): DocxChild[] {
   const noBorder = { style: BorderStyle.NONE, color: "FFFFFF", size: 0 };
   const accent = { style: BorderStyle.SINGLE, color: variant.accent, size: 24 }; // 24 = 3pt
   return [
+    ...hoisted,
     new Table({
       rows: [
         new TableRow({
@@ -708,9 +747,9 @@ function lighten(hex: string, amount: number): string {
 
 function convertFigure(el: HTMLElement, s: ResolvedSettings): Paragraph[] {
   const result: Paragraph[] = [];
-  const canvas = el.querySelector<HTMLCanvasElement>("canvas");
-
-  if (canvas) {
+  // A chart split into partial plots holds one canvas per part, each with its
+  // own alt text — every one becomes its own image.
+  for (const canvas of el.querySelectorAll<HTMLCanvasElement>("canvas")) {
     const alt = canvas.getAttribute("aria-label") ?? "";
     try {
       const bytes = dataUrlToBytes(canvas.toDataURL("image/png"));
@@ -769,19 +808,45 @@ function dataUrlToBytes(dataUrl: string): Uint8Array {
   return bytes;
 }
 
-/** Compute embed dimensions (px) that fit within the page content area, preserving aspect ratio. */
+/** Compute embed dimensions (px) that fit within the page content area (width and height), preserving aspect ratio. */
 function fitToPage(canvas: HTMLCanvasElement, s: ResolvedSettings): { width: number; height: number } {
   const contentTwips = s.pageWidth - s.marginLeft - s.marginRight;
   const maxWidthPx = Math.max(1, Math.floor((contentTwips / 1440) * 96)); // twips → in → px @96 DPI
   const cssW = canvas.clientWidth || canvas.width;
   const cssH = canvas.clientHeight || canvas.height;
   const aspect = cssW > 0 ? cssH / cssW : 0.5;
-  const width = Math.min(cssW || maxWidthPx, maxWidthPx);
+  // Tall charts (horizontal bar charts that grew past `maxColumns`) are also
+  // capped at the content height, shrinking the width to keep the ratio.
+  const contentHeightTwips = s.pageHeight - s.marginTop - s.marginBottom;
+  const maxHeightPx = Math.max(1, Math.floor((contentHeightTwips / 1440) * 96));
+  let width = Math.min(cssW || maxWidthPx, maxWidthPx);
+  if (aspect > 0 && width * aspect > maxHeightPx) width = Math.floor(maxHeightPx / aspect);
   const height = Math.max(1, Math.round(width * aspect));
-  return { width, height };
+  return { width: Math.max(1, width), height };
 }
 
-function convertTable(tableEl: HTMLTableElement, s: ResolvedSettings): Table {
+/**
+ * A table plus, when the HTML carries one, its `<caption>` as a paragraph
+ * right above it — docx has no table-caption element, and walking only the
+ * `<tr>`s used to drop the caption from the export altogether. `keepNext`
+ * holds it on the same page as the table it names.
+ */
+function convertTable(tableEl: HTMLTableElement, s: ResolvedSettings): DocxChild[] {
+  const out: DocxChild[] = [];
+  const caption = tableEl.caption?.textContent?.trim();
+  if (caption) {
+    out.push(
+      new Paragraph({
+        keepNext: true,
+        children: [new TextRun({ text: caption, italics: true, font: s.fontFamily, size: s.fontSize })],
+      })
+    );
+  }
+  out.push(tableBody(tableEl, s));
+  return out;
+}
+
+function tableBody(tableEl: HTMLTableElement, s: ResolvedSettings): Table {
   const border = {
     style: s.tableBorderStyle,
     color: s.tableBorderColor,
@@ -821,7 +886,15 @@ function convertTable(tableEl: HTMLTableElement, s: ResolvedSettings): Table {
         })
       );
     }
-    if (cells.length > 0) rows.push(new TableRow({ children: cells }));
+    // Bold alone only looks like a header. `tableHeader` (w:tblHeader) is what
+    // makes Word's screen-reader support announce column headers, repeat the
+    // row on every page, and pass the Accessibility Checker.
+    // Omitted (not `false`) on body rows, which docx would otherwise spell out
+    // as <w:tblHeader w:val="false"/> on every one of them.
+    const isHeaderRow = tr.parentElement?.tagName.toLowerCase() === "thead";
+    if (cells.length > 0) {
+      rows.push(new TableRow({ children: cells, tableHeader: isHeaderRow || undefined }));
+    }
   }
 
   return new Table({ rows });

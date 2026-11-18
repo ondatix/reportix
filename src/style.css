@@ -13,6 +13,9 @@
   --black: #232528;
   --white: #FFFFFF;
   --deep-violet: #2D1B4E;
+  /* Error red — 6.5:1 on --error-light, 7.7:1 on white (WCAG AA for body text) */
+  --error-full: #B3261E;
+  --error-light: #FDECEA;
   color: var(--black);
   background: var(--white);
 }
@@ -21,6 +24,36 @@
   max-width: 960px;
   margin: 0 auto;
   padding: 2rem;
+}
+
+/* Off-screen until focused, so keyboard users can jump the header without
+   the link showing up for everyone else. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  z-index: 100;
+  padding: 0.5rem 0.9rem;
+  background: var(--white);
+  color: var(--deep-violet);
+  border: 2px solid var(--deep-violet);
+  border-radius: 4px;
+}
+
+/* Establishes a block formatting context so the floated logo is contained
+   rather than escaping into the first step. */
+header {
+  overflow: hidden;
+}
+
+/* Replaces the obsolete align="right" presentation attribute this used to
+   carry — the height attribute stays on the element to reserve its space. */
+.logo {
+  float: right;
 }
 
 h1 {
@@ -63,7 +96,7 @@ h1 {
 }
 
 .language-bar select:focus-visible {
-  outline: 2px solid var(--purple-full);
+  outline: 2px solid var(--deep-violet);
   outline-offset: 1px;
 }
 
@@ -85,7 +118,7 @@ h1 {
 }
 
 .handbuch-link:focus-visible {
-  outline: 2px solid var(--purple-full);
+  outline: 2px solid var(--deep-violet);
   outline-offset: 1px;
 }
 
@@ -101,6 +134,14 @@ h1 {
   margin-top: 0;
   font-size: 1.2rem;
   color: var(--deep-violet);
+}
+
+/* The step headings take programmatic focus when their step opens, so they
+   need a visible indicator. :focus-visible (not :focus) keeps the ring for
+   keyboard users while sparing mouse users an outline they didn't ask for. */
+.step h2:focus-visible {
+  outline: 2px solid var(--deep-violet);
+  outline-offset: 2px;
 }
 
 label {
@@ -144,6 +185,38 @@ input[type="file"]::file-selector-button:hover {
   margin-bottom: 0.25rem;
 }
 
+/* Step 1's own fields (parameters marked `step: template`, i.e. the reporting
+   period). A from/to pair reads as one control, so the fields sit side by side
+   rather than stacked like the step-3 parameter form. `wrap` keeps them
+   readable on a narrow viewport, and each field still grows to fill its share
+   with a floor so a date input is never squeezed below its content. */
+.inline-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.inline-fields .parameter-field {
+  flex: 1 1 12rem;
+  min-width: 12rem;
+  margin: 0;
+}
+
+/* Label + its ⓘ button on one line. The button sits beside the <label> rather
+   than inside it (a <label> may only contain the control it labels), so the
+   pair needs a wrapper to stay on one row. */
+.field-head {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.field-head label {
+  margin: 0;
+}
+
 .parameter-field input,
 .parameter-field select {
   width: 100%;
@@ -171,6 +244,13 @@ input[type="file"]::file-selector-button:hover {
   margin: 0;
   padding: 0;
   accent-color: var(--purple-medium);
+  cursor: pointer;
+}
+
+.parameter-field input[type="color"] {
+  width: 3.5rem;      /* override the full-width stretch from the rule above */
+  height: 2.25rem;
+  padding: 2px;
   cursor: pointer;
 }
 
@@ -310,6 +390,7 @@ button {
   border-radius: 4px;
   font-size: 1rem;
   cursor: pointer;
+  max-width: 15rem;
 }
 
 button:hover {
@@ -330,6 +411,15 @@ button:hover {
 
 .report-preview figure {
   margin: 1.5rem 0;
+}
+
+/* One wrapper per partial plot of a split chart (Chart.js sizes a canvas from its parent). */
+.report-preview .chart-part {
+  position: relative;
+}
+
+.report-preview .chart-part + .chart-part {
+  margin-top: 1rem;
 }
 
 .report-preview figcaption {
@@ -382,16 +472,124 @@ button:hover {
   color: var(--deep-violet);
 }
 
+/* The same region when there is nothing to warn about — not styled as a warning. */
+.data-warnings.data-warnings-ok {
+  background: var(--seafoam-light);
+  border-left-color: var(--seafoam-full);
+}
+
+/* Live regions (this one and .upload-error) are never toggled with `hidden` —
+   a screen reader has to have them registered before their content changes.
+   They stay in the tree and collapse while empty instead. */
+.data-warnings:empty,
+.upload-error:empty {
+  display: none;
+}
+
+/* A <fieldset> so the radios form a named group, named by its <legend>. None
+   of the default fieldset chrome. */
+#template-choices {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+/* Visually hidden, read by screen readers: the step heading right above
+   already says the same on screen. The canonical sr-only pattern, verbatim —
+   checkers recognise it and skip it, where a variant (e.g. with a real margin)
+   gets its 1×1 px clipped box sampled and reported as a contrast failure,
+   although the text is 15:1 and WCAG 1.4.3 exempts text nobody can see.
+   Never display: none, which would drop the group's name. */
+.template-legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 .template-option {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin: 0.35rem 0;
+}
+
+/* The row is a <div> and the text a child <label>, so the global
+   `label { display: block; margin: 0.5rem 0 }` above — previously overridden
+   because the row *was* the label — now applies and would break the flex row. */
+.template-option .template-name {
+  font-weight: 500;
+  display: inline;
+  margin: 0;
   cursor: pointer;
 }
 
-.template-option .template-name {
-  font-weight: 500;
+/* Data-validation checklists (step: data parameters) — one bordered group
+   per parameter, values in a responsive grid. The checkbox accent is
+   --deep-violet: the ticked state must carry 3:1 against white by itself,
+   which --purple-medium does not. */
+.data-checklist {
+  border: 1px solid var(--purple-medium);
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem 0.75rem;
+  margin: 0 0 1rem;
+  min-width: 0;
+}
+
+.data-checklist legend {
+  font-weight: 600;
+  padding: 0 0.25rem;
+}
+
+.data-checklist-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0 0 0.5rem;
+}
+
+.data-checklist-actions button {
+  margin: 0;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.9rem;
+}
+
+.data-checklist-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0.25rem 1rem;
+}
+
+.data-checklist-option {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.data-checklist-option input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0;
+  accent-color: var(--deep-violet);
+  cursor: pointer;
+}
+
+/* Same global-`label` override as .template-option above. */
+.data-checklist-option label {
+  display: inline;
+  margin: 0;
+  cursor: pointer;
+}
+
+.data-checklist-summary {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
 }
 
 .data-warnings ul {
@@ -401,6 +599,17 @@ button:hover {
 
 .data-warnings li {
   margin: 0.15rem 0;
+}
+
+/* Inline upload error, shown next to the file input that produced it. */
+.upload-error {
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0.8rem;
+  background: var(--error-light);
+  border-left: 4px solid var(--error-full);
+  border-radius: 4px;
+  color: var(--error-full);
+  font-size: 0.95rem;
 }
 
 /* ── Icon radio widgets (page orientation, page-number position) ───────── */
@@ -443,15 +652,19 @@ button:hover {
   background: var(--purple-light);
 }
 
+/* The native radio here is visually hidden (see below), so this border is the
+   only thing marking the selection and has to carry WCAG 1.4.11's 3:1 on its
+   own — --purple-full manages 2.1:1, --deep-violet 15.2:1. The palette/font
+   options keep the lighter border because their radio stays visible. */
 .orientation-option:has(input:checked),
 .page-number-option:has(input:checked) {
-  border-color: var(--purple-full);
+  border-color: var(--deep-violet);
   background: var(--purple-medium);
 }
 
 .orientation-option:has(input:focus-visible),
 .page-number-option:has(input:focus-visible) {
-  outline: 2px solid var(--purple-full);
+  outline: 2px solid var(--deep-violet);
   outline-offset: 1px;
 }
 
@@ -510,22 +723,15 @@ button:hover {
 .page-number-none::after { display: none; }
 .page-number-none { opacity: 0.55; }
 
-/* ── Section numbering (preview) — CSS counters on h2–h4 ──────────────── */
-.report-preview.section-numbered { counter-reset: sec2; }
-.report-preview.section-numbered h2 { counter-reset: sec3; }
-.report-preview.section-numbered h3 { counter-reset: sec4; }
-
-.report-preview.section-numbered h2::before {
-  counter-increment: sec2;
-  content: counter(sec2) ". ";
-}
-.report-preview.section-numbered h3::before {
-  counter-increment: sec3;
-  content: counter(sec2) "." counter(sec3) ". ";
-}
-.report-preview.section-numbered h4::before {
-  counter-increment: sec4;
-  content: counter(sec2) "." counter(sec3) "." counter(sec4) ". ";
+/* ── Section numbering (preview) ────────────────────────────────────────
+ * Numbers are computed in JS (renderer's numberHeadings) into a
+ * data-secnum attribute — each text block renders into its own <section>,
+ * which breaks plain CSS counter-reset/increment scoping across blocks. */
+.report-preview.section-numbered h2::before,
+.report-preview.section-numbered h3::before,
+.report-preview.section-numbered h4::before,
+.report-preview.section-numbered h5::before {
+  content: attr(data-secnum);
 }
 
 /* ── Table of contents (preview) ──────────────────────────────────────── */
@@ -566,11 +772,16 @@ button:hover {
 .report-toc-l2 { padding-left: 2.5rem; }
 
 /* ── Data step: format toggle + sheet/column mapping ──────────────────── */
+/* A <fieldset> so the two options form a real radio group; the default
+   fieldset chrome is reset so it still reads as a segmented control. */
 .data-format-toggle {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 1rem;
+  margin: 0 0 1rem;
+  border: 0;
+  padding: 0;
+  min-width: 0;
 }
 
 .data-format-label {
@@ -578,8 +789,8 @@ button:hover {
   color: var(--deep-violet);
 }
 
-.data-format-toggle button {
-  margin-top: 0;
+.data-format-option {
+  margin: 0;
   padding: 0.4rem 1rem;
   background: var(--purple-light);
   color: var(--deep-violet);
@@ -589,23 +800,46 @@ button:hover {
   cursor: pointer;
 }
 
-.data-format-toggle button:hover {
+.data-format-option:hover {
   background: var(--purple-medium);
 }
 
-.data-format-toggle button.active {
+/* The border, not the fill, carries the selected state: --purple-full against
+   --purple-light is only 1.9:1, well under WCAG 1.4.11's 3:1, and the radio
+   itself is visually hidden below. --deep-violet reaches 10.5:1 on the fill. */
+.data-format-option:has(input:checked) {
   background: var(--purple-full);
   color: var(--black);
+  border-color: var(--deep-violet);
+}
+
+.data-format-option:has(input:focus-visible) {
+  outline: 2px solid var(--deep-violet);
+  outline-offset: 2px;
+}
+
+/* Hidden, not removed: it stays focusable and arrow-key navigable, and the
+   label above renders the selection. */
+.data-format-option input[type="radio"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* "Edit mapping" button shown when the panel is collapsed */
-.data-edit-btn {
+.data-edit-btn,
+.data-checklist-actions button {
   background: var(--purple-light);
   color: var(--deep-violet);
   border: 1px solid var(--purple-full);
 }
 
-.data-edit-btn:hover {
+.data-edit-btn:hover,
+.data-checklist-actions button:hover {
   background: var(--purple-medium);
 }
 
@@ -657,6 +891,16 @@ button:hover {
   color: var(--deep-violet);
 }
 
+/* Same reason as .template-name: these rows are now <div>s whose text is a
+   child <label>, so the global label rule has to be neutralised to keep the
+   grid columns aligned. */
+.sheet-map-name label,
+.column-map-name label {
+  display: inline;
+  margin: 0;
+  cursor: pointer;
+}
+
 .column-maps {
   display: flex;
   flex-direction: column;
@@ -706,18 +950,24 @@ button:hover {
   border: none;
   border-radius: 50%;
   background: none;
-  color: var(--seafoam-full);
+  /* "ⓘ" is a text character at ~15px, so it needs the 4.5:1 of WCAG 1.4.3 —
+     not the 3:1 for icons. --seafoam-full reaches only 2.1:1 on white;
+     --deep-violet is the sole non-error brand token that clears the bar
+     (15.2:1), which is why hover moves to a background change instead of a
+     lighter foreground. */
+  color: var(--deep-violet);
   font-size: 0.95rem;
   line-height: 1;
   cursor: pointer;
 }
 
 .info-trigger:hover {
+  background: var(--seafoam-light);
   color: var(--deep-violet);
 }
 
 .info-trigger:focus-visible {
-  outline: 2px solid var(--seafoam-full);
+  outline: 2px solid var(--deep-violet);
   outline-offset: 2px;
 }
 

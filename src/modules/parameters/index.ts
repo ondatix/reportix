@@ -14,11 +14,13 @@
  *
  * Usable independently in other projects.
  */
-import type { AppConfig, ParameterDef, ParameterValues } from "../types";
+import type { AppConfig, DataStore, ParameterDef, ParameterValues } from "../types";
 import { PALETTES } from "../palettes";
 import { FONTS } from "../fonts";
 import { t } from "../i18n";
 import { attachInfo, resolveTooltip } from "../info";
+import { getAtPath } from "../shared/path";
+import { asStr, matchesLeafCondition } from "../shared/condition";
 
 /**
  * Resolve the default value to prefill into the form for a single parameter.
@@ -53,22 +55,6 @@ export function applyParameterOverrides(
   return clone;
 }
 
-function getAtPath(
-  obj: Record<string, unknown>,
-  path: string
-): unknown {
-  const parts = path.split(".");
-  let cur: unknown = obj;
-  for (const p of parts) {
-    if (cur && typeof cur === "object" && p in (cur as Record<string, unknown>)) {
-      cur = (cur as Record<string, unknown>)[p];
-    } else {
-      return undefined;
-    }
-  }
-  return cur;
-}
-
 function setAtPath(
   obj: Record<string, unknown>,
   path: string,
@@ -84,6 +70,280 @@ function setAtPath(
     cur = cur[p] as Record<string, unknown>;
   }
   cur[parts[parts.length - 1]] = value;
+}
+
+/**
+ * The step-1 fields (parameters marked `step: template`), rendered as a plain
+ * inline row rather than through `buildParameterForm`.
+ *
+ * Deliberately *not* the parameter form: that form ends in a "Bericht
+ * erstellen" submit button, which is the wrong action for step 1 — the step
+ * continues with its own Continue button. It is also a vertical stack, while
+ * a from/to date pair reads as one control and belongs side by side.
+ *
+ * Returns the fields' container plus a `collect()` that reads the current
+ * values, keyed like `collectParameterValues` so both steps' results merge.
+ */
+export interface InlineFields {
+  element: HTMLElement;
+  collect(): ParameterValues;
+}
+
+export function buildInlineFields(
+  parameters: Record<string, ParameterDef>,
+  container: HTMLElement,
+  config: AppConfig
+): InlineFields {
+  const row = document.createElement("div");
+  row.className = "inline-fields";
+  const inputs = new Map<string, HTMLInputElement | HTMLSelectElement>();
+
+  for (const [key, def] of Object.entries(parameters)) {
+    const initial = resolveParamDefault(def, config);
+
+    const field = document.createElement("div");
+    field.className = "parameter-field";
+
+    // Same shape as a normal parameter field: the ⓘ trigger hangs off a
+    // wrapper, never inside the <label>, or it would capture the control's
+    // accessible name (see the Info module).
+    const head = document.createElement("span");
+    head.className = "field-head";
+    const label = document.createElement("label");
+    label.htmlFor = `param-${key}`;
+    label.textContent = def.label;
+    head.appendChild(label);
+    attachInfo(
+      head,
+      resolveTooltip(def.info, def.definition),
+      t("ui.info.trigger", { name: def.label })
+    );
+    field.appendChild(head);
+
+    let input: HTMLInputElement | HTMLSelectElement;
+    if (def.type === "select") {
+      const sel = document.createElement("select");
+      for (const opt of def.options ?? []) {
+        const option = document.createElement("option");
+        option.value = opt;
+        option.textContent = opt;
+        if (initial === opt) option.selected = true;
+        sel.appendChild(option);
+      }
+      input = sel;
+    } else {
+      const inp = document.createElement("input");
+      // `date` and `number` map to native inputs; anything else is text.
+      inp.type = def.type === "date" || def.type === "number" ? def.type : "text";
+      if (initial !== undefined && initial !== null) inp.value = String(initial);
+      input = inp;
+    }
+    input.id = `param-${key}`;
+    input.name = key;
+
+    field.appendChild(input);
+    row.appendChild(field);
+    inputs.set(key, input);
+  }
+
+  container.appendChild(row);
+
+  return {
+    element: row,
+    collect() {
+      const values: ParameterValues = {};
+      for (const [key, def] of Object.entries(parameters)) {
+        const raw = inputs.get(key)?.value ?? "";
+        const fallback = resolveParamDefault(def, config);
+        values[key] =
+          def.type === "number"
+            ? raw === ""
+              ? Number(fallback ?? 0)
+              : Number(raw)
+            : raw === "" && fallback != null
+              ? String(fallback)
+              : raw;
+      }
+      return values;
+    },
+  };
+}
+
+/**
+ * The data-validation step's fields (parameters marked `step: data` with an
+ * `options_from:` source): one checklist per parameter, listing the distinct
+ * values that column holds in the uploaded data, each with its row count.
+ *
+ * Checkboxes rather than a `<select multiple>`: the multiple select needs
+ * Ctrl/Shift to extend a selection with keyboard or mouse, and screen readers
+ * announce its selection state inconsistently.
+ *
+ * Pre-selection: a value keeps the choice from `previous` (the last build —
+ * re-mapping in the data step rebuilds this step) when it was offered then;
+ * a value seen for the first time is ticked iff it matches `defaultWhen`.
+ * Parameters whose dataset/column is missing or empty are skipped, so the
+ * binding never receives an empty list for data that simply isn't there.
+ */
+export interface DataChecklists {
+  element: HTMLElement;
+  /** The ticked values, keyed by parameter — merge into the parameter values. */
+  collect(): ParameterValues;
+  /** Offered + ticked values per parameter, to hand back as `previous`. */
+  snapshot(): ChecklistSnapshot;
+}
+
+export type ChecklistSnapshot = Record<string, { options: string[]; selected: string[] }>;
+
+/** Distinct non-empty values of a column with their row counts, naturally sorted (A9 before A10). */
+export function distinctValues(
+  store: DataStore,
+  source: { dataset: string; column: string }
+): { value: string; count: number }[] {
+  const counts = new Map<string, number>();
+  for (const row of store[source.dataset] ?? []) {
+    const v = asStr(row[source.column]);
+    if (v !== "") counts.set(v, (counts.get(v) ?? 0) + 1);
+  }
+  return [...counts]
+    .map(([value, count]) => ({ value, count }))
+    .sort((a, b) => a.value.localeCompare(b.value, "de", { numeric: true }));
+}
+
+/**
+ * The pre-selection of every `step: data` checklist without building any DOM:
+ * per parameter, the offered values that match its `defaultWhen`. What the
+ * app's checklists start from — and what a headless pipeline (tests, the
+ * alt-text goldens) should feed to preprocessing to match an untouched step.
+ * Parameters without values in `store` are omitted, as in the checklist.
+ */
+export function dataParameterDefaults(
+  parameters: Record<string, ParameterDef>,
+  store: DataStore
+): ParameterValues {
+  const out: ParameterValues = {};
+  for (const [key, def] of Object.entries(parameters)) {
+    if (!def.optionsFrom) continue;
+    const values = distinctValues(store, def.optionsFrom);
+    if (values.length === 0) continue;
+    out[key] = values.map((v) => v.value).filter((v) => isDefaultSelected(def, v));
+  }
+  return out;
+}
+
+function isDefaultSelected(def: ParameterDef, value: string): boolean {
+  return def.defaultWhen !== undefined && matchesLeafCondition(value, def.defaultWhen);
+}
+
+export function buildDataChecklists(
+  parameters: Record<string, ParameterDef>,
+  store: DataStore,
+  container: HTMLElement,
+  opts: { previous?: ChecklistSnapshot; onChange?: () => void } = {}
+): DataChecklists {
+  const wrapper = document.createElement("div");
+  wrapper.className = "data-checklists";
+  const groups = new Map<string, { options: string[]; boxes: HTMLInputElement[] }>();
+
+  for (const [key, def] of Object.entries(parameters)) {
+    if (!def.optionsFrom) continue;
+    const values = distinctValues(store, def.optionsFrom);
+    if (values.length === 0) continue;
+    const prev = opts.previous?.[key];
+    const total = values.reduce((n, v) => n + v.count, 0);
+
+    // The legend hosts the ⓘ button (legal inside a <legend>), so the
+    // fieldset's name is pinned with aria-label — otherwise it would include
+    // the button's name as well (see the Info module).
+    const fieldset = document.createElement("fieldset");
+    fieldset.className = "data-checklist";
+    fieldset.setAttribute("aria-label", def.label);
+    const legend = document.createElement("legend");
+    const legendText = document.createElement("span");
+    legendText.textContent = def.label;
+    legend.appendChild(legendText);
+    attachInfo(legend, resolveTooltip(def.info, def.definition), t("ui.info.trigger", { name: def.label }));
+    fieldset.appendChild(legend);
+
+    const actions = document.createElement("div");
+    actions.className = "data-checklist-actions";
+    const summary = document.createElement("p");
+    summary.className = "data-checklist-summary";
+
+    const grid = document.createElement("div");
+    grid.className = "data-checklist-options";
+    const boxes: HTMLInputElement[] = [];
+    const updateSummary = () => {
+      const rows = values.reduce((n, v, i) => n + (boxes[i].checked ? v.count : 0), 0);
+      summary.textContent = t("ui.validation.summary", {
+        selected: boxes.filter((b) => b.checked).length,
+        values: values.length,
+        rows,
+        total,
+      });
+    };
+    const changed = () => {
+      updateSummary();
+      opts.onChange?.();
+    };
+
+    values.forEach(({ value, count }, i) => {
+      const option = document.createElement("div");
+      option.className = "data-checklist-option";
+      const box = document.createElement("input");
+      box.type = "checkbox";
+      box.id = `param-${key}-${i}`;
+      box.name = key;
+      box.value = value;
+      box.checked =
+        prev && prev.options.includes(value)
+          ? prev.selected.includes(value)
+          : isDefaultSelected(def, value);
+      box.addEventListener("change", changed);
+      const label = document.createElement("label");
+      label.htmlFor = box.id;
+      label.textContent = t("ui.validation.option", { value, count });
+      option.append(box, label);
+      grid.appendChild(option);
+      boxes.push(box);
+    });
+
+    for (const [labelKey, state] of [
+      ["ui.validation.selectAll", true],
+      ["ui.validation.selectNone", false],
+    ] as const) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = t(labelKey);
+      btn.addEventListener("click", () => {
+        for (const b of boxes) b.checked = state;
+        changed();
+      });
+      actions.appendChild(btn);
+    }
+
+    updateSummary();
+    fieldset.append(actions, grid, summary);
+    wrapper.appendChild(fieldset);
+    groups.set(key, { options: values.map((v) => v.value), boxes });
+  }
+
+  container.appendChild(wrapper);
+
+  return {
+    element: wrapper,
+    collect() {
+      const out: ParameterValues = {};
+      for (const [key, g] of groups) out[key] = g.boxes.filter((b) => b.checked).map((b) => b.value);
+      return out;
+    },
+    snapshot() {
+      const out: ChecklistSnapshot = {};
+      for (const [key, g] of groups) {
+        out[key] = { options: g.options, selected: g.boxes.filter((b) => b.checked).map((b) => b.value) };
+      }
+      return out;
+    },
+  };
 }
 
 export function buildParameterForm(
@@ -125,11 +385,21 @@ export function buildParameterForm(
     const fieldset = document.createElement("div");
     fieldset.className = "parameter-field";
 
+    // The info button hangs off a wrapper rather than the <label> itself: a
+    // <label> may only contain the control it labels, and a button inside it
+    // also leaks into the labelled control's accessible name.
+    const head = document.createElement("span");
+    head.className = "field-head";
     const label = document.createElement("label");
     label.htmlFor = `param-${key}`;
     label.textContent = def.label;
-    attachInfo(label, resolveTooltip(def.info, def.definition));
-    fieldset.appendChild(label);
+    head.appendChild(label);
+    attachInfo(
+      head,
+      resolveTooltip(def.info, def.definition),
+      t("ui.info.trigger", { name: def.label })
+    );
+    fieldset.appendChild(head);
 
     let input: HTMLElement;
 
@@ -198,6 +468,16 @@ export function buildParameterForm(
         break;
       }
 
+      case "color": {
+        const inp = document.createElement("input");
+        inp.type = "color";
+        inp.id = `param-${key}`;
+        inp.name = key;
+        if (initial !== undefined && initial !== null) inp.value = String(initial);
+        input = inp;
+        break;
+      }
+
       default: {
         // "text" and fallback
         const inp = document.createElement("input");
@@ -235,10 +515,19 @@ function buildPaletteField(
 ): HTMLElement {
   const fieldset = document.createElement("fieldset");
   fieldset.className = "parameter-field palette-field";
+  // aria-label wins over the <legend> when naming the group. Without it the
+  // group name absorbs the legend's info button, and screen readers repeat the
+  // group name on entry *and* alongside every radio option — so the noise is
+  // multiplied here rather than heard once. Same string as the legend below.
+  fieldset.setAttribute("aria-label", def.label);
 
   const legend = document.createElement("legend");
   legend.textContent = def.label;
-  attachInfo(legend, resolveTooltip(def.info, def.definition));
+  attachInfo(
+    legend,
+    resolveTooltip(def.info, def.definition),
+    t("ui.info.trigger", { name: def.label })
+  );
   fieldset.appendChild(legend);
 
   const defaultId = typeof initial === "string" ? initial : undefined;
@@ -259,7 +548,7 @@ function buildPaletteField(
 
     const name = document.createElement("span");
     name.className = "palette-name";
-    name.textContent = opt;
+    name.textContent = t(`param.palette.${opt}`);
     wrapper.appendChild(name);
 
     const swatches = document.createElement("span");
@@ -291,10 +580,15 @@ function buildFontField(
 ): HTMLElement {
   const fieldset = document.createElement("fieldset");
   fieldset.className = "parameter-field font-field";
+  fieldset.setAttribute("aria-label", def.label); // see buildPaletteField
 
   const legend = document.createElement("legend");
   legend.textContent = def.label;
-  attachInfo(legend, resolveTooltip(def.info, def.definition));
+  attachInfo(
+    legend,
+    resolveTooltip(def.info, def.definition),
+    t("ui.info.trigger", { name: def.label })
+  );
   fieldset.appendChild(legend);
 
   const defaultId = typeof initial === "string" ? initial : undefined;
@@ -343,10 +637,15 @@ function buildIconRadioField(
 ): HTMLElement {
   const fieldset = document.createElement("fieldset");
   fieldset.className = `parameter-field ${fieldClass}`;
+  fieldset.setAttribute("aria-label", def.label); // see buildPaletteField
 
   const legend = document.createElement("legend");
   legend.textContent = def.label;
-  attachInfo(legend, resolveTooltip(def.info, def.definition));
+  attachInfo(
+    legend,
+    resolveTooltip(def.info, def.definition),
+    t("ui.info.trigger", { name: def.label })
+  );
   fieldset.appendChild(legend);
 
   const defaultId = typeof initial === "string" ? initial : undefined;

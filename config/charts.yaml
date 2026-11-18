@@ -1,21 +1,32 @@
 charts:
-  palette: okabe-ito           # bound by parameters.palette
+  palette: okabe-ito           # bound by parameters.palette; colors stacked bar chart segments and is the fallback for any category that isn't männlich/weiblich elsewhere
   animation: false             # disable animation (recommended for reports)
   aspect_ratio: 2.0            # width:height ratio of every chart
+  max_height_ratio: 1.5        # tallest a chart may grow, as a multiple of its width: a horizontal bar chart beyond it is split into equally big parts
+
+  # Every crosstab in this report is broken down by "Geschlecht" (männlich/
+  # weiblich), so these two colors drive that category's color in every chart
+  # type EXCEPT stacked bar charts (which use `palette` above instead — a
+  # stack can have more segments than there are gender colors to spare).
+  # Bound by parameters gender_color_male / gender_color_female.
+  gender:
+    male: "#142a3e"             # Geschlecht = männlich
+    female: "#6192b9"           # Geschlecht = weiblich
 
   font:
     family: Arial              # overridden at runtime by the `font` parameter
-    size: 12                   # pt
+    size: 14                   # pt
     color: "555555"            # hex without #; used for tick labels and legend
 
   title:
+    display: false               # false hides every chart's title, regardless of the block's `title:`
     position: top              # top | bottom | left | right
     align: center              # start | center | end
     color: "1A1A1A"            # hex without #
 
   legend:
     display: true
-    position: top              # top | bottom | left | right
+    position: right              # top | bottom | left | right
     align: center              # start | center | end
 
   tooltip:
@@ -32,6 +43,7 @@ charts:
       grid_display: true
       grid_color: "rgba(0,0,0,0.08)"
       tick_color: "888888"     # hex without #
+      trim_to_data: false      # true: non-stacked bar charts start the y-axis near the smallest bar instead of 0
 
   elements:
     line:
@@ -40,3 +52,4 @@ charts:
     bar:
       border_radius: 0         # rounded bar corners in px
       bar_percentage: 0.9      # fraction of category slot used by bars (0–1)
+      max_columns: 10          # more categories than this ⇒ horizontal bars, chart grows in height

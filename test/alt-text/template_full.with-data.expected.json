@@ -1,0 +1,107 @@
+[
+  {
+    "index": 0,
+    "title": "Schülerschaft nach Geschlecht",
+    "alt": "Schülerschaft nach Geschlecht. Kreisdiagramm vergleicht den Anteil (% des Gesamtwerts) von Geschlecht. Datenpunkte: Geschlecht männlich: 49.0%; Geschlecht weiblich: 51.0%. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 1,
+    "title": "Jahrgangsstufen nach Geschlecht",
+    "alt": "Jahrgangsstufen nach Geschlecht. Bevölkerungspyramide vergleicht die Anzahl von Jahrgangsstufe, aufgeteilt nach Geschlecht. Datenpunkte: Jahrgangsstufe 5, weiblich: 53; Jahrgangsstufe 5, männlich: 62; Jahrgangsstufe 6, weiblich: 52; Jahrgangsstufe 6, männlich: 63; Jahrgangsstufe 7, weiblich: 59; Jahrgangsstufe 7, männlich: 56; Jahrgangsstufe 8, weiblich: 52; Jahrgangsstufe 8, männlich: 48; Jahrgangsstufe 9, weiblich: 52; Jahrgangsstufe 9, männlich: 48; Jahrgangsstufe 10, weiblich: 46; Jahrgangsstufe 10, männlich: 54; Jahrgangsstufe 11, weiblich: 43; Jahrgangsstufe 11, männlich: 37; Jahrgangsstufe 12, weiblich: 49; Jahrgangsstufe 12, männlich: 31; Jahrgangsstufe 13, weiblich: 45; Jahrgangsstufe 13, männlich: 35. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 2,
+    "title": "Ausbildungsrichtungen nach Geschlecht",
+    "alt": "Ausbildungsrichtungen nach Geschlecht. Balkendiagramm vergleicht die Anzahl von Ausbildungsrichtung, gruppiert nach Geschlecht. Datenpunkte: Ausbildungsrichtung Musisch, weiblich: 69; Ausbildungsrichtung Musisch, männlich: 67; Ausbildungsrichtung Naturwissenschaftlich-technologisch, weiblich: 106; Ausbildungsrichtung Naturwissenschaftlich-technologisch, männlich: 166; Ausbildungsrichtung Sprachlich, weiblich: 174; Ausbildungsrichtung Sprachlich, männlich: 95; Ausbildungsrichtung Wirtschafts- und sozialwissenschaftlich, weiblich: 102; Ausbildungsrichtung Wirtschafts- und sozialwissenschaftlich, männlich: 106. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 3,
+    "title": "MINT-Zweig je Stufe",
+    "alt": "MINT-Zweig je Stufe. Balkendiagramm vergleicht die Anzahl von Stufe · MINT-Zweig, gruppiert nach Geschlecht. Datenpunkte: Stufe · MINT-Zweig Mittelstufe · Ja, weiblich: 31; Stufe · MINT-Zweig Mittelstufe · Ja, männlich: 51; Stufe · MINT-Zweig Mittelstufe · Nein, weiblich: 119; Stufe · MINT-Zweig Mittelstufe · Nein, männlich: 99; Stufe · MINT-Zweig Oberstufe · Ja, weiblich: 39; Stufe · MINT-Zweig Oberstufe · Ja, männlich: 34; Stufe · MINT-Zweig Oberstufe · Nein, weiblich: 98; Stufe · MINT-Zweig Oberstufe · Nein, männlich: 69; Stufe · MINT-Zweig Unterstufe · Ja, weiblich: 36; Stufe · MINT-Zweig Unterstufe · Ja, männlich: 81; Stufe · MINT-Zweig Unterstufe · Nein, weiblich: 128; Stufe · MINT-Zweig Unterstufe · Nein, männlich: 100. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 4,
+    "title": "Erste Fremdsprache nach Geschlecht",
+    "alt": "Erste Fremdsprache nach Geschlecht. Balkendiagramm vergleicht die Anzahl von Erste Fremdsprache, gruppiert nach Geschlecht. Datenpunkte: Erste Fremdsprache Englisch, weiblich: 320; Erste Fremdsprache Englisch, männlich: 302; Erste Fremdsprache Französisch, weiblich: 34; Erste Fremdsprache Französisch, männlich: 28; Erste Fremdsprache Latein, weiblich: 97; Erste Fremdsprache Latein, männlich: 104. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 5,
+    "title": "Migrationshintergrund je Stufe",
+    "alt": "Migrationshintergrund je Stufe. Balkendiagramm vergleicht den Anteil innerhalb der Gruppe von Migrationshintergrund nach Stufe, gruppiert nach Geschlecht. Datenpunkte: Stufe Mittelstufe, weiblich: 17.3%; Stufe Mittelstufe, männlich: 20.7%; Stufe Oberstufe, weiblich: 24.1%; Stufe Oberstufe, männlich: 18.4%; Stufe Unterstufe, weiblich: 23.2%; Stufe Unterstufe, männlich: 24.3%. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 6,
+    "title": "Anmeldungen nach Herkunftsschulart",
+    "alt": "Anmeldungen nach Herkunftsschulart. Balkendiagramm vergleicht die Anzahl von Herkunftsschulart, gruppiert nach Geschlecht. Datenpunkte: Herkunftsschulart Grundschule, weiblich: 67; Herkunftsschulart Grundschule, männlich: 84; Herkunftsschulart Gymnasium, weiblich: 7; Herkunftsschulart Gymnasium, männlich: <5; Herkunftsschulart Mittelschule, weiblich: <5; Herkunftsschulart Mittelschule, männlich: <5; Herkunftsschulart Realschule, weiblich: <5; Herkunftsschulart Realschule, männlich: <5. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 7,
+    "title": "Sprengel und Gastschüler",
+    "alt": "Sprengel und Gastschüler. Ringdiagramm vergleicht den Anteil (% des Gesamtwerts) von Sprengelzugehörigkeit. Datenpunkte: Sprengelzugehörigkeit Gastschüler: 15.3%; Sprengelzugehörigkeit Sprengel: 84.7%. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 8,
+    "title": "Eintritte je Jahrgangsstufe",
+    "alt": "Eintritte je Jahrgangsstufe. Balkendiagramm vergleicht die Anzahl von Jahrgangsstufe, gruppiert nach Geschlecht. Datenpunkte: Jahrgangsstufe 5, weiblich: 53; Jahrgangsstufe 5, männlich: 62; Jahrgangsstufe 6, weiblich: 5; Jahrgangsstufe 6, männlich: <5; Jahrgangsstufe 7, weiblich: <5; Jahrgangsstufe 7, männlich: 6; Jahrgangsstufe 8, weiblich: <5; Jahrgangsstufe 8, männlich: 5; Jahrgangsstufe 9, weiblich: <5; Jahrgangsstufe 9, männlich: 5; Jahrgangsstufe 10, weiblich: 5; Jahrgangsstufe 10, männlich: <5; Jahrgangsstufe 11, weiblich: 7; Jahrgangsstufe 11, männlich: 7. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 9,
+    "title": "Bewilligte Fördermaßnahmen",
+    "alt": "Bewilligte Fördermaßnahmen. Balkendiagramm vergleicht die Anzahl von Förderart, gruppiert nach Geschlecht (gefiltert auf Fördermaßnahme bewilligt). Datenpunkte: Förderart Begabtenförderung, männlich: <5; Förderart Begabtenförderung, weiblich: 5; Förderart Förderkurs Deutsch, männlich: 17; Förderart Förderkurs Deutsch, weiblich: 17; Förderart Förderkurs Mathematik, männlich: 15; Förderart Förderkurs Mathematik, weiblich: 18; Förderart LRS-Förderung, männlich: 13; Förderart LRS-Förderung, weiblich: 6; Förderart Sprachförderung, männlich: 10; Förderart Sprachförderung, weiblich: 12. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 10,
+    "title": "Abschlussquote der Fördermaßnahmen",
+    "alt": "Abschlussquote der Fördermaßnahmen. Distanzdiagramm vergleicht den Anteil innerhalb der Gruppe von Fördermaßnahme abgeschlossen nach Förderart, aufgeteilt nach Geschlecht (gefiltert auf Fördermaßnahme bewilligt). Datenpunkte: Förderart Begabtenförderung, männlich: nicht ausgewiesen; Förderart Begabtenförderung, weiblich: 80.0%; Förderart Förderkurs Deutsch, männlich: 70.6%; Förderart Förderkurs Deutsch, weiblich: 82.4%; Förderart Förderkurs Mathematik, männlich: 73.3%; Förderart Förderkurs Mathematik, weiblich: 72.2%; Förderart LRS-Förderung, männlich: 46.2%; Förderart LRS-Förderung, weiblich: 83.3%; Förderart Sprachförderung, männlich: 50.0%; Förderart Sprachförderung, weiblich: 66.7%. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 11,
+    "title": "Ganztagsbetreuung je Jahrgangsstufe",
+    "alt": "Ganztagsbetreuung je Jahrgangsstufe. Liniendiagramm vergleicht den Anteil innerhalb der Gruppe von Ganztagsbetreuung nach Jahrgangsstufe, gruppiert nach Geschlecht. Datenpunkte: Jahrgangsstufe 5, weiblich: 60.4%; Jahrgangsstufe 5, männlich: 56.5%; Jahrgangsstufe 6, weiblich: 55.8%; Jahrgangsstufe 6, männlich: 50.8%; Jahrgangsstufe 7, weiblich: 39.0%; Jahrgangsstufe 7, männlich: 33.9%; Jahrgangsstufe 8, weiblich: 23.1%; Jahrgangsstufe 8, männlich: 27.1%; Jahrgangsstufe 9, weiblich: 3.8%; Jahrgangsstufe 9, männlich: 12.5%; Jahrgangsstufe 10, weiblich: 2.2%; Jahrgangsstufe 10, männlich: 7.4%; Jahrgangsstufe 11, weiblich: 4.7%; Jahrgangsstufe 11, männlich: 0.0%; Jahrgangsstufe 12, weiblich: 6.1%; Jahrgangsstufe 12, männlich: 3.2%; Jahrgangsstufe 13, weiblich: 8.9%; Jahrgangsstufe 13, männlich: 5.7%. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 12,
+    "title": "Inklusion je Stufe",
+    "alt": "Inklusion je Stufe. Balkendiagramm vergleicht die Anzahl von Stufe, gruppiert nach Geschlecht (gefiltert auf Inklusion). Datenpunkte: Stufe Mittelstufe, männlich: 10; Stufe Mittelstufe, weiblich: 6; Stufe Oberstufe, männlich: <5; Stufe Oberstufe, weiblich: <5; Stufe Unterstufe, männlich: 6; Stufe Unterstufe, weiblich: 6. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 13,
+    "title": "Notendurchschnitt je Jahrgangsstufe",
+    "alt": "Notendurchschnitt je Jahrgangsstufe. Distanzdiagramm vergleicht den Mittelwert von Notendurchschnitt nach Jahrgangsstufe, aufgeteilt nach Geschlecht. Datenpunkte: Jahrgangsstufe 5, weiblich: 2.79; Jahrgangsstufe 5, männlich: 3.22; Jahrgangsstufe 6, weiblich: 2.71; Jahrgangsstufe 6, männlich: 2.77; Jahrgangsstufe 7, weiblich: 2.69; Jahrgangsstufe 7, männlich: 2.76; Jahrgangsstufe 8, weiblich: 2.57; Jahrgangsstufe 8, männlich: 2.78; Jahrgangsstufe 9, weiblich: 2.84; Jahrgangsstufe 9, männlich: 3.02; Jahrgangsstufe 10, weiblich: 2.75; Jahrgangsstufe 10, männlich: 2.80; Jahrgangsstufe 11, weiblich: 2.62; Jahrgangsstufe 11, männlich: 2.93; Jahrgangsstufe 12, weiblich: 2.66; Jahrgangsstufe 12, männlich: 2.88; Jahrgangsstufe 13, weiblich: 2.56; Jahrgangsstufe 13, männlich: 2.82. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 14,
+    "title": "Notendurchschnitt in der Oberstufe",
+    "alt": "Notendurchschnitt in der Oberstufe. Balkendiagramm vergleicht den Mittelwert von Notendurchschnitt nach Ausbildungsrichtung, gruppiert nach Geschlecht (gefiltert auf Oberstufe). Datenpunkte: Ausbildungsrichtung Musisch, männlich: 2.55; Ausbildungsrichtung Musisch, weiblich: 2.50; Ausbildungsrichtung Naturwissenschaftlich-technologisch, männlich: 2.75; Ausbildungsrichtung Naturwissenschaftlich-technologisch, weiblich: 2.51; Ausbildungsrichtung Sprachlich, männlich: 3.08; Ausbildungsrichtung Sprachlich, weiblich: 2.72; Ausbildungsrichtung Wirtschafts- und sozialwissenschaftlich, männlich: 3.00; Ausbildungsrichtung Wirtschafts- und sozialwissenschaftlich, weiblich: 2.64. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 15,
+    "title": "Vorrückungsquote je Stufe",
+    "alt": "Vorrückungsquote je Stufe. Balkendiagramm vergleicht den Anteil innerhalb der Gruppe von Vorgerückt nach Stufe, gruppiert nach Geschlecht. Datenpunkte: Stufe Mittelstufe, weiblich: 98.7%; Stufe Mittelstufe, männlich: 96.7%; Stufe Oberstufe, weiblich: 94.6%; Stufe Oberstufe, männlich: 95.6%; Stufe Unterstufe, weiblich: 97.0%; Stufe Unterstufe, männlich: 97.2%. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 16,
+    "title": "Wiederholungen auf Antrag",
+    "alt": "Wiederholungen auf Antrag. Balkendiagramm vergleicht die Anzahl von Antrag, gruppiert nach Geschlecht (gefiltert auf Wiederholung). Datenpunkte: Antrag Ja, männlich: <5; Antrag Ja, weiblich: <5; Antrag Nein, männlich: 9; Antrag Nein, weiblich: 9. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 17,
+    "title": "Beurlaubungsgründe",
+    "alt": "Beurlaubungsgründe. Balkendiagramm vergleicht die Anzahl von Beurlaubungsgrund, gruppiert nach Geschlecht. Datenpunkte: Beurlaubungsgrund Familiärer Anlass, weiblich: 8; Beurlaubungsgrund Familiärer Anlass, männlich: 10; Beurlaubungsgrund Hochzeit, weiblich: 6; Beurlaubungsgrund Hochzeit, männlich: 7; Beurlaubungsgrund Kur, weiblich: 5; Beurlaubungsgrund Kur, männlich: <5; Beurlaubungsgrund Leistungssport, weiblich: <5; Beurlaubungsgrund Leistungssport, männlich: 12; Beurlaubungsgrund Religiöser Feiertag, weiblich: 17; Beurlaubungsgrund Religiöser Feiertag, männlich: 9; Beurlaubungsgrund Schüleraustausch, weiblich: 11; Beurlaubungsgrund Schüleraustausch, männlich: 10; Beurlaubungsgrund Trauerfall, weiblich: 5; Beurlaubungsgrund Trauerfall, männlich: <5. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 18,
+    "title": "Dauer familiärer Beurlaubungen",
+    "alt": "Dauer familiärer Beurlaubungen. Balkendiagramm vergleicht den Mittelwert von Beurlaubungsdauer nach Stufe, gruppiert nach Geschlecht (gefiltert auf Familiärer Anlass). Datenpunkte: Stufe Mittelstufe, weiblich: 2; Stufe Mittelstufe, männlich: 2.22; Stufe Oberstufe, weiblich: 2.17; Stufe Oberstufe, männlich: nicht ausgewiesen; Stufe Unterstufe, weiblich: 2.60; Stufe Unterstufe, männlich: 2.11. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 19,
+    "title": "Wettbewerbsteilnahmen",
+    "alt": "Wettbewerbsteilnahmen. Balkendiagramm vergleicht die Anzahl von Wettbewerbsart, gruppiert nach Geschlecht. Datenpunkte: Wettbewerbsart Gesellschaft, weiblich: <5; Wettbewerbsart Gesellschaft, männlich: 7; Wettbewerbsart MINT, weiblich: 25; Wettbewerbsart MINT, männlich: 35; Wettbewerbsart Musik, weiblich: 13; Wettbewerbsart Musik, männlich: 14; Wettbewerbsart Sport, weiblich: 12; Wettbewerbsart Sport, männlich: 17; Wettbewerbsart Sprachen, weiblich: 15; Wettbewerbsart Sprachen, männlich: 18. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 20,
+    "title": "Erfolgsquote je Wettbewerbsart",
+    "alt": "Erfolgsquote je Wettbewerbsart. Balkendiagramm vergleicht den Anteil innerhalb der Gruppe von Erfolgreiche Teilnahme nach Wettbewerbsart, gruppiert nach Geschlecht. Datenpunkte: Wettbewerbsart Gesellschaft, weiblich: nicht ausgewiesen; Wettbewerbsart Gesellschaft, männlich: 28.6%; Wettbewerbsart MINT, weiblich: 44.0%; Wettbewerbsart MINT, männlich: 25.7%; Wettbewerbsart Musik, weiblich: 76.9%; Wettbewerbsart Musik, männlich: 42.9%; Wettbewerbsart Sport, weiblich: 41.7%; Wettbewerbsart Sport, männlich: 41.2%; Wettbewerbsart Sprachen, weiblich: 46.7%; Wettbewerbsart Sprachen, männlich: 27.8%. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  }
+]

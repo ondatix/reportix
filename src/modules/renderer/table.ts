@@ -1,36 +1,32 @@
 /**
- * Table renderer — renders a TableSpec into an accessible HTML table
+ * Table renderer — renders a TableSpec into an accessible HTML crosstab
  * with proper <th scope>, <caption>, and value formatting.
- * Optionally applies row filtering, GROUP BY semantics, and a privacy
- * threshold (data protection) that masks small group counts/sums/shares.
+ *
+ * The data shaping is shared with the chart renderer: the spec is turned
+ * into a `WrangledTable` (filter → groupby rows × cols → aggregate, with
+ * per-cell data-protection flags) by the aggregation module; this renderer
+ * only lays that crosstab out as HTML. Protected cells render as
+ * `<{threshold}` instead of their value.
+ *
  * Usable independently in other projects.
  */
-import type { TableSpec, DataSet, DataProtectionConfig } from "../types";
-import {
-  aggregateField,
-  applyFilter,
-  firstValue,
-  shouldProtect,
-  type AggregationOp,
-} from "../aggregation";
+import type { TableSpec, DataSet, DataParametersConfig } from "../types";
+import { wrangleTable, showsGroupCount, type WrangledCell, type WrangledTable } from "../aggregation";
+import { t } from "../i18n";
 
-const FORMATTERS: Record<string, (v: unknown) => string> = {
+const FORMATTERS: Record<string, (v: number) => string> = {
   currency: (v) =>
-    Number(v).toLocaleString(undefined, {
+    v.toLocaleString(undefined, {
       style: "currency",
-      currency: "USD",
+      currency: "EUR",
     }),
-  percent: (v) =>
-    Number(v).toLocaleString(undefined, {
-      style: "percent",
-      minimumFractionDigits: 1,
-    }),
+  percent: (v) => `${v.toLocaleString(undefined, { maximumFractionDigits: 1 })} %`,
   integer: (v) =>
-    Number(v).toLocaleString(undefined, {
+    v.toLocaleString(undefined, {
       maximumFractionDigits: 0,
     }),
   decimal: (v) =>
-    Number(v).toLocaleString(undefined, {
+    v.toLocaleString(undefined, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }),
@@ -40,10 +36,10 @@ export function renderTable(
   spec: TableSpec,
   data: DataSet,
   container: HTMLElement,
-  dataProtection?: DataProtectionConfig
+  dataParameters?: DataParametersConfig
 ): HTMLTableElement {
-  const threshold = dataProtection?.smallestGroup ?? 0;
-  const filtered = applyFilter(data, spec.filter);
+  const threshold = dataParameters?.smallestGroup ?? 0;
+  const wrangled = wrangleTable(spec, data, threshold, dataParameters?.categoryOrder);
 
   const table = document.createElement("table");
 
@@ -55,7 +51,11 @@ export function renderTable(
 
   const thead = document.createElement("thead");
   const headerRow = document.createElement("tr");
-  for (const col of spec.columns) {
+  // `rowHeader` is empty when the spec omits `groupby.rows` (every row
+  // collapses into one "Gesamt" row). An empty <th> leaves the row-label
+  // column unnamed for screen readers, so fall back to a generic label.
+  const rowHeader = wrangled.rowHeader || t("table.rowHeaderFallback");
+  for (const col of [rowHeader, ...wrangled.cols]) {
     const th = document.createElement("th");
     th.scope = "col";
     th.textContent = col;
@@ -65,16 +65,19 @@ export function renderTable(
   table.appendChild(thead);
 
   const tbody = document.createElement("tbody");
-  const rows = spec.aggregation ? aggregateRows(filtered, spec) : filtered;
-  for (const row of rows) {
+  wrangled.rows.forEach((rowLabel, i) => {
     const tr = document.createElement("tr");
-    for (const col of spec.columns) {
+    const th = document.createElement("th");
+    th.scope = "row";
+    th.textContent = rowLabel;
+    tr.appendChild(th);
+    wrangled.cells[i].forEach((cell) => {
       const td = document.createElement("td");
-      td.textContent = formatCell(row[col], col, spec, threshold);
+      td.textContent = formatWrangledCell(cell, wrangled, spec.format);
       tr.appendChild(td);
-    }
+    });
     tbody.appendChild(tr);
-  }
+  });
   table.appendChild(tbody);
 
   container.appendChild(table);
@@ -82,52 +85,24 @@ export function renderTable(
 }
 
 /**
- * Decide how to render a cell. Aggregated cells whose op is "count-like"
- * (count, sum, share_total, share_group) and whose value is below the
- * privacy threshold render as `<{threshold}` instead of the formatted value.
+ * Render a wrangled cell as display text. A privacy-protected cell shows
+ * `<{threshold}` only where the number *is* the group count; for every other
+ * op that label would be untrue, so it shows a neutral placeholder instead.
+ * An explicit `format` wins; otherwise share ops render as percentages, whole
+ * numbers plainly, and other values with two decimals.
  */
-function formatCell(
-  raw: unknown,
-  col: string,
-  spec: TableSpec,
-  threshold: number
+export function formatWrangledCell(
+  cell: WrangledCell,
+  wrangled: Pick<WrangledTable, "threshold" | "isShare" | "aggregation">,
+  format?: TableSpec["format"]
 ): string {
-  const op = spec.aggregation?.[col];
-  if (op && threshold > 0 && shouldProtect(op)) {
-    const num = Number(raw);
-    if (num > 0 && num < threshold) return `<${threshold}`;
+  if (cell.protected) {
+    return showsGroupCount(wrangled.aggregation)
+      ? `<${wrangled.threshold}`
+      : t("agg.suppressed");
   }
-  const fmt = spec.format?.[col];
-  return fmt && FORMATTERS[fmt] ? FORMATTERS[fmt](raw) : String(raw ?? "");
-}
-
-/**
- * Apply GROUP BY semantics: rows are grouped by the columns whose op is
- * `identity` (or unspecified in the aggregation map); other columns are
- * aggregated within each group. Group keys preserve their first non-empty
- * raw value so non-numeric columns (text, dates) render correctly.
- */
-function aggregateRows(data: DataSet, spec: TableSpec): DataSet {
-  const agg = spec.aggregation!;
-  const opFor = (col: string): AggregationOp => agg[col] ?? "identity";
-
-  const groupCols = spec.columns.filter((c) => opFor(c) === "identity");
-  const valueCols = spec.columns.filter((c) => opFor(c) !== "identity");
-  const total = data.length;
-
-  const groups = new Map<string, DataSet>();
-  for (const row of data) {
-    const key = groupCols.map((c) => String(row[c] ?? "")).join(" ");
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key)!.push(row);
-  }
-
-  const out: DataSet = [];
-  for (const rows of groups.values()) {
-    const aggregated: Record<string, unknown> = {};
-    for (const col of groupCols) aggregated[col] = firstValue(rows, col);
-    for (const col of valueCols) aggregated[col] = aggregateField(rows, col, opFor(col), total);
-    out.push(aggregated);
-  }
-  return out;
+  if (format && FORMATTERS[format]) return FORMATTERS[format](cell.value);
+  if (wrangled.isShare) return FORMATTERS.percent(cell.value);
+  if (Number.isInteger(cell.value)) return FORMATTERS.integer(cell.value);
+  return FORMATTERS.decimal(cell.value);
 }

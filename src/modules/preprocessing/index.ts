@@ -13,8 +13,12 @@
  * layer (for localized warnings). Never throws — structural problems (missing
  * sheet, missing key, missing column) surface as non-blocking warnings.
  */
-import type { DataSet, DataStore, JoinDef, MutationDef, MutationCondition, PreprocessingConfig } from "../types";
+import type { DataSet, DataStore, JoinDef, MutationDef, MutationCase, MutationCondition, PreprocessingConfig } from "../types";
+import { fromColumns } from "../types";
+import type { TransformRegistry } from "../transforms";
+import { getAtPath } from "../shared/path";
 import { t } from "../i18n";
+import { matchesLeafCondition, isConfigRef } from "../shared/condition";
 
 export interface PreprocessingWarning {
   source: string;
@@ -27,6 +31,32 @@ export interface PreprocessingResult {
 }
 
 /**
+ * Restrict a preprocessing config to the datasets actually present in the
+ * store. When the data step only requests a template's required sheets (see
+ * `requiredDataForBlocks` in the config module), mutations and joins for the
+ * unrequested sheets are expected to be inapplicable — without this filter
+ * they would surface as "dataset not found" warnings. Joins are checked
+ * sequentially, so a join whose `right` is an earlier (kept) join output
+ * stays.
+ */
+export function preprocessingForStore(
+  store: DataStore,
+  config?: PreprocessingConfig
+): PreprocessingConfig | undefined {
+  if (!config) return config;
+  const available = new Set(Object.keys(store));
+  const mutations = (config.mutations ?? []).filter((m) => available.has(m.dataset));
+  const joins: JoinDef[] = [];
+  for (const join of config.joins ?? []) {
+    if (available.has(join.left) && available.has(join.right)) {
+      joins.push(join);
+      available.add(join.name);
+    }
+  }
+  return { mutations, joins };
+}
+
+/**
  * Apply every configured join in order, returning a new store with the join
  * outputs added (or overwritten when a join's `name` equals an existing key).
  * The input store is not mutated. Joins run sequentially against the evolving
@@ -34,7 +64,9 @@ export interface PreprocessingResult {
  */
 export function applyPreprocessing(
   store: DataStore,
-  config?: PreprocessingConfig
+  config?: PreprocessingConfig,
+  transforms?: TransformRegistry,
+  settings?: Record<string, unknown>
 ): PreprocessingResult {
   const out: DataStore = { ...store };
   const warnings: PreprocessingWarning[] = [];
@@ -42,7 +74,7 @@ export function applyPreprocessing(
   // Mutations first (derive columns on raw sheets), then joins (which can
   // propagate the derived columns to other datasets).
   for (const mutation of config?.mutations ?? []) {
-    const { dataset, warnings: w } = runMutation(out, mutation);
+    const { dataset, warnings: w } = runMutation(out, mutation, transforms, settings);
     warnings.push(...w);
     if (dataset) out[mutation.dataset] = dataset;
   }
@@ -60,78 +92,177 @@ export function applyPreprocessing(
 
 function runMutation(
   store: DataStore,
-  m: MutationDef
+  m: MutationDef,
+  transforms?: TransformRegistry,
+  settings?: Record<string, unknown>
 ): { dataset?: DataSet; warnings: PreprocessingWarning[] } {
   const warnings: PreprocessingWarning[] = [];
   const src = `${m.dataset}.${m.column}`;
   const rows = store[m.dataset];
+  const sources = fromColumns(m);
 
   if (!rows) {
     warnings.push({ source: src, message: t("mutation.missingDataset", { dataset: m.dataset }) });
     return { warnings };
   }
-  if (rows.length > 0 && !columnUnion(rows).has(m.from)) {
-    warnings.push({ source: src, message: t("mutation.missingColumn", { column: m.from, dataset: m.dataset }) });
-    // Proceed: every row fails the condition and receives the `else` value.
+
+  const present = rows.length > 0 ? columnUnion(rows) : undefined;
+  const missing = present ? sources.filter((c) => !present.has(c)) : [];
+  if (missing.length > 0) {
+    // A condition mutation proceeds (every row falls through to `else`); an
+    // `fn` mutation does not — a transform handed columns of `undefined` would
+    // produce a column of silent nonsense rather than nothing. The two say so
+    // differently, because the outcome differs.
+    const key = m.fn ? "mutation.missingColumnFn" : "mutation.missingColumn";
+    warnings.push({
+      source: src,
+      message: t(key, { column: missing.join(", "), dataset: m.dataset, target: m.column }),
+    });
+    if (m.fn) return { warnings };
   }
 
+  if (m.fn) {
+    const result = runTransform(rows, m, sources, transforms, src, settings);
+    return { dataset: result.dataset, warnings: [...warnings, ...result.warnings] };
+  }
+
+  const from = sources[0];
+
+  // Top-level `when`/`then` (if present) is the first elif branch, followed by `cases`.
+  // `{ from_config }` values are resolved into fresh case objects, never
+  // written back into the config's own.
+  const cases: MutationCase[] = [];
+  if (m.when !== undefined || m.then !== undefined) cases.push({ when: m.when ?? {}, then: m.then ?? "" });
+  if (m.cases) cases.push(...m.cases);
+  const resolvedCases = cases.map((c) => ({ ...c, when: resolveConditionRefs(c.when, settings) }));
+
   const elseValue = m.else ?? "";
-  const result: DataSet = rows.map((row) => ({
-    ...row,
-    [m.column]: matchesCondition(row[m.from], m.when) ? m.then : elseValue,
-  }));
+  let elseHits = 0;
+  const result: DataSet = rows.map((row) => {
+    const value = row[from];
+    const hit = resolvedCases.find((c) => matchesLeafCondition(value, c.when));
+    if (!hit) elseHits++;
+    return { ...row, [m.column]: hit ? hit.then : elseValue };
+  });
+
+  if (elseHits > 0 && m.elseWarning) {
+    warnings.push({
+      source: src,
+      message: `${t("mutation.elseHit", { dataset: m.dataset, column: m.column, count: elseHits })} ${m.elseWarning}`,
+    });
+  }
 
   return { dataset: result, warnings };
 }
 
-/** Evaluate the if-else condition against a source value (AND of all predicates). */
-function matchesCondition(value: unknown, when?: MutationCondition): boolean {
-  // No condition → "is truthy".
-  if (!when || Object.keys(when).length === 0) return isTruthy(value);
-
-  const s = asStr(value);
-  const num = Number(s);
-  const checks: boolean[] = [];
-
-  if (when.equals !== undefined) checks.push(toList(when.equals).some((v) => asStr(v) === s));
-  if (when.in !== undefined) checks.push(toList(when.in).some((v) => asStr(v) === s));
-  if (when.notEquals !== undefined) checks.push(!toList(when.notEquals).some((v) => asStr(v) === s));
-  if (when.contains !== undefined) checks.push(toList(when.contains).some((v) => s.includes(asStr(v))));
-  if (when.startsWith !== undefined) checks.push(toList(when.startsWith).some((v) => s.startsWith(asStr(v))));
-  if (when.endsWith !== undefined) checks.push(toList(when.endsWith).some((v) => s.endsWith(asStr(v))));
-  if (when.matches !== undefined) checks.push(safeRegex(when.matches).test(s));
-  if (when.gt !== undefined) checks.push(!Number.isNaN(num) && num > when.gt);
-  if (when.gte !== undefined) checks.push(!Number.isNaN(num) && num >= when.gte);
-  if (when.lt !== undefined) checks.push(!Number.isNaN(num) && num < when.lt);
-  if (when.lte !== undefined) checks.push(!Number.isNaN(num) && num <= when.lte);
-  if (when.empty !== undefined) checks.push(when.empty ? s === "" : s !== "");
-  if (when.truthy !== undefined) checks.push(when.truthy ? isTruthy(value) : !isTruthy(value));
-
-  // An otherwise-empty `when` object falls back to truthy (defensive).
-  return checks.length > 0 ? checks.every(Boolean) : isTruthy(value);
-}
-
-function toList<T>(v: T | T[]): T[] {
-  return Array.isArray(v) ? v : [v];
-}
-
-function safeRegex(source: string): RegExp {
-  try {
-    return new RegExp(source);
-  } catch {
-    return /$.^/; // never matches
+/**
+ * Compute a derived column with a registered transform (see the transforms
+ * module). The transform is column-wise: it gets one array per `from:` column
+ * and returns the finished column. Every failure mode — unknown name, a throw,
+ * a non-array or wrong-length result — degrades to a warning and leaves the
+ * dataset untouched, so a broken transform can never write ragged rows or
+ * abort the pipeline.
+ */
+function runTransform(
+  rows: DataSet,
+  m: MutationDef,
+  sources: string[],
+  transforms: TransformRegistry | undefined,
+  src: string,
+  settings?: Record<string, unknown>
+): { dataset?: DataSet; warnings: PreprocessingWarning[] } {
+  const fn = transforms?.[m.fn!];
+  if (!fn) {
+    return { warnings: [{ source: src, message: t("mutation.unknownFn", { fn: m.fn! }) }] };
   }
+
+  const columns = sources.map((name) => rows.map((row) => row[name]));
+  let out: unknown;
+  try {
+    out = fn(columns, {
+      rowCount: rows.length,
+      options: resolveOptions(m.options, settings),
+      dataset: m.dataset,
+      column: m.column,
+    });
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err);
+    return { warnings: [{ source: src, message: t("mutation.fnFailed", { fn: m.fn!, detail }) }] };
+  }
+
+  if (!Array.isArray(out) || out.length !== rows.length) {
+    return {
+      warnings: [
+        {
+          source: src,
+          message: t("mutation.fnBadResult", {
+            fn: m.fn!,
+            expected: rows.length,
+            got: Array.isArray(out) ? out.length : typeof out,
+          }),
+        },
+      ],
+    };
+  }
+
+  return { dataset: rows.map((row, i) => ({ ...row, [m.column]: out[i] })), warnings: [] };
 }
 
-const TRUTHY = new Set(["true", "ja", "yes", "1"]);
-function isTruthy(value: unknown): boolean {
-  if (typeof value === "boolean") return value;
-  if (typeof value === "number") return value !== 0;
-  return TRUTHY.has(asStr(value).toLowerCase());
+/** Condition keys whose value may be a `{ from_config }` reference. */
+const REF_KEYS = ["equals", "in", "notEquals", "contains", "startsWith", "endsWith"] as const;
+
+/**
+ * Replace `{ from_config: "path" }` values in a condition with what that path
+ * holds in the resolved AppConfig — how a mutation reads a value list the user
+ * picked in the data-validation step (e.g. which profiles count as STEM).
+ * An unresolvable path becomes an empty list, which matches nothing. Returns a
+ * copy; the config's own condition object is left untouched.
+ */
+function resolveConditionRefs(
+  when: MutationCondition,
+  settings: Record<string, unknown> | undefined
+): MutationCondition {
+  if (!REF_KEYS.some((k) => isConfigRef(when[k]))) return when;
+  const out: Record<string, unknown> = { ...when };
+  for (const key of REF_KEYS) {
+    const v = when[key];
+    if (!isConfigRef(v)) continue;
+    const resolved = getAtPath(settings ?? {}, v.from_config);
+    out[key] = Array.isArray(resolved)
+      ? resolved
+      : resolved === undefined || resolved === null
+        ? []
+        : [resolved];
+  }
+  return out as MutationCondition;
 }
 
-function asStr(value: unknown): string {
-  return String(value ?? "").normalize("NFC").trim();
+/**
+ * Resolve a mutation's `options:` before handing them to a transform.
+ *
+ * A value written as `{ from_config: "dotted.path" }` is looked up in
+ * `settings` — the **resolved** AppConfig, i.e. after the user's parameter
+ * answers have been merged in. That is the difference between a transform
+ * seeing the config's bundled default and seeing what the user actually
+ * entered; a literal in the YAML would only ever be the former.
+ *
+ * Anything else passes through untouched, and an unresolvable path yields
+ * `undefined` (the transform decides what that means) rather than an error.
+ */
+function resolveOptions(
+  options: Record<string, unknown> | undefined,
+  settings: Record<string, unknown> | undefined
+): Record<string, unknown> {
+  if (!options) return {};
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(options)) {
+    const ref =
+      value && typeof value === "object" && !Array.isArray(value)
+        ? (value as Record<string, unknown>).from_config
+        : undefined;
+    out[key] = typeof ref === "string" ? getAtPath(settings ?? {}, ref) : value;
+  }
+  return out;
 }
 
 interface ResolvedSelect {

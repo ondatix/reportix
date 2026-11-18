@@ -18,3 +18,432 @@ template:
         de: "Schuljahresbericht (Kurzfassung)"
         en: "Annual school report (short)"
       file: template_mandatory.md
+
+  # ── Question catalog ────────────────────────────────────────────────
+  # Consumed ONLY by scripts/gen-templates.ts (the runtime config parser
+  # ignores this key). A flat, ordered list rendered into the master's
+  # `{{questions}}` placeholder; the `{{tables}}` placeholder in the appendix
+  # receives one crosstab table per question, built from the same `table:`
+  # spec and the same `caption:`.
+  #
+  # Two entry types, discriminated by their first key:
+  #   - section: <heading>          # emits "### <heading>" + a Definitionen
+  #     definitions: <markdown>     #   callout; a Fazit callout is appended
+  #                                 #   automatically after the section's last
+  #                                 #   question. Sections with no included
+  #                                 #   question are skipped entirely.
+  #   - title: <question>           # emits "#### <question>" + the parts below
+  #     include: full               # template id(s); omit ⇒ every template
+  #     comment: Optional           # italic status line under the heading
+  #     datenquelle: Schulverwaltung   # source line: "> Datenquelle: … ·
+  #     personenkreis: Alle         #   Personenkreis: … · Datensatz: <table.data>"
+  #     caption: "…"                # figure caption + appendix-table caption
+  #     text: "…"                   # omit/null ⇒ default freetext placeholder
+  #     table:                      # the wrangled crosstab both blocks share
+  #       data: <dataset>           #   DataStore key (sheet or join output)
+  #       filter: <column>          #   truthy-row filter; omit ⇒ all rows
+  #       groupby:
+  #         rows: <column>          #   table rows / chart categories
+  #         cols: <column>          #   optional: table columns / chart series
+  #       aggregation: count        #   count | sum | mean | min | max | median
+  #                                 #   | share_total | share_group
+  #       value: <column>           #   required by sum/mean/min/max/median/share_group
+  #       format: currency          #   optional cell format (integer|decimal|percent|currency)
+  #     chart:                      # presentation only
+  #       type: bar                 #   bar | line | pie | doughnut | pyramid | distance
+  #       stacked: true             #   bar/line: stack the series
+  #       title: "…"
+  questions:
+    # `definitions:` entries reference the column/mutation/sheet definitions in
+    # data.yaml (single source of truth). Entry forms:
+    #   - <name>                       # term = data.yaml name
+    #   - term: <shown>, ref: <name>   # displayed term differs from data.yaml name
+    #   - term: <shown>, text: <text>  # verbatim — concept without data.yaml entry
+
+    # ═══ Schülerschaft ═══
+    - section: Schülerschaft
+      definitions:
+        - Geschlecht
+        - Jahrgangsstufe
+        - Stufe
+        - Ausbildungsrichtung
+        - MINT-Zweig
+        - Erste Fremdsprache
+        - Migrationshintergrund
+
+    - title: "Wie viele Schülerinnen und Schüler besuchen unsere Schule?"
+      datenquelle: Schulverwaltung
+      personenkreis: Alle
+      caption: "Verteilung der Schülerschaft nach Geschlecht (Anteile in Prozent)."
+      table:
+        data: Schueler
+        groupby:
+          cols: Geschlecht
+        aggregation: share_total
+      chart:
+        type: pie
+        title: Schülerschaft nach Geschlecht
+
+    - title: "Wie verteilen sich die Schülerinnen und Schüler auf die Jahrgangsstufen?"
+      datenquelle: Schulverwaltung
+      personenkreis: Alle
+      caption: "Anzahl der Schülerinnen und Schüler je Jahrgangsstufe."
+      table:
+        data: Schueler
+        groupby:
+          rows: Jahrgangsstufe
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: pyramid
+        title: Jahrgangsstufen nach Geschlecht
+
+    - title: "Wie verteilen sich die Schülerinnen und Schüler auf die Ausbildungsrichtungen?"
+      datenquelle: Schulverwaltung
+      personenkreis: Alle
+      caption: "Anzahl der Schülerinnen und Schüler je Ausbildungsrichtung."
+      table:
+        data: Schueler
+        groupby:
+          rows: Ausbildungsrichtung
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        stacked: true
+        title: Ausbildungsrichtungen nach Geschlecht
+
+    - title: "Wie verteilen sich Mädchen und Jungen auf MINT- und andere Zweige?"
+      include: full
+      comment: Optional
+      datenquelle: Schulverwaltung
+      personenkreis: Alle
+      caption: "Anzahl der Schülerinnen und Schüler nach Stufe und MINT-Zweig."
+      table:
+        data: Schueler
+        groupby:
+          rows: [Stufe, MINT-Zweig]
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        title: MINT-Zweig je Stufe
+
+    - title: "Welche erste Fremdsprache wählen die Schülerinnen und Schüler?"
+      include: full
+      comment: Optional
+      datenquelle: Schulverwaltung
+      personenkreis: Alle
+      caption: "Anzahl der Schülerinnen und Schüler je erster Fremdsprache."
+      table:
+        data: Schueler
+        groupby:
+          rows: Erste Fremdsprache
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        title: Erste Fremdsprache nach Geschlecht
+
+    - title: "Wie hoch ist der Anteil mit Migrationshintergrund je Stufe?"
+      datenquelle: Schulverwaltung
+      personenkreis: Alle
+      caption: "Anteil der Schülerinnen und Schüler mit Migrationshintergrund je Stufe."
+      table:
+        data: Schueler
+        groupby:
+          rows: Stufe
+          cols: Geschlecht
+        aggregation: share_group
+        value: Migrationshintergrund
+      chart:
+        type: bar
+        title: Migrationshintergrund je Stufe
+
+    # ═══ Anmeldungen und Eintritte ═══
+    - section: Anmeldungen und Eintritte
+      definitions:
+        - term: Anmeldung
+          ref: Zeitraum_Anmeldung   # sheet definition
+        - term: Eintritt
+          ref: Zeitraum_Eintritt
+        - Herkunftsschulart
+        - Sprengelzugehörigkeit
+
+    - title: "Aus welchen Schularten kommen die Anmeldungen?"
+      datenquelle: Anmeldeverwaltung
+      personenkreis: Alle Anmeldungen
+      caption: "Anzahl der Anmeldungen je Herkunftsschulart."
+      table:
+        data: Zeitraum_Anmeldung
+        groupby:
+          rows: Herkunftsschulart
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        stacked: true
+        title: Anmeldungen nach Herkunftsschulart
+
+    - title: "Wie viele Anmeldungen kommen aus dem Sprengel bzw. von Gastschülern?"
+      include: full
+      comment: Optional
+      datenquelle: Anmeldeverwaltung
+      personenkreis: Alle Anmeldungen
+      caption: "Anteil der Anmeldungen aus dem Sprengel und von Gastschülerinnen und Gastschülern."
+      table:
+        data: Zeitraum_Anmeldung
+        groupby:
+          rows: Sprengelzugehörigkeit
+        aggregation: share_total
+      chart:
+        type: doughnut
+        title: Sprengel und Gastschüler
+
+    - title: "In welche Jahrgangsstufen treten neue Schülerinnen und Schüler ein?"
+      datenquelle: Schulverwaltung
+      personenkreis: Eintritte
+      caption: "Anzahl der Eintritte je Jahrgangsstufe."
+      table:
+        data: Zeitraum_Eintritt
+        groupby:
+          rows: Jahrgangsstufe
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        title: Eintritte je Jahrgangsstufe
+
+    # ═══ Förderung ═══
+    - section: Förderung
+      definitions:
+        - Förderart
+        - Fördermaßnahme bewilligt
+        - Fördermaßnahme abgeschlossen
+        - Ganztagsbetreuung
+        - Inklusion
+
+    - title: "Wie viele Fördermaßnahmen wurden je Förderart bewilligt?"
+      datenquelle: Förderkoordination
+      personenkreis: Bewilligte Maßnahmen
+      caption: "Anzahl der bewilligten Fördermaßnahmen je Förderart."
+      table:
+        data: Zeitraum_Foerdermassnahme
+        filter: Fördermaßnahme bewilligt
+        groupby:
+          rows: Förderart
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        title: Bewilligte Fördermaßnahmen
+
+    - title: "Wie viele bewilligte Fördermaßnahmen wurden erfolgreich abgeschlossen?"
+      include: full
+      datenquelle: Förderkoordination
+      personenkreis: Bewilligte Maßnahmen
+      caption: "Anteil erfolgreich abgeschlossener Fördermaßnahmen je Förderart."
+      table:
+        data: Zeitraum_Foerdermassnahme
+        filter: Fördermaßnahme bewilligt
+        groupby:
+          rows: Förderart
+          cols: Geschlecht
+        aggregation: share_group
+        value: Fördermaßnahme abgeschlossen
+      chart:
+        type: distance
+        title: Abschlussquote der Fördermaßnahmen
+
+    - title: "Wie viele Schülerinnen und Schüler nutzen die Ganztagsbetreuung?"
+      datenquelle: Schulverwaltung
+      personenkreis: Alle
+      caption: "Anteil der Schülerinnen und Schüler in Ganztagsbetreuung je Jahrgangsstufe."
+      table:
+        data: Schueler
+        groupby:
+          rows: Jahrgangsstufe
+          cols: Geschlecht
+        aggregation: share_group
+        value: Ganztagsbetreuung
+      chart:
+        type: line
+        title: Ganztagsbetreuung je Jahrgangsstufe
+
+    - title: "Wie viele Schülerinnen und Schüler werden inklusiv beschult?"
+      include: full
+      comment: Optional
+      datenquelle: Schulverwaltung
+      personenkreis: Inklusiv beschulte Schülerinnen und Schüler
+      caption: "Anzahl der inklusiv beschulten Schülerinnen und Schüler je Stufe."
+      table:
+        data: Schueler
+        filter: Inklusion
+        groupby:
+          rows: Stufe
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        title: Inklusion je Stufe
+
+    # ═══ Leistungen und Vorrückung ═══
+    - section: Leistungen und Vorrückung
+      definitions:
+        - Notendurchschnitt
+        - Oberstufe
+        - Ergebnis
+        - Vorgerückt
+        - Wiederholung
+        - Antrag
+
+    - title: "Wie ist der Notendurchschnitt je Jahrgangsstufe?"
+      datenquelle: Schulverwaltung
+      personenkreis: Alle
+      caption: "Durchschnittlicher Zeugnisnotendurchschnitt je Jahrgangsstufe (1,0 = sehr gut)."
+      table:
+        data: Schueler
+        groupby:
+          rows: Jahrgangsstufe
+          cols: Geschlecht
+        aggregation: mean
+        value: Notendurchschnitt
+        format: decimal
+      chart:
+        type: distance
+        title: Notendurchschnitt je Jahrgangsstufe
+
+    - title: "Wie ist der Notendurchschnitt in der Oberstufe je Ausbildungsrichtung?"
+      include: full
+      comment: Optional
+      datenquelle: Schulverwaltung
+      personenkreis: Oberstufe
+      caption: "Durchschnittlicher Zeugnisnotendurchschnitt in der Oberstufe je Ausbildungsrichtung."
+      table:
+        data: Schueler
+        filter: Oberstufe
+        groupby:
+          rows: Ausbildungsrichtung
+          cols: Geschlecht
+        aggregation: mean
+        value: Notendurchschnitt
+        format: decimal
+      chart:
+        type: bar
+        title: Notendurchschnitt in der Oberstufe
+
+    - title: "Wie viele Schülerinnen und Schüler sind vorgerückt?"
+      datenquelle: Schulverwaltung
+      personenkreis: Alle Entscheidungen am Schuljahresende
+      caption: "Anteil der Vorrückungen (auch auf Probe) je Stufe."
+      table:
+        data: Zeitraum_Vorrueckung
+        groupby:
+          rows: Stufe
+          cols: Geschlecht
+        aggregation: share_group
+        value: Vorgerückt
+      chart:
+        type: bar
+        title: Vorrückungsquote je Stufe
+
+    - title: "Wie viele Wiederholungen erfolgten auf Antrag der Eltern?"
+      include: full
+      comment: Optional
+      datenquelle: Schulverwaltung
+      personenkreis: Wiederholungen
+      caption: "Anzahl der Wiederholungen nach Antrag (Ja = auf Antrag der Eltern)."
+      table:
+        data: Zeitraum_Vorrueckung
+        filter: Wiederholung
+        groupby:
+          rows: Antrag
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        stacked: true
+        title: Wiederholungen auf Antrag
+
+    # ═══ Beurlaubungen ═══
+    - section: Beurlaubungen
+      definitions:
+        - term: Beurlaubung
+          ref: Zeitraum_Beurlaubung
+        - Beurlaubungsgrund
+        - Familiärer Anlass
+        - Beurlaubungsdauer
+
+    - title: "Aus welchen Gründen werden Schülerinnen und Schüler beurlaubt?"
+      include: full
+      datenquelle: Sekretariat
+      personenkreis: Alle Beurlaubungen
+      caption: "Anzahl der Beurlaubungen je Beurlaubungsgrund."
+      table:
+        data: Zeitraum_Beurlaubung
+        groupby:
+          rows: Beurlaubungsgrund
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        title: Beurlaubungsgründe
+
+    - title: "Wie lange dauern Beurlaubungen aus familiärem Anlass?"
+      include: full
+      datenquelle: Sekretariat
+      personenkreis: Beurlaubungen aus familiärem Anlass
+      caption: "Durchschnittliche Beurlaubungsdauer (Tage im Berichtszeitraum) je Stufe, nur Beurlaubungen aus familiärem Anlass."
+      table:
+        data: Zeitraum_Beurlaubung
+        filter: Familiärer Anlass
+        groupby:
+          rows: Stufe
+          cols: Geschlecht
+        aggregation: mean
+        value: Beurlaubungsdauer
+        format: decimal
+      chart:
+        type: bar
+        title: Dauer familiärer Beurlaubungen
+
+    # ═══ Wettbewerbe ═══
+    - section: Wettbewerbe
+      definitions:
+        - term: Wettbewerbsteilnahme
+          ref: Zeitraum_Wettbewerb
+        - Wettbewerbsart
+        - Erfolgreiche Teilnahme
+
+    - title: "An welchen Wettbewerben nehmen Schülerinnen und Schüler teil?"
+      include: full
+      datenquelle: Fachschaften
+      personenkreis: Alle Teilnahmen
+      caption: "Anzahl der Wettbewerbsteilnahmen je Wettbewerbsart."
+      table:
+        data: Zeitraum_Wettbewerb
+        groupby:
+          rows: Wettbewerbsart
+          cols: Geschlecht
+        aggregation: count
+      chart:
+        type: bar
+        stacked: true
+        title: Wettbewerbsteilnahmen
+
+    - title: "Wie erfolgreich sind die Teilnahmen?"
+      include: full
+      comment: Optional
+      datenquelle: Fachschaften
+      personenkreis: Alle Teilnahmen
+      caption: "Anteil erfolgreicher Teilnahmen (Platzierung oder Urkunde) je Wettbewerbsart."
+      table:
+        data: Zeitraum_Wettbewerb
+        groupby:
+          rows: Wettbewerbsart
+          cols: Geschlecht
+        aggregation: share_group
+        value: Erfolgreiche Teilnahme
+      chart:
+        type: bar
+        title: Erfolgsquote je Wettbewerbsart
