@@ -33,6 +33,14 @@ export function parseTemplate(markdown: string): TemplateBlock[] {
       delete spec["alt-intro"];
     }
 
+    // Hand-written specs may omit the aggregation op — default to count.
+    const tableSpec = (blockType === "chart" ? spec.table : spec) as
+      | Record<string, unknown>
+      | undefined;
+    if (tableSpec && typeof tableSpec === "object" && !tableSpec.aggregation) {
+      tableSpec.aggregation = "count";
+    }
+
     if (blockType === "chart") {
       blocks.push({ type: "chart", spec: spec as unknown as ChartSpec });
     } else {

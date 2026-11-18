@@ -6,6 +6,7 @@
 import { describe, it, expect } from "vitest";
 import { applyPreprocessing } from "../../src/modules/preprocessing";
 import type { DataStore } from "../../src/modules/types";
+import type { ColumnTransform } from "../../src/modules/transforms";
 
 function store(): DataStore {
   return {
@@ -114,6 +115,87 @@ describe("applyPreprocessing — mutations", () => {
     expect(missingCol.store.Stichtag.every((r) => r.X === "b")).toBe(true); // all else
   });
 
+  it("cases: evaluates an elif chain in order, first match wins", () => {
+    const s = store();
+    s.Stichtag = [{ Gruppe: "A11" }, { Gruppe: "E10" }, { Gruppe: "" }, { Gruppe: "Z9" }];
+    const { store: out } = applyPreprocessing(s, {
+      mutations: [
+        {
+          dataset: "Stichtag",
+          column: "Status",
+          from: "Gruppe",
+          cases: [
+            { when: { empty: true }, then: "" },
+            { when: { startsWith: ["A", "B", "R", "W"] }, then: "Beamte" },
+            { when: { startsWith: "E" }, then: "Tarif" },
+          ],
+          else: "Unbekannt",
+        },
+      ],
+    });
+    expect(out.Stichtag.map((r) => r.Status)).toEqual(["Beamte", "Tarif", "", "Unbekannt"]);
+  });
+
+  it("elseWarning: emits a warning once when the else branch fires, with the row count", () => {
+    const s = store();
+    s.Stichtag = [{ Gruppe: "A11" }, { Gruppe: "Z9" }, { Gruppe: "Z8" }];
+    const { warnings } = applyPreprocessing(s, {
+      mutations: [
+        {
+          dataset: "Stichtag",
+          column: "Status",
+          from: "Gruppe",
+          cases: [{ when: { startsWith: "A" }, then: "Beamte" }],
+          else: "Unbekannt",
+          elseWarning: "Unerwartete Gruppe außerhalb der bekannten Präfixe.",
+        },
+      ],
+    });
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0].message).toContain("2");
+    expect(warnings[0].message).toContain("Unerwartete Gruppe außerhalb der bekannten Präfixe.");
+  });
+
+  it("elseWarning: no warning when every row matches a case", () => {
+    const { warnings } = applyPreprocessing(store(), {
+      mutations: [
+        {
+          dataset: "Stichtag",
+          column: "Status",
+          from: "Gruppe",
+          cases: [{ when: { startsWith: ["A", "E", "B"] }, then: "x" }], // matches every Gruppe in store()
+          else: "Unbekannt",
+          elseWarning: "sollte nie feuern",
+        },
+      ],
+    });
+    expect(warnings).toEqual([]);
+  });
+
+  it("without elseWarning, the else branch stays silent even when hit", () => {
+    const { warnings } = applyPreprocessing(store(), {
+      mutations: [{ dataset: "Stichtag", column: "Status", from: "Gruppe", when: { equals: "nope" }, then: "x", else: "y" }],
+    });
+    expect(warnings).toEqual([]);
+  });
+
+  it("top-level when/then acts as the first case, ahead of `cases`", () => {
+    const { store: out } = applyPreprocessing(store(), {
+      mutations: [
+        {
+          dataset: "Stichtag",
+          column: "Status",
+          from: "Gruppe",
+          when: { empty: true },
+          then: "leer",
+          cases: [{ when: { startsWith: ["A", "B"] }, then: "Beamte" }],
+          else: "Tarif",
+        },
+      ],
+    });
+    expect(out.Stichtag.map((r) => r.Status)).toEqual(["Beamte", "Tarif", "Beamte"]);
+  });
+
   it("does not mutate the input store", () => {
     const s = store();
     const before = JSON.stringify(s);
@@ -121,5 +203,141 @@ describe("applyPreprocessing — mutations", () => {
       mutations: [{ dataset: "Stichtag", column: "X", from: "Gruppe", when: { equals: "A11" }, then: "y" }],
     });
     expect(JSON.stringify(s)).toBe(before);
+  });
+});
+
+describe("mutations with a transform function (fn:)", () => {
+  const rows: DataStore = {
+    Urlaub: [
+      { PersNr: 1, von: 1, bis: 11 },
+      { PersNr: 2, von: 5, bis: 10 },
+    ],
+  };
+
+  /** Difference of two numeric columns — stands in for a real transform. */
+  const registry = {
+    span: ((columns, ctx) =>
+      Array.from({ length: ctx.rowCount }, (_, i) => {
+        const end = Number(columns[0][i]);
+        const start = Number(columns[1][i]);
+        return end - start + (ctx.options.inclusive === true ? 1 : 0);
+      })) as ColumnTransform,
+    boom: (() => {
+      throw new Error("kaputt");
+    }) as ColumnTransform,
+    short: (() => [1]) as ColumnTransform,
+    notAnArray: (() => 5 as unknown as unknown[]) as ColumnTransform,
+  };
+
+  const mutation = (extra: Record<string, unknown> = {}) => ({
+    mutations: [
+      { dataset: "Urlaub", column: "Dauer", fn: "span", from: ["bis", "von"], ...extra },
+    ],
+  });
+
+  it("derives the column from several source columns, in the order given", () => {
+    const { store, warnings } = applyPreprocessing(rows, mutation() as never, registry);
+    expect(warnings).toEqual([]);
+    expect(store.Urlaub.map((r) => r.Dauer)).toEqual([10, 5]);
+  });
+
+  it("passes options through verbatim", () => {
+    const { store } = applyPreprocessing(
+      rows,
+      mutation({ options: { inclusive: true } }) as never,
+      registry
+    );
+    expect(store.Urlaub.map((r) => r.Dauer)).toEqual([11, 6]);
+  });
+
+  it("leaves the dataset untouched and warns when the function is unknown", () => {
+    const cfg = { mutations: [{ dataset: "Urlaub", column: "Dauer", fn: "fehlt", from: ["bis"] }] };
+    const { store, warnings } = applyPreprocessing(rows, cfg as never, registry);
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0].message).toContain("fehlt");
+    expect(store.Urlaub[0].Dauer).toBeUndefined();
+  });
+
+  it("catches a throwing transform", () => {
+    const { store, warnings } = applyPreprocessing(rows, mutation({ fn: "boom" }) as never, registry);
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0].message).toContain("kaputt");
+    expect(store.Urlaub[0].Dauer).toBeUndefined();
+  });
+
+  it("rejects a result that is not an array of one entry per row", () => {
+    for (const fn of ["short", "notAnArray"]) {
+      const { store, warnings } = applyPreprocessing(rows, mutation({ fn }) as never, registry);
+      expect(warnings).toHaveLength(1);
+      expect(store.Urlaub[0].Dauer).toBeUndefined();
+    }
+  });
+
+  it("does not run the transform when a source column is missing", () => {
+    // A condition mutation falls through to `else`; an fn mutation must not
+    // compute a column out of undefined values.
+    const cfg = {
+      mutations: [{ dataset: "Urlaub", column: "Dauer", fn: "span", from: ["bis", "fehlt"] }],
+    };
+    const { store, warnings } = applyPreprocessing(rows, cfg as never, registry);
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0].message).toContain("fehlt");
+    expect(store.Urlaub[0].Dauer).toBeUndefined();
+  });
+
+  describe("options resolved from the config (`from_config`)", () => {
+    const echo = {
+      echoOption: ((_columns, ctx) =>
+        Array.from({ length: ctx.rowCount }, () => ctx.options.limit)) as ColumnTransform,
+    };
+    const cfg = (limit: unknown) => ({
+      mutations: [
+        { dataset: "Urlaub", column: "L", fn: "echoOption", from: ["bis"], options: { limit } },
+      ],
+    });
+
+    it("looks the value up in the settings passed to applyPreprocessing", () => {
+      const { store } = applyPreprocessing(
+        rows,
+        cfg({ from_config: "dataParameters.periodEnd" }) as never,
+        echo,
+        { dataParameters: { periodEnd: "2025-12-31" } }
+      );
+      expect(store.Urlaub.map((r) => r.L)).toEqual(["2025-12-31", "2025-12-31"]);
+    });
+
+    it("reflects the user's answer, not the bundled default", () => {
+      // The whole point: the same config yields a different column once the
+      // user's parameter values have been merged into the settings.
+      const userEdited = { dataParameters: { periodEnd: "2025-06-30" } };
+      const { store } = applyPreprocessing(
+        rows,
+        cfg({ from_config: "dataParameters.periodEnd" }) as never,
+        echo,
+        userEdited
+      );
+      expect(store.Urlaub[0].L).toBe("2025-06-30");
+    });
+
+    it("passes a plain option through untouched", () => {
+      const { store } = applyPreprocessing(rows, cfg(7) as never, echo, {});
+      expect(store.Urlaub[0].L).toBe(7);
+    });
+
+    it("yields undefined for an unresolvable path, without warning", () => {
+      const { store, warnings } = applyPreprocessing(
+        rows,
+        cfg({ from_config: "nope.missing" }) as never,
+        echo,
+        {}
+      );
+      expect(warnings).toEqual([]);
+      expect(store.Urlaub[0].L).toBeUndefined();
+    });
+  });
+
+  it("warns when no registry was supplied at all", () => {
+    const { warnings } = applyPreprocessing(rows, mutation() as never);
+    expect(warnings).toHaveLength(1);
   });
 });

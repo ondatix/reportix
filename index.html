@@ -1,15 +1,34 @@
 <!doctype html>
-<html lang="en">
+<!-- lang matches DEFAULT_LOCALE ("de") so the pre-JS paint is labelled
+     correctly; initApp then keeps it in sync with the language selector. -->
+<html lang="de">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="/img/ondatix_Bildmarke_dunkler_Hintergrund_SVG.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- <meta http-equiv="Content-Security-Policy"
-          content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" /> -->
+    <!-- The Content-Security-Policy is delivered as a response header, not as a
+         meta tag: only a header can carry frame-ancestors, and keeping it in one
+         place (nginx.conf, alongside the other security headers) stops the two
+         copies from drifting apart. Deploying dist/ to a plain static host means
+         configuring the equivalent headers there — see nginx.conf. -->
     <title>reportix</title>
   </head>
   <body>
-    <div id="app"></div>
+    <!-- A static stand-in for the shell initApp builds (it replaces everything
+         inside #app on startup). Without it, anything reading the page before
+         or without JavaScript — some accessibility crawlers, a browser with
+         scripts off — finds no <h1> and no <main>, only an empty div. The
+         heading text matches the one in src/app.ts. -->
+    <div id="app">
+      <header>
+        <h1>reportix</h1>
+      </header>
+      <main id="main-content">
+        <noscript>
+          <p>Diese Anwendung benötigt JavaScript. Bitte aktivieren Sie JavaScript in Ihrem Browser.</p>
+        </noscript>
+      </main>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

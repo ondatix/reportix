@@ -55,6 +55,13 @@ marked.use({ extensions: [calloutExtension] });
 /**
  * Render a Markdown string to HTML.
  * Supports simple {{parameter}} interpolation from collected values.
+ *
+ * The template itself is developer-authored and trusted (it may contain HTML),
+ * but parameter values come from the user's form input and are **escaped**
+ * before substitution: the result is assigned via `innerHTML` by the renderer,
+ * so an unescaped value would execute as markup in the preview and carry into
+ * the DOCX export. Escaping happens before parsing, so entities survive `marked`
+ * untouched and render as the literal characters the user typed.
  */
 export function renderText(
   markdown: string,
@@ -67,7 +74,7 @@ export function renderText(
       /\{\{\s*(\w+)\s*\}\}/g,
       (_match, key: string) => {
         const value = parameters[key];
-        return value !== undefined ? String(value) : `{{${key}}}`;
+        return value !== undefined ? escapeHTML(String(value)) : `{{${key}}}`;
       }
     );
   }
@@ -80,5 +87,6 @@ function escapeHTML(s: string): string {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }

@@ -1,8 +1,8 @@
 export:
-  filename: schuljahresbericht.docx  # bound by parameters.filename
+  filename: Schuljahresbericht.docx # bound by parameters.filename
   locale: de-DE                # bound by parameters.locale
-  section_numbering: false     # bound by parameters.section_numbering
-  toc: false                   # bound by parameters.toc
+  section_numbering: true     # bound by parameters.section_numbering
+  toc: true                   # bound by parameters.toc
 
   document:
     title: Schuljahresbericht
@@ -66,8 +66,8 @@ export:
   # `color`      = accent (left border + title), 6-digit hex without #
   # `background` = true → pale tint derived from `color`; false → no fill
   definition_box:
-    color: "1F77B4"            # blue accent
+    color: "1C6BA2"            # blue accent (darkened from 1F77B4 for 4.5:1 title contrast on its tint)
     background: true
   summary_box:
-    color: "2CA02C"            # green accent
+    color: "207520"            # green accent (darkened from 2CA02C for 4.5:1 title contrast on its tint)
     background: true

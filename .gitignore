@@ -19,7 +19,7 @@
 # misc
 .DS_Store
 *.pem
-TODO.md
+/doc-*/
 
 # debug
 npm-debug.log*
@@ -44,13 +44,8 @@ next-env.d.ts
 .claude/*
 # CLAUDE.md
 
-# example data
-/example
-
 # generated report templates (built from templates/master.md by scripts/gen-templates.ts)
 /templates/template_*
 
-# Quarto handbuch build artifacts (handbuch/_freeze IS committed — it carries the
-# R output so the deploy build renders without R)
-/handbuch/_site/
-/handbuch/.quarto/
+# xlsx tmps
+~$*

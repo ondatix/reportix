@@ -7,30 +7,29 @@ parameters:
     label:
       de: "Titel"
       en: "Title"
+    info:
+      de: "Wählen Sie einen Titel für Ihren Bericht."
+      en: "Choose a title for your report."
     type: text
     default: "Schuljahresbericht"
   office:
     label:
       de: "Schule"
       en: "School"
+    info:
+      de: "Für welche Schule wird der Bericht verfasst?"
+      en: "Which school is the report being written for?"
     type: text
     default: "Gymnasium Beispielstadt"
-  # palette:
-  #   label: "Chart color palette"
-  #   type: select
-  #   default: okabe-ito
-  #   options:
-  #     - okabe-ito   # Okabe & Ito / Wong (2011) — 8-colour standard
-  #     - tol-bright  # Paul Tol — Bright (7)
-  #     - tol-muted   # Paul Tol — Muted (9)
-  #     - ibm         # IBM Design Language colourblind-safe (5)
-  #     - grayscale   # Print-safe maximum-contrast fallback
   font:
     # Curated theme: maps to CSS stack + DOCX family + display name via the
     # fonts module; not a 1:1 string override, so it stays standalone.
     label:
       de: "Schriftart"
       en: "Font"
+    info:
+      de: "Hier können Sie eine Schriftart auswählen."
+      en: "Here you can choose a font."
     type: select
     default: arial
     options:
@@ -42,10 +41,37 @@ parameters:
   # — Bound overrides — `bind:` points at a config leaf. The form prefills
   #   from that leaf; the user-entered value overrides the preset at runtime.
   #   Bound entries carry no `default:` (the bound leaf is the source of truth).
+  # Every chart in this report is broken down by "Geschlecht" — these two
+  # color pickers keep that coding consistent across every chart, regardless
+  # of chart type or which axis (rows/cols) the value sits on.
+  gender_color_male:
+    label:
+      de: "Farbe für „männlich“"
+      en: "Color for \"male\""
+    info:
+      de: "Hier können Sie eine Farbe auswählen, die im gesamten Bericht für „männlich“ verwendet werden soll."
+      en: "Here you can choose a color that will be used throughout the report for \"male\"."
+    type: color
+    bind: charts.gender.male
+  gender_color_female:
+    label:
+      de: "Farbe für „weiblich“"
+      en: "Color for \"female\""
+    info:
+      de: "Hier können Sie eine Farbe auswählen, die im gesamten Bericht für „weiblich“ verwendet werden soll."
+      en: "Here you can choose a color that will be used throughout the report for \"female\"."
+    type: color
+    bind: charts.gender.female
+  # Used for stacked bar charts (one hue per row/segment — the gender pickers
+  # above don't apply there, see charts.ts) and as the fallback color source
+  # for any category elsewhere that isn't männlich/weiblich.
   palette:
     label:
-      de: "Farbpalette des Diagramms"
-      en: "Chart color palette"
+      de: "Farbpalette für gestapelte Balkendiagramme"
+      en: "Color palette for stacked bar charts"
+    info:
+      de: "Hier können Sie zwischen verschiedenen barrierefreien Farbpaletten wählen."
+      en: "Here you can choose between different accessible color palettes."
     type: select
     bind: charts.palette
     options:
@@ -56,35 +82,44 @@ parameters:
       - grayscale   # Print-safe maximum-contrast fallback
   font_size:
     label:
-      de: "Schriftgröße des Texts (pt)"
+      de: "Text-Schriftgröße (pt)"
       en: "Body font size (pt)"
+    info:
+      de: "Wählen Sie hier die Standard-Schriftgröße für den Text."
+      en: "Choose the default font size for the text here."
     type: number
     bind: export.font.size
-  heading_color:
-    label:
-      de: "Überschriftenfarbe (Hex ohne #)"
-      en: "Heading color (hex without #)"
-    type: text
-    bind: export.headings.color
-  page_orientation:
-    label:
-      de: "Seitenausrichtung"
-      en: "Page orientation"
-    type: select
-    bind: export.page.orientation
-    options:
-      - portrait
-      - landscape
+  # heading_color:
+  #   label:
+  #     de: "Überschriftenfarbe (Hex ohne #)"
+  #     en: "Heading color (hex without #)"
+  #   type: text
+  #   bind: export.headings.color
+  # page_orientation:
+  #   label:
+  #     de: "Seitenausrichtung"
+  #     en: "Page orientation"
+  #   type: select
+  #   bind: export.page.orientation
+  #   options:
+  #     - portrait
+  #     - landscape
   header_text:
     label:
       de: "Kopfzeilentext"
       en: "Header text"
+    info:
+      de: "Sollten Sie einen Text in der Kopfzeile wünschen, können Sie diesen hier angeben."
+      en: "If you'd like text in the header, you can enter it here."
     type: text
     bind: export.header.text
   footer_text:
     label:
       de: "Fußzeilentext"
       en: "Footer text"
+    info:
+      de: "Sollten Sie einen Text in der Fußzeile wünschen, können Sie diesen hier angeben."
+      en: "If you'd like text in the footer, you can enter it here."
     type: text
     bind: export.footer.text
   page_numbers:
@@ -93,6 +128,9 @@ parameters:
     label:
       de: "Seitenzahlen"
       en: "Page numbers"
+    info:
+      de: "Möchten Sie Seitenzahlen links, zentriert, rechts oder gar nicht anzeigen lassen?"
+      en: "Would you like page numbers shown on the left, centered, right, or not at all?"
     type: select
     bind: export.pageNumbers.position
     options:
@@ -104,39 +142,117 @@ parameters:
     label:
       de: "Dateiname der Ausgabe"
       en: "Output filename"
+    info:
+      de: "Wie soll das Dokument benannt werden?"
+      en: "What should the document be named?"
     type: text
     bind: export.filename
   # locale:
   #   label: "Locale"
   #   type: text
   #   bind: export.locale
-  doc_subject:
+  # doc_subject:
+  #   label:
+  #     de: "Dokumentbetreff"
+  #     en: "Document subject"
+  #   type: text
+  #   bind: export.document.subject
+  # doc_creator:
+  #   label:
+  #     de: "Dokumentersteller"
+  #     en: "Document creator"
+  #   type: text
+  #   bind: export.document.creator
+  # ── Angaben zum Datensatz (siehe `data_parameters:` in data.yaml) ──
+  # `step: template` stellt das Feld in Schritt 1 neben die Vorlagenauswahl:
+  # Der Berichtszeitraum beschreibt den Bericht selbst und wird zuerst
+  # beantwortet. Das Preprocessing (Schritt 3) liest ihn über `from_config`,
+  # die Beurlaubungsdauer wird also auf den hier gewählten Zeitraum gekappt.
+  period_start:
     label:
-      de: "Dokumentbetreff"
-      en: "Document subject"
-    type: text
-    bind: export.document.subject
-  doc_creator:
+      de: "Berichtszeitraum von"
+      en: "Reporting period from"
+    info:
+      de: "Erster Tag des Berichtszeitraums, z. B. der erste Tag des Schuljahres."
+      en: "First day of the reporting period, e.g. the first day of the school year."
+    type: date
+    step: template
+    bind: dataParameters.periodStart
+  period_end:
     label:
-      de: "Dokumentersteller"
-      en: "Document creator"
-    type: text
-    bind: export.document.creator
+      de: "Berichtszeitraum bis"
+      en: "Reporting period to"
+    info:
+      de: "Letzter Tag des Berichtszeitraums."
+      en: "Last day of the reporting period."
+    type: date
+    step: template
+    bind: dataParameters.periodEnd
   smallest_group:
     label:
       de: "Schwellenwert kleinste Gruppe"
       en: "Smallest group threshold"
+    info:
+      de: "Werte, die auf weniger Schülerinnen und Schülern beruhen als hier angegeben, werden maskiert, damit niemand identifizierbar ist. Bei Anzahlen zeigen Tabellen und Grafiken dann „<x“ (z. B. „<5“) statt des tatsächlichen Werts."
+      en: "Values based on fewer pupils than entered here are masked so that no one can be identified. For counts, tables and charts then show \"<x\" (e.g. \"<5\") instead of the actual value."
     type: number
-    bind: dataProtection.smallestGroup
-  section_numbering:
+    bind: dataParameters.smallestGroup
+  # y_axis_trim_to_data:
+  #   label:
+  #     de: "y-Achse an kleinste Gruppe anpassen"
+  #     en: "Trim y-axis to data"
+  #   type: boolean
+  #   bind: charts.scales.y.trimToData
+  # section_numbering:
+  #   label:
+  #     de: "Überschriften nummerieren (1., 1.1., …)"
+  #     en: "Number headings (1., 1.1., …)"
+  #   info:
+  #     de: "Sollen die Kapitel und Unterkapitel im Bericht nummeriert werden? Wenn ja, setzen Sie ein Häkchen."
+  #     en: "Should chapters and subchapters in the concept be numbered? If so, check the box."
+  #   type: boolean
+  #   bind: export.sectionNumbering
+  # toc:
+  #   label:
+  #     de: "Inhaltsverzeichnis einfügen"
+  #     en: "Include table of contents"
+  #   info:
+  #     de: "Soll ein Inhaltsverzeichnis generiert werden? Wenn ja, setzen Sie ein Häkchen."
+  #     en: "Should a table of contents be generated? If so, check the box."
+  #   type: boolean
+  #   bind: export.toc
+
+  # — Datenvalidierung (step: data) —
+  # Checklisten aus den hochgeladenen Werten einer Spalte (`options_from`),
+  # vorausgewählt nach `default_when` (gleiche Operatoren wie `when:` einer
+  # Mutation). Die Auswahl landet unter `dataParameters.selections.*` und wird
+  # von den Mutationen in data.yaml per `from_config` gelesen — sie steht vor
+  # dem Preprocessing fest.
+  mint_profiles:
     label:
-      de: "Überschriften nummerieren (1., 1.1., …)"
-      en: "Number headings (1., 1.1., …)"
-    type: boolean
-    bind: export.sectionNumbering
-  toc:
+      de: "Ausbildungsrichtungen des MINT-Zweigs"
+      en: "Profiles counting as STEM"
+    info:
+      de: "Kreuzen Sie diejenigen Ausbildungsrichtungen an, die als MINT-Zweig (Mathematik, Informatik, Naturwissenschaften, Technik) gelten. Vorausgewählt sind Richtungen, deren Name „Naturwissenschaft“ oder „Technik“ enthält."
+      en: "Tick those profiles that count as STEM (mathematics, computer science, natural sciences, technology). Profiles whose name contains \"Naturwissenschaft\" or \"Technik\" are preselected."
+    type: multiselect
+    step: data
+    options_from:
+      dataset: Schueler
+      column: Ausbildungsrichtung
+    default_when: { contains: [Naturwissenschaft, Technik, technolog] }
+    bind: dataParameters.selections.mint_profiles
+  family_leave_reasons:
     label:
-      de: "Inhaltsverzeichnis einfügen"
-      en: "Include table of contents"
-    type: boolean
-    bind: export.toc
+      de: "Beurlaubungsgründe mit familiärem Anlass"
+      en: "Leave reasons counting as family-related"
+    info:
+      de: "Kreuzen Sie diejenigen Beurlaubungsgründe an, die als familiärer Anlass gelten. Prüfen Sie, ob in Ihren Daten weitere Ausprägungen dazugehören."
+      en: "Tick those leave reasons that count as family-related. Check whether further values in your data belong here."
+    type: multiselect
+    step: data
+    options_from:
+      dataset: Zeitraum_Beurlaubung
+      column: Beurlaubungsgrund
+    default_when: { in: ["Familiärer Anlass", "Hochzeit", "Trauerfall", "Geburt eines Geschwisterkinds"] }
+    bind: dataParameters.selections.family_leave_reasons

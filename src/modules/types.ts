@@ -8,7 +8,8 @@ export type ParameterType =
   | "date"
   | "select"
   | "multiselect"
-  | "boolean";
+  | "boolean"
+  | "color";
 
 export interface ParameterDef {
   label: string;
@@ -28,7 +29,34 @@ export interface ParameterDef {
   definition?: string;
   /** Bilingual tooltip text, resolved to the active locale at parse time. Wins over `definition`. */
   info?: string;
+  /**
+   * Which workflow step asks for this parameter. `template` puts the field in
+   * step 1 beside the template chooser — for questions that describe the
+   * *report* and are better answered up front (the reporting period); the
+   * default `parameters` leaves it in step 3 with the layout settings.
+   */
+  step?: ParameterStep;
+  /**
+   * Data-driven options (`step: data` multiselects): the distinct non-empty
+   * values of this column in the uploaded (pre-preprocessing) data, offered
+   * as a checklist in the data-validation step instead of a fixed `options`
+   * list.
+   */
+  optionsFrom?: { dataset: string; column: string };
+  /**
+   * Pre-selection for `optionsFrom`: every offered value matching this
+   * condition starts ticked. Same operators as a mutation's `when:`.
+   */
+  defaultWhen?: MutationCondition;
 }
+
+/**
+ * Workflow step a parameter is asked in — see `ParameterDef.step`. `data` is
+ * the data-validation step between the upload and the report parameters; its
+ * answers exist before preprocessing runs, so mutations can read them via
+ * `from_config`.
+ */
+export type ParameterStep = "template" | "data" | "parameters";
 
 /**
  * One required column of a config sheet, plus optional metadata.
@@ -42,6 +70,8 @@ export interface ColumnDef {
   info?: string;
   notes?: string;
   include?: string[];
+  /** Custom text appended to the generic "unmapped column" warning when this column has no mapping. */
+  warning?: string;
 }
 
 export interface SheetDef {
@@ -53,6 +83,8 @@ export interface SheetDef {
   notes?: string;
   /** Template ids this sheet belongs to; omitted/empty ⇒ every template. */
   include?: string[];
+  /** Custom text appended to the generic "unmapped sheet" warning when this sheet has no mapping. */
+  warning?: string;
 }
 
 export interface DataSourceDef {
@@ -205,7 +237,7 @@ export interface ExportConfig {
 
   /**
    * Styling for `::: {.callout-note} … :::` blocks (used for definition
-   * boxes in the stmas template). The accent colour drives the left
+   * boxes in the bundled template). The accent colour drives the left
    * border and title text; `background: true` adds a pale tint derived
    * from the accent colour.
    */
@@ -228,14 +260,37 @@ export interface CalloutBoxConfig {
 /** Global chart rendering defaults applied to every chart. */
 export interface ChartDefaults {
   /**
-   * Palette ID used by every chart (e.g. `okabe-ito`). Resolved at render
-   * time via the palettes module. Overridable via the `palette` parameter.
+   * Palette ID used as the fallback color source (e.g. `okabe-ito`) for any
+   * category that isn't gender-coded (see `gender` below) — set by
+   * developers in config, not exposed as a report parameter.
    */
   palette?: string;
+  /**
+   * Every crosstab in this report is broken down by "Geschlecht", so a
+   * category value that normalizes (NFC + trim + lowercase) to "männlich"
+   * or "weiblich" always renders in its own dedicated color, consistently
+   * across every chart — regardless of which axis (rows or cols) it sits
+   * on. Configured via the `gender_color_male` / `gender_color_female`
+   * report parameters. Any other category value (e.g. a future "divers"
+   * value, or a non-gender dimension) falls back to `palette`.
+   */
+  gender?: {
+    /** Hex color (with #) for values that normalize to "männlich". */
+    male?: string;
+    /** Hex color (with #) for values that normalize to "weiblich". */
+    female?: string;
+  };
   /** Disable animation — recommended for report generation. */
   animation?: boolean;
   /** width:height ratio (default 2). */
   aspectRatio?: number;
+  /**
+   * Tallest a chart may grow, as a multiple of its width (height ÷ width).
+   * A horizontal bar chart (see `elements.bar.maxColumns`) that would grow
+   * past it is split into equally big partial plots, each within the limit.
+   * Unset ⇒ never split.
+   */
+  maxHeightRatio?: number;
 
   /** Global font applied to all chart text (titles, labels, ticks). */
   font?: {
@@ -246,6 +301,8 @@ export interface ChartDefaults {
   };
 
   title?: {
+    /** Show the chart title. Default true; set false to hide every chart's title globally. */
+    display?: boolean;
     /** "top" | "bottom" | "left" | "right" */
     position?: string;
     /** "start" | "center" | "end" */
@@ -279,6 +336,15 @@ export interface ChartDefaults {
       gridDisplay?: boolean;
       gridColor?: string;
       tickColor?: string;
+      /**
+       * Trim unused chart space: for non-stacked bar charts, start the
+       * y-axis at the nearest round tick below the smallest plotted value
+       * instead of at 0 (e.g. a step of 5 and a minimum of 132 start the
+       * axis at 130), so bars aren't drawn over a mostly-empty gap. No
+       * effect on stacked bars, line/pie/pyramid/distance charts, or when
+       * the smallest value is <= 0.
+       */
+      trimToData?: boolean;
     };
   };
 
@@ -294,11 +360,25 @@ export interface ChartDefaults {
       borderRadius?: number;
       /** Fraction of the category slot used by all bars (0–1). */
       barPercentage?: number;
+      /**
+       * Most categories a bar chart shows on a vertical (column) layout. A
+       * bar chart with more categories flips to horizontal bars (categories
+       * on the y-axis) and grows in height: its aspect ratio shrinks by
+       * `maxColumns / categories`, so every bar keeps the thickness it had
+       * at exactly `maxColumns`. Unset ⇒ never flipped.
+       */
+      maxColumns?: number;
     };
   };
 }
 
-export interface DataProtectionConfig {
+/**
+ * Settings that describe the *data* rather than the document: the reporting
+ * period it covers and the group size below which numbers are masked. Grouped
+ * together because they are the two questions a user answers about their
+ * dataset, not about layout or export.
+ */
+export interface DataParametersConfig {
   /**
    * Minimum aggregated value to display verbatim. Aggregated values strictly
    * less than this threshold (and greater than zero) are replaced with the
@@ -306,6 +386,26 @@ export interface DataProtectionConfig {
    * as `<{threshold}` in tables. Default: 5.
    */
   smallestGroup?: number;
+  /** First day of the reporting period, `YYYY-MM-DD`. */
+  periodStart?: string;
+  /** Last day of the reporting period, `YYYY-MM-DD`. */
+  periodEnd?: string;
+  /**
+   * Fixed display order for named columns' values, keyed by column name
+   * (e.g. `Geschlecht`, `Arbeitszeitanteil`), each an ordered list of the
+   * values that column may take. Applied by `wrangleTable` to both the row
+   * axis (single-column `groupby.rows` only — composite/tuple rows keep the
+   * default alphabetical order) and the column axis (`groupby.cols`).
+   * Values not listed sort alphabetically after the listed ones.
+   */
+  categoryOrder?: Record<string, string[]>;
+  /**
+   * Value lists the user picks in the data-validation step (`step: data`
+   * parameters bind here, e.g. `dataParameters.selections.mint_profiles`),
+   * keyed by a free-form name. Mutations read them with
+   * `in: { from_config: dataParameters.selections.<name> }`.
+   */
+  selections?: Record<string, string[]>;
 }
 
 // ── Data preprocessing (joins) ──────────────────────────────────────
@@ -352,19 +452,30 @@ export interface JoinDef {
 }
 
 /**
+ * A reference to a value in the resolved AppConfig, written in YAML as
+ * `{ from_config: "dotted.path" }`. Allowed wherever a condition takes a
+ * value list (`equals`, `in`, `not_equals`, `contains`, `starts_with`,
+ * `ends_with`); preprocessing resolves it before matching. An unresolved
+ * reference matches nothing.
+ */
+export interface ConfigRef {
+  from_config: string;
+}
+
+/**
  * A predicate tested against a single source-column value. All provided keys
  * are combined with AND. String comparisons are NFC + trimmed; numeric ones
  * (`gt`/`lt`/…) parse the value as a number. Scalar keys also accept a list,
  * which matches if any entry matches.
  */
 export interface MutationCondition {
-  equals?: string | number | (string | number)[];
-  notEquals?: string | number | (string | number)[];
+  equals?: string | number | (string | number)[] | ConfigRef;
+  notEquals?: string | number | (string | number)[] | ConfigRef;
   /** Alias of `equals` with a list. */
-  in?: (string | number)[];
-  contains?: string | string[];
-  startsWith?: string | string[];
-  endsWith?: string | string[];
+  in?: (string | number)[] | ConfigRef;
+  contains?: string | string[] | ConfigRef;
+  startsWith?: string | string[] | ConfigRef;
+  endsWith?: string | string[] | ConfigRef;
   /** JavaScript regular-expression source tested against the value. */
   matches?: string;
   gt?: number;
@@ -377,10 +488,19 @@ export interface MutationCondition {
   truthy?: boolean;
 }
 
+/** One branch of an elif chain: `when` holds → the column gets `then`. */
+export interface MutationCase {
+  when: MutationCondition;
+  then: string | number | boolean;
+}
+
 /**
- * Derive a new column on a dataset with a simple if-else rule: where `when`
- * holds for the `from` value, the new `column` gets `then`, otherwise `else`.
- * Omitting `when` means the condition is "value is truthy".
+ * Derive a new column on a dataset with an if/elif/…/else rule against the
+ * `from` value: `cases` are tested in order and the first match's `then`
+ * wins; if none match (or `cases` is empty), the column gets `else`. The
+ * top-level `when`/`then` are shorthand for a single leading case — either
+ * form works alone, and a top-level `when`/`then` runs before any `cases`.
+ * Omitting `when` on a case means "value is truthy".
  */
 export interface MutationDef {
   /** Dataset to add the column to (modified into a derived copy). */
@@ -389,14 +509,42 @@ export interface MutationDef {
   column: string;
   /** Human-readable definition of the derived column (metadata). */
   definition?: string;
-  /** Source column whose value the condition tests. */
-  from: string;
-  /** Condition on the `from` value (default: truthy). */
+  /**
+   * Source column(s). A condition mutation tests the single (first) column;
+   * an `fn` mutation receives every listed column, in the order given.
+   */
+  from: string | string[];
+  /**
+   * Name of a registered column transform (see the transforms module). When
+   * set, the transform computes the whole column and `when`/`cases`/`else`
+   * are ignored — this is the escape hatch for derivations the declarative
+   * if/else form cannot express (date arithmetic, running totals, …).
+   */
+  fn?: string;
+  /** Arbitrary options handed to the `fn` transform verbatim. */
+  options?: Record<string, unknown>;
+  /** Condition on the `from` value — shorthand for a single leading case (default: truthy). */
   when?: MutationCondition;
-  /** Value written when the condition holds. */
-  then: string | number | boolean;
-  /** Value written otherwise (default: empty string). */
+  /** Value written when the top-level `when` holds — pairs with `when`. */
+  then?: string | number | boolean;
+  /** Additional elif branches, tested in order after the top-level `when`/`then`. */
+  cases?: MutationCase[];
+  /** Value written when no case matches (default: empty string). */
   else?: string | number | boolean;
+  /**
+   * Opt-in: when set, a preprocessing warning is emitted once if the `else`
+   * branch fires for at least one row (i.e. no case matched) — this text is
+   * appended to the generic message. Useful to surface unexpected/unmapped
+   * source values (e.g. a category outside the modelled cases) rather than
+   * having them silently fall through to `else`. Bilingual (like `info`),
+   * resolved to the active locale at parse time.
+   */
+  elseWarning?: string;
+}
+
+/** A mutation's `from`, normalized to a list (it accepts a scalar or a list). */
+export function fromColumns(m: MutationDef): string[] {
+  return Array.isArray(m.from) ? m.from : m.from ? [m.from] : [];
 }
 
 export interface PreprocessingConfig {
@@ -406,15 +554,42 @@ export interface PreprocessingConfig {
   joins?: JoinDef[];
 }
 
+/**
+ * A boolean rule tree over a single source value: the leaf predicate keys
+ * (from `MutationCondition`) combine with AND within one object, same as a
+ * mutation's `when:`; `and`/`or` combine a list of nested conditions, `not`
+ * negates one. A row is valid when the tree evaluates to `true`.
+ */
+export type ValidationCondition = MutationCondition & {
+  and?: ValidationCondition[];
+  or?: ValidationCondition[];
+  not?: ValidationCondition;
+};
+
+/** One data-validation rule: every row's `column` value on `dataset` must satisfy `check`. */
+export interface ValidationRule {
+  dataset: string;
+  column: string;
+  /** Human-readable description of the rule, appended to the warning when rows fail it. */
+  definition?: string;
+  check: ValidationCondition;
+}
+
+export interface ValidationConfig {
+  rules?: ValidationRule[];
+}
+
 export interface AppConfig {
   parameters: Record<string, ParameterDef>;
   data: Record<string, DataSourceDef>;
   template: TemplateDef;
   /** Derived datasets (joins) built from the loaded sheets before rendering. */
   preprocessing?: PreprocessingConfig;
+  /** Row-level checks run against the loaded (and preprocessed) data; failures surface as non-blocking warnings. */
+  validation?: ValidationConfig;
   export?: ExportConfig;
   charts?: ChartDefaults;
-  dataProtection?: DataProtectionConfig;
+  dataParameters?: DataParametersConfig;
 }
 
 // ── Data ────────────────────────────────────────────────────────────
@@ -432,47 +607,51 @@ export interface TextBlock {
   markdown: string;
 }
 
-export interface ChartSpec {
+/**
+ * The wrangled-crosstab spec — the single data-shaping description shared
+ * by table blocks and (embedded as `table:`) chart blocks. It is turned
+ * into a `WrangledTable` by `wrangleTable()` in the aggregation module:
+ * filter → group by `groupby.rows` (× `groupby.cols`) → aggregate per cell.
+ */
+export interface TableSpec {
+  /** DataStore key (a config sheet name or preprocessing join output). */
   data: string;
-  /** Categorical axis for non-pyramid charts; not used by pyramid. */
-  x?: string;
-  /** Series key(s); for pyramid: the category axis (e.g. age group, pay grade). */
-  y: string | string[];
-  type: "bar" | "line" | "pie" | "doughnut" | "scatter" | "pyramid" | "distance";
-  /** Pyramid only — column whose two distinct values split the chart left/right. */
-  split?: string;
-  /** Pyramid only — column to sum per bucket; if omitted, rows are counted. */
-  value?: string;
-  /**
-   * Categorical column used as the grouping (a.k.a. "hue") axis: rows are
-   * pivoted into one series per distinct value, each coloured from the
-   * active palette. Works across bar, line, scatter, pie, doughnut, and
-   * pyramid (where it acts as the binary split, equivalent to `split`).
-   */
-  color?: string;
-  /**
-   * For multi-series bar (and line) charts: stack groups along the value
-   * axis instead of placing them side-by-side. Defaults to `false`
-   * (dodged). Ignored by pyramid, which is always stacked.
-   */
-  stacked?: boolean;
-  /**
-   * How to combine rows that share the same group key. Setting `y` to any
-   * non-identity op enables grouping by `x` (and `color` if present).
-   * Defaults: ungrouped charts → `identity` (rows are data points);
-   * `color`-grouped or pyramid charts → `sum`.
-   * Supported ops: identity, count, sum, mean, min, max, median.
-   */
-  aggregation?: {
-    x?: import("./aggregation").AggregationOp;
-    y?: import("./aggregation").AggregationOp;
-  };
   /**
    * Boolean column whose truthy rows are kept before aggregation. Useful
-   * for restricting a chart to a sub-group ("Personenkreis"). Values
+   * for restricting a block to a sub-group ("Personenkreis"). Values
    * `Alle`, `-`, or empty disable the filter.
    */
   filter?: string;
+  /** Crosstab axes: `rows` labels the table rows (chart categories), the
+   *  optional `cols` the table columns (chart series). `rows` may be a single
+   *  column name or a list — a list buckets by the tuple of values, joined
+   *  with ` · ` for the label. Omitting `rows` collapses every (filtered) row
+   *  into a single synthetic "total" row. */
+  groupby: { rows?: string | string[]; cols?: string };
+  /**
+   * Single aggregation op applied per cell (defaulted to `count` by the
+   * template parser). Supported: count, sum, mean, min, max, median,
+   * share_total, share_group.
+   */
+  aggregation: import("./aggregation").AggregationOp;
+  /** Column the op aggregates — required by sum/mean/min/max/median/share_group. */
+  value?: string;
+  caption?: string;
+  /** Explicit cell format, overriding the op-derived default. */
+  format?: "integer" | "decimal" | "percent" | "currency";
+}
+
+export interface ChartSpec {
+  type: "bar" | "line" | "pie" | "doughnut" | "pyramid" | "distance";
+  /** The wrangled-crosstab spec the chart visualises (rows → categories,
+   *  cols → series; pyramid/distance require exactly two `cols` values). */
+  table: TableSpec;
+  /**
+   * For multi-series bar (and line) charts: stack the series along the
+   * value axis instead of placing them side-by-side. Defaults to `false`
+   * (dodged). Ignored by pyramid, which is always stacked.
+   */
+  stacked?: boolean;
   title?: string;
   /**
    * Explicit alt text. When set, bypasses auto-generation entirely.
@@ -490,22 +669,6 @@ export interface ChartSpec {
 export interface ChartBlock {
   type: "chart";
   spec: ChartSpec;
-}
-
-export interface TableSpec {
-  data: string;
-  columns: string[];
-  format?: Record<string, string>;
-  /**
-   * Per-column aggregation. Setting any column to a non-identity op enables
-   * GROUP BY semantics: rows are grouped by the columns whose op is
-   * `identity` (or unspecified), and the others are aggregated. Omitting
-   * the field entirely renders rows verbatim.
-   */
-  aggregation?: Record<string, import("./aggregation").AggregationOp>;
-  /** Boolean column whose truthy rows are kept before aggregation. */
-  filter?: string;
-  caption?: string;
 }
 
 export interface TableBlock {

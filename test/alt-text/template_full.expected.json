@@ -1,0 +1,107 @@
+[
+  {
+    "index": 0,
+    "title": "Schülerschaft nach Geschlecht",
+    "alt": "Schülerschaft nach Geschlecht. Kreisdiagramm vergleicht den Anteil (% des Gesamtwerts) von Geschlecht. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 1,
+    "title": "Jahrgangsstufen nach Geschlecht",
+    "alt": "Jahrgangsstufen nach Geschlecht. Bevölkerungspyramide vergleicht die Anzahl von Jahrgangsstufe, aufgeteilt nach Geschlecht. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 2,
+    "title": "Ausbildungsrichtungen nach Geschlecht",
+    "alt": "Ausbildungsrichtungen nach Geschlecht. Balkendiagramm vergleicht die Anzahl von Ausbildungsrichtung, gruppiert nach Geschlecht. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 3,
+    "title": "MINT-Zweig je Stufe",
+    "alt": "MINT-Zweig je Stufe. Balkendiagramm vergleicht die Anzahl von Stufe · MINT-Zweig, gruppiert nach Geschlecht. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 4,
+    "title": "Erste Fremdsprache nach Geschlecht",
+    "alt": "Erste Fremdsprache nach Geschlecht. Balkendiagramm vergleicht die Anzahl von Erste Fremdsprache, gruppiert nach Geschlecht. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 5,
+    "title": "Migrationshintergrund je Stufe",
+    "alt": "Migrationshintergrund je Stufe. Balkendiagramm vergleicht den Anteil innerhalb der Gruppe von Migrationshintergrund nach Stufe, gruppiert nach Geschlecht. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 6,
+    "title": "Anmeldungen nach Herkunftsschulart",
+    "alt": "Anmeldungen nach Herkunftsschulart. Balkendiagramm vergleicht die Anzahl von Herkunftsschulart, gruppiert nach Geschlecht. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 7,
+    "title": "Sprengel und Gastschüler",
+    "alt": "Sprengel und Gastschüler. Ringdiagramm vergleicht den Anteil (% des Gesamtwerts) von Sprengelzugehörigkeit. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 8,
+    "title": "Eintritte je Jahrgangsstufe",
+    "alt": "Eintritte je Jahrgangsstufe. Balkendiagramm vergleicht die Anzahl von Jahrgangsstufe, gruppiert nach Geschlecht. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 9,
+    "title": "Bewilligte Fördermaßnahmen",
+    "alt": "Bewilligte Fördermaßnahmen. Balkendiagramm vergleicht die Anzahl von Förderart, gruppiert nach Geschlecht (gefiltert auf Fördermaßnahme bewilligt). [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 10,
+    "title": "Abschlussquote der Fördermaßnahmen",
+    "alt": "Abschlussquote der Fördermaßnahmen. Distanzdiagramm vergleicht den Anteil innerhalb der Gruppe von Fördermaßnahme abgeschlossen nach Förderart, aufgeteilt nach Geschlecht (gefiltert auf Fördermaßnahme bewilligt). [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 11,
+    "title": "Ganztagsbetreuung je Jahrgangsstufe",
+    "alt": "Ganztagsbetreuung je Jahrgangsstufe. Liniendiagramm vergleicht den Anteil innerhalb der Gruppe von Ganztagsbetreuung nach Jahrgangsstufe, gruppiert nach Geschlecht. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 12,
+    "title": "Inklusion je Stufe",
+    "alt": "Inklusion je Stufe. Balkendiagramm vergleicht die Anzahl von Stufe, gruppiert nach Geschlecht (gefiltert auf Inklusion). [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 13,
+    "title": "Notendurchschnitt je Jahrgangsstufe",
+    "alt": "Notendurchschnitt je Jahrgangsstufe. Distanzdiagramm vergleicht den Mittelwert von Notendurchschnitt nach Jahrgangsstufe, aufgeteilt nach Geschlecht. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 14,
+    "title": "Notendurchschnitt in der Oberstufe",
+    "alt": "Notendurchschnitt in der Oberstufe. Balkendiagramm vergleicht den Mittelwert von Notendurchschnitt nach Ausbildungsrichtung, gruppiert nach Geschlecht (gefiltert auf Oberstufe). [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 15,
+    "title": "Vorrückungsquote je Stufe",
+    "alt": "Vorrückungsquote je Stufe. Balkendiagramm vergleicht den Anteil innerhalb der Gruppe von Vorgerückt nach Stufe, gruppiert nach Geschlecht. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 16,
+    "title": "Wiederholungen auf Antrag",
+    "alt": "Wiederholungen auf Antrag. Balkendiagramm vergleicht die Anzahl von Antrag, gruppiert nach Geschlecht (gefiltert auf Wiederholung). [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 17,
+    "title": "Beurlaubungsgründe",
+    "alt": "Beurlaubungsgründe. Balkendiagramm vergleicht die Anzahl von Beurlaubungsgrund, gruppiert nach Geschlecht. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 18,
+    "title": "Dauer familiärer Beurlaubungen",
+    "alt": "Dauer familiärer Beurlaubungen. Balkendiagramm vergleicht den Mittelwert von Beurlaubungsdauer nach Stufe, gruppiert nach Geschlecht (gefiltert auf Familiärer Anlass). [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 19,
+    "title": "Wettbewerbsteilnahmen",
+    "alt": "Wettbewerbsteilnahmen. Balkendiagramm vergleicht die Anzahl von Wettbewerbsart, gruppiert nach Geschlecht. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  },
+  {
+    "index": 20,
+    "title": "Erfolgsquote je Wettbewerbsart",
+    "alt": "Erfolgsquote je Wettbewerbsart. Balkendiagramm vergleicht den Anteil innerhalb der Gruppe von Erfolgreiche Teilnahme nach Wettbewerbsart, gruppiert nach Geschlecht. [Hier sollte die Grafik/die Tabelle in 1-2 Sätzen interpretiert werden.]"
+  }
+]

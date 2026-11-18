@@ -9,8 +9,7 @@
 # this list in sync.
 include:
   - config/parameters.yaml
-  - config/data.yaml          # data sources + preprocessing (mutations & joins)
+  - config/data.yaml          # data parameters + sources + preprocessing (mutations & joins) + validation
   - config/template.yaml
-  - config/data_protection.yaml
   - config/export.yaml
   - config/charts.yaml
